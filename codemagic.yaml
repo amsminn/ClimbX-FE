@@ -1,0 +1,40 @@
+workflows:
+  # PR 검증용 워크플로우
+  pr:
+    name: PR Validation
+    triggering:
+      pull_request:
+        branches:
+          include:
+            - develop
+            - main
+    scripts:
+      - name: Static analysis
+        script: flutter analyze
+      - name: Run tests
+        script: flutter test --coverage
+      - name: Quick debug APK
+        script: flutter build apk --debug
+
+  # main 브랜치에 푸시될 때 릴리즈 빌드
+  release:
+    name: Release Build
+    triggering:
+      push:
+        branches:
+          include:
+            - main
+    scripts:
+      - name: Build Android AppBundle
+        script: flutter build appbundle --release
+      - name: Build iOS IPA
+        script: flutter build ipa --release
+    publishing:
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
+        track: internal
+      app_store_connect:
+        api_key_path: ./appstore_connect_key.json
+        issuer_id: $APP_STORE_ISSUER_ID
+        key_id: $APP_STORE_KEY_ID
+        ipa_path: build/ios/ipa/Runner.ipa
