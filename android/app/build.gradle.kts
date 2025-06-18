@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.climbx_fe"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34  // API 34 (Android 14) 사용
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -24,8 +24,8 @@ android {
         applicationId = "com.example.climbx_fe"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 21  // Android 5.0 이상 지원
+        targetSdk = 34  // API 34 (Android 14) 타겟
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
