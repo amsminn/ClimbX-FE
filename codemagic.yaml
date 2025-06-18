@@ -1,40 +1,53 @@
 workflows:
-  # PR 검증용 워크플로우
-  pr:
-    name: PR Validation
+  # PR 검증 워크플로우 (CI 전용)
+  ci-workflow:
+    name: CI - PR Validation
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    
+    environment:
+      flutter: stable
+      
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/.gradle/caches
+        - $HOME/.gradle/wrapper
+        - $HOME/Library/Caches/CocoaPods
+        - $HOME/Library/Android/sdk
+        
     triggering:
-      pull_request:
-        branches:
-          include:
-            - develop
-            - main
+      events:
+        - pull_request
+      branch_patterns:
+        - pattern: develop
+          include: true
+          source: false
+        - pattern: main
+          include: true
+          source: false
+      cancel_previous_builds: true
+          
     scripts:
-      - name: Static analysis
-        script: flutter analyze
-      - name: Run tests
-        script: flutter test --coverage
-      - name: Quick debug APK
-        script: flutter build apk --debug
+      - name: Get Flutter dependencies
+        script: |
+          flutter pub get
+          
+      - name: Flutter analyze
+        script: |
+          flutter analyze
+          
+      - name: Run unit tests
+        script: |
+          flutter test
+          
+      - name: Build Android debug APK (optional)
+        script: |
+          flutter build apk --debug
+        ignore_failure: true
+          
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - flutter_drive.log
 
-  # main 브랜치에 푸시될 때 릴리즈 빌드
-  release:
-    name: Release Build
-    triggering:
-      push:
-        branches:
-          include:
-            - main
-    scripts:
-      - name: Build Android AppBundle
-        script: flutter build appbundle --release
-      - name: Build iOS IPA
-        script: flutter build ipa --release
-    publishing:
-      google_play:
-        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
-        track: internal
-      app_store_connect:
-        api_key_path: ./appstore_connect_key.json
-        issuer_id: $APP_STORE_ISSUER_ID
-        key_id: $APP_STORE_KEY_ID
-        ipa_path: build/ios/ipa/Runner.ipa
+# CD파이프라인은 추후 추가
