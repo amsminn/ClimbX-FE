@@ -41,10 +41,10 @@ workflows:
         script: |
           flutter test
           
-      - name: Build Android debug APK (optional)
-        script: |
-          flutter build apk --debug
-        ignore_failure: true
+      # - name: Build Android debug APK (optional)
+      #   script: |
+      #     flutter build apk --debug
+      #   ignore_failure: true
           
     artifacts:
       - build/**/outputs/**/*.apk
