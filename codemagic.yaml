@@ -7,7 +7,7 @@ workflows:
     
     environment:
       flutter: stable
-      
+
     cache:
       cache_paths:
         - $HOME/.pub-cache
@@ -15,7 +15,7 @@ workflows:
         - $HOME/.gradle/wrapper
         - $HOME/Library/Caches/CocoaPods
         - $HOME/Library/Android/sdk
-        
+
     triggering:
       events:
         - pull_request
@@ -27,16 +27,16 @@ workflows:
           include: true
           source: false
       cancel_previous_builds: true
-          
+
     scripts:
       - name: Get Flutter dependencies
         script: |
           flutter pub get
-          
+
       - name: Flutter analyze
         script: |
           flutter analyze
-          
+
       - name: Run unit tests
         script: |
           flutter test
