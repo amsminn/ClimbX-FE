@@ -26,17 +26,17 @@ class TierWidget extends StatelessWidget {
           colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
         ),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0x08000000),
+            color: Color(0x08000000),
             blurRadius: 20,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: const Color(0x12000000),
+            color: Color(0x12000000),
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
             spreadRadius: -2,
           ),
         ],
@@ -60,11 +60,11 @@ class TierWidget extends StatelessWidget {
                       gradient: colorScheme.gradient,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
+                    child: const Text(
                       'USER RATING',
                       style: TextStyle(
                         fontSize: 11,
-                        color: const Color(0xFFFFFFFF),
+                        color: Color(0xFFFFFFFF),
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.5,
                       ),
@@ -95,12 +95,12 @@ class TierWidget extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Flexible(
+                        const Flexible(
                           child: Text(
                             '상위 0.1%',
                             style: TextStyle(
                               fontSize: 12,
-                              color: const Color(0xFF64748B),
+                              color: Color(0xFF64748B),
                               fontWeight: FontWeight.w500,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -159,7 +159,7 @@ class TierWidget extends StatelessWidget {
                 Container(
                   width: screenWidth * 0.14,
                   height: screenWidth * 0.14,
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                     minWidth: 50,
                     minHeight: 50,
                     maxWidth: 70,

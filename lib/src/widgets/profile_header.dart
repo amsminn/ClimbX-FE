@@ -23,17 +23,17 @@ class ProfileHeader extends StatelessWidget {
           colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
         ),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0x08000000),
+            color: Color(0x08000000),
             blurRadius: 20,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: const Color(0x12000000),
+            color: Color(0x12000000),
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
             spreadRadius: -2,
           ),
         ],
@@ -114,9 +114,9 @@ class ProfileHeader extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.settings_outlined,
-                    color: const Color(0xFF64748B),
+                    color: Color(0xFF64748B),
                     size: 20,
                   ),
                 ),
@@ -160,11 +160,11 @@ class ProfileHeader extends StatelessWidget {
                           color: const Color(0x33FFFFFF),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
+                        child: const Text(
                           'USER RATING',
                           style: TextStyle(
                             fontSize: 10,
-                            color: const Color(0xFFFFFFFF),
+                            color: Color(0xFFFFFFFF),
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                           ),
@@ -179,7 +179,7 @@ class ProfileHeader extends StatelessWidget {
                         'Master까지 86점',
                         style: TextStyle(
                           fontSize: 10,
-                          color: const Color(0xFFFFFFFF),
+                          color: Color(0xFFFFFFFF),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -188,20 +188,20 @@ class ProfileHeader extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     tierName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFFFFFFFF),
+                      color: Color(0xFFFFFFFF),
                       letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  const Text(
                     '2714',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFFFFFFFF),
+                      color: Color(0xFFFFFFFF),
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -216,7 +216,7 @@ class ProfileHeader extends StatelessWidget {
                         Container(
                           height: 6,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
@@ -231,7 +231,7 @@ class ProfileHeader extends StatelessWidget {
                               borderRadius: BorderRadius.circular(3),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: Colors.white.withValues(alpha: 0.5),
                                   blurRadius: 4,
                                   offset: const Offset(0, 1),
                                 ),
@@ -249,19 +249,19 @@ class ProfileHeader extends StatelessWidget {
             SizedBox(height: screenWidth * 0.04),
 
             // 지역 정보
-            Row(
+            const Row(
               children: [
                 Icon(
                   Icons.location_on_outlined,
-                  color: const Color(0xFF94A3B8),
+                  color: Color(0xFF94A3B8),
                   size: 16,
                 ),
-                const SizedBox(width: 6),
+                SizedBox(width: 6),
                 Text(
                   '서울 은평구',
                   style: TextStyle(
                     fontSize: 13,
-                    color: const Color(0xFF64748B),
+                    color: Color(0xFF64748B),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -281,7 +281,7 @@ class ProfileHeader extends StatelessWidget {
                     colorScheme,
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: _buildStatCard(
                     '274',
@@ -290,7 +290,7 @@ class ProfileHeader extends StatelessWidget {
                     colorScheme,
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: _buildStatCard(
                     '331',
@@ -327,17 +327,17 @@ class ProfileHeader extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             number,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1E293B),
+              color: Color(0xFF1E293B),
             ),
           ),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 10,
-              color: const Color(0xFF64748B),
+              color: Color(0xFF64748B),
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,

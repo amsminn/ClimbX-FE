@@ -62,7 +62,7 @@ class TierTestHelper {
                     onTierSelected(tier);
                   },
                 );
-              }).toList(),
+              }),
               const SizedBox(height: 20),
             ],
           ),

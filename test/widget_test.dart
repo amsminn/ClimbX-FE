@@ -1,30 +1,26 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:climbx_fe/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('ClimbX Profile App Tests', () {
+    testWidgets('앱이 정상적으로 로딩되고 기본 구조가 존재한다', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      // 완전히 로딩될때까지 기다리기
+      await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      // 전체 프로필 페이지
+      expect(find.byType(Scaffold), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      // 상단 ClimbX와 알림 옵션 바
+      expect(find.byType(AppBar), findsWidgets);
+
+      // 탭 컨트롤러 (개요, 히스토리 ...)
+      expect(find.byType(DefaultTabController), findsWidgets);
+
+      // 크래시 없이 로딩 완료
+      expect(tester.takeException(), isNull);
+    });
   });
 }

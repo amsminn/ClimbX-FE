@@ -32,10 +32,10 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
-        title: Text(
+        title: const Text(
           'ClimbX',
           style: TextStyle(
-            color: const Color(0xFF1E293B),
+            color: Color(0xFF1E293B),
             fontSize: 24,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
@@ -111,7 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     unselectedLabelColor: const Color(0xFF64748B),
                     indicator: BoxDecoration(
                       gradient: colorScheme.gradient,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     labelStyle: const TextStyle(
                       fontWeight: FontWeight.w600,
@@ -123,7 +123,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     indicatorSize: TabBarIndicatorSize.tab,
                     dividerColor: Colors.transparent,
-                    overlayColor: MaterialStateProperty.all(Colors.transparent),
+                    overlayColor: WidgetStateProperty.all(Colors.transparent),
                     tabs: [
                       _buildTab('개요'),
                       _buildTab('히스토리'),
@@ -165,13 +165,13 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+        decoration: const BoxDecoration(
+          color: Color(0xFFFFFFFF),
           boxShadow: [
             BoxShadow(
-              color: const Color(0x08000000),
+              color: Color(0x08000000),
               blurRadius: 20,
-              offset: const Offset(0, -2),
+              offset: Offset(0, -2),
               spreadRadius: 0,
             ),
           ],
@@ -254,11 +254,11 @@ class _ProfilePageState extends State<ProfilePage> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0x08000000),
+            color: Color(0x08000000),
             blurRadius: 20,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
             spreadRadius: 0,
           ),
         ],
@@ -277,18 +277,18 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 16),
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1E293B),
+              color: Color(0xFF1E293B),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             '곧 출시 예정입니다',
             style: TextStyle(
               fontSize: 14,
-              color: const Color(0xFF64748B),
+              color: Color(0xFF64748B),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -320,11 +320,11 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0x08000000),
+            color: Color(0x08000000),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
             spreadRadius: 0,
           ),
         ],
