@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import '../utils/tier_colors.dart';
 
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key});
+  final String tierName;
 
-    @override
+  const ProfileHeader({super.key, this.tierName = 'Bronze 3'});
+
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+
+    final TierType currentTier = TierColors.getTierFromString(tierName);
+    final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
 
     return Container(
       width: double.infinity,
@@ -14,10 +20,7 @@ class ProfileHeader extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFF8FAFC),
-          ],
+          colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -49,14 +52,10 @@ class ProfileHeader extends StatelessWidget {
                   height: screenWidth * 0.18,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-                    ),
+                    gradient: colorScheme.gradient,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0x33667EEA),
+                        color: colorScheme.shadow,
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                         spreadRadius: 0,
@@ -67,7 +66,9 @@ class ProfileHeader extends StatelessWidget {
                     padding: const EdgeInsets.all(3),
                     child: CircleAvatar(
                       radius: screenWidth * 0.09 - 3,
-                      backgroundImage: const AssetImage('assets/images/avatar.png'),
+                      backgroundImage: const AssetImage(
+                        'assets/images/avatar.png',
+                      ),
                     ),
                   ),
                 ),
@@ -108,7 +109,10 @@ class ProfileHeader extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                    border: Border.all(
+                      color: const Color(0xFFE2E8F0),
+                      width: 1,
+                    ),
                   ),
                   child: Icon(
                     Icons.settings_outlined,
@@ -121,24 +125,20 @@ class ProfileHeader extends StatelessWidget {
 
             // 상단 프로필이랑 티어 카드 사이의 패딩
             SizedBox(height: screenWidth * 0.06),
-            
+
             // 티어 정보 카드
             Container(
               // 컨테이너 속성
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-                ),
+                gradient: colorScheme.gradient,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x33667EEA),
+                    color: colorScheme.shadow,
                     blurRadius: 12,
-                    offset: Offset(0, 4),
+                    offset: const Offset(0, 4),
                     spreadRadius: 0,
                   ),
                 ],
@@ -152,7 +152,10 @@ class ProfileHeader extends StatelessWidget {
                     children: [
                       // 1. 왼쪽 위의 USER RATING
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0x33FFFFFF),
                           borderRadius: BorderRadius.circular(8),
@@ -184,7 +187,7 @@ class ProfileHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Diamond I',
+                    tierName,
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w700,
@@ -213,31 +216,38 @@ class ProfileHeader extends StatelessWidget {
                         Container(
                           height: 6,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE0E0E0),
+                            color: Colors.white.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
-                        // 진행도 (흰색 또는 다른 색)
+                        // 진행도 (현재 티어 색상)
                         FractionallySizedBox(
                           alignment: Alignment.centerLeft,
                           widthFactor: 0.14, // 0.14 = 14% 진행
                           child: Container(
                             height: 6, // 높이도 명시적으로 지정
                             decoration: BoxDecoration(
-                              color: const Color(0xFF4C0AE6), // 진행도 색상
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.5),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
-            
+
             SizedBox(height: screenWidth * 0.04),
-            
+
             // 지역 정보
             Row(
               children: [
@@ -257,22 +267,37 @@ class ProfileHeader extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             SizedBox(height: screenWidth * 0.04),
-            
+
             // 통계 정보
             Row(
               children: [
                 Expanded(
-                  child: _buildStatCard('1520', '문제 해결', Icons.check_circle_outline),
+                  child: _buildStatCard(
+                    '1520',
+                    '문제 해결',
+                    Icons.check_circle_outline,
+                    colorScheme,
+                  ),
                 ),
                 SizedBox(width: 12),
                 Expanded(
-                  child: _buildStatCard('274', '문제 기여', Icons.add_circle_outline),
+                  child: _buildStatCard(
+                    '274',
+                    '문제 기여',
+                    Icons.add_circle_outline,
+                    colorScheme,
+                  ),
                 ),
                 SizedBox(width: 12),
                 Expanded(
-                  child: _buildStatCard('331', '명의 라이벌', Icons.people_outline),
+                  child: _buildStatCard(
+                    '331',
+                    '명의 라이벌',
+                    Icons.people_outline,
+                    colorScheme,
+                  ),
                 ),
               ],
             ),
@@ -283,7 +308,12 @@ class ProfileHeader extends StatelessWidget {
   }
 
   // 스탯 카드 만드는 위젯
-  Widget _buildStatCard(String number, String label, IconData icon) {
+  Widget _buildStatCard(
+    String number,
+    String label,
+    IconData icon,
+    TierColorScheme colorScheme,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -293,11 +323,7 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: const Color(0xFF667EEA),
-            size: 18,
-          ),
+          Icon(icon, color: colorScheme.primary, size: 18),
           const SizedBox(height: 4),
           Text(
             number,

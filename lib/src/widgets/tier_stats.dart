@@ -3,12 +3,8 @@ import 'package:flutter/material.dart';
 class TierStats extends StatelessWidget {
   final String label;
   final String value;
-  
-  const TierStats({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+
+  const TierStats({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -43,4 +39,4 @@ class TierStats extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import '../utils/tier_colors.dart';
 
 class TierWidget extends StatelessWidget {
-  const TierWidget({super.key});
+  final String tierName;
+
+  const TierWidget({super.key, this.tierName = 'Diamond I'});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
+    final TierType currentTier = TierColors.getTierFromString(tierName);
+    final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
+
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(
@@ -17,10 +23,7 @@ class TierWidget extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFF8FAFC),
-          ],
+          colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -49,11 +52,12 @@ class TierWidget extends StatelessWidget {
               children: [
                 Flexible(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-                      ),
+                      gradient: colorScheme.gradient,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -71,7 +75,10 @@ class TierWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(20),
@@ -84,7 +91,7 @@ class TierWidget extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF667EEA),
+                            color: colorScheme.primary,
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -105,9 +112,9 @@ class TierWidget extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             SizedBox(height: screenWidth * 0.05),
-            
+
             // 메인 티어 정보
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -122,11 +129,11 @@ class TierWidget extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Diamond I',
+                          tierName,
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 20 : 24,
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF667EEA),
+                            color: colorScheme.primary,
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -159,15 +166,11 @@ class TierWidget extends StatelessWidget {
                     maxHeight: 70,
                   ),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-                    ),
+                    gradient: colorScheme.gradient,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0x33667EEA),
+                        color: colorScheme.shadow,
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                         spreadRadius: 0,
@@ -175,16 +178,16 @@ class TierWidget extends StatelessWidget {
                     ],
                   ),
                   child: Icon(
-                    Icons.diamond_outlined,
+                    TierColors.getTierIcon(currentTier),
                     color: const Color(0xFFFFFFFF),
                     size: screenWidth * 0.07,
                   ),
                 ),
               ],
             ),
-            
+
             SizedBox(height: screenWidth * 0.04),
-            
+
             // 상세 정보
             Container(
               width: double.infinity,
@@ -196,11 +199,7 @@ class TierWidget extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.trending_up,
-                    color: const Color(0xFF667EEA),
-                    size: 20,
-                  ),
+                  Icon(Icons.trending_up, color: colorScheme.primary, size: 20),
                   SizedBox(width: screenWidth * 0.02),
                   Expanded(
                     child: Text(
@@ -218,7 +217,7 @@ class TierWidget extends StatelessWidget {
                     style: TextStyle(
                       fontSize: screenWidth < 360 ? 14 : 15,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF667EEA),
+                      color: colorScheme.primary,
                     ),
                   ),
                 ],

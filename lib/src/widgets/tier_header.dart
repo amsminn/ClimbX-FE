@@ -4,11 +4,8 @@ import 'package:flutter/material.dart';
 
 class TierHeader extends StatelessWidget {
   final String title;
-  
-  const TierHeader({
-    super.key,
-    this.title = 'USER RATING',
-  });
+
+  const TierHeader({super.key, this.title = 'USER RATING'});
 
   @override
   Widget build(BuildContext context) {
@@ -27,4 +24,4 @@ class TierHeader extends StatelessWidget {
       ),
     );
   }
-} 
+}

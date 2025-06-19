@@ -4,7 +4,7 @@ class TierInfo extends StatelessWidget {
   final String tierName;
   final int points;
   final Color textColor;
-  
+
   const TierInfo({
     super.key,
     required this.tierName,
@@ -32,4 +32,4 @@ class TierInfo extends StatelessWidget {
       ),
     );
   }
-} 
+}

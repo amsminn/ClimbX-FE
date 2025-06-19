@@ -3,12 +3,8 @@ import 'package:flutter/material.dart';
 class RankBadge extends StatelessWidget {
   final String rank;
   final String percentage;
-  
-  const RankBadge({
-    super.key,
-    required this.rank,
-    required this.percentage,
-  });
+
+  const RankBadge({super.key, required this.rank, required this.percentage});
 
   @override
   Widget build(BuildContext context) {
@@ -52,4 +48,4 @@ class RankBadge extends StatelessWidget {
       ),
     );
   }
-} 
+}

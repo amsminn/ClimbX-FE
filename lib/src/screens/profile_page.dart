@@ -1,12 +1,32 @@
 import 'package:flutter/material.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/tier_widget.dart';
+import '../utils/tier_test_helper.dart';
+import '../utils/tier_colors.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String currentTier = [
+    'Bronze I',
+    'Silver I',
+    'Gold I',
+    'Platinum I',
+    'Diamond I',
+    'Master',
+  ][5];
+
+  @override
   Widget build(BuildContext context) {
+    // 현재 티어 색상 정보 가져옴
+    final TierType tierType = TierColors.getTierFromString(currentTier);
+    final TierColorScheme colorScheme = TierColors.getColorScheme(tierType);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -22,6 +42,27 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
         actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.palette_outlined,
+                color: Color(0xFF64748B),
+                size: 22,
+              ),
+              onPressed: () {
+                TierTestHelper.showTierSelector(context, (String selectedTier) {
+                  setState(() {
+                    currentTier = selectedTier;
+                  });
+                });
+              },
+            ),
+          ),
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
@@ -59,22 +100,17 @@ class ProfilePage extends StatelessWidget {
         child: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
-              SliverToBoxAdapter(
-                child: const ProfileHeader(),
-              ),
+              SliverToBoxAdapter(child: ProfileHeader(tierName: currentTier)),
 
               SliverPersistentHeader(
                 delegate: _StickyTabBarDelegate(
                   TabBar(
-
                     isScrollable: true,
                     tabAlignment: TabAlignment.start,
                     labelColor: const Color(0xFFFFFFFF),
                     unselectedLabelColor: const Color(0xFF64748B),
                     indicator: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-                      ),
+                      gradient: colorScheme.gradient,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     labelStyle: const TextStyle(
@@ -103,20 +139,26 @@ class ProfilePage extends StatelessWidget {
           },
           body: TabBarView(
             children: [
+              _buildTabContent(child: TierWidget(tierName: currentTier)),
               _buildTabContent(
-                child: const TierWidget(),
+                child: _buildComingSoon('히스토리', Icons.history, colorScheme),
               ),
               _buildTabContent(
-                child: _buildComingSoon('히스토리', Icons.history),
+                child: _buildComingSoon(
+                  '스트릭',
+                  Icons.local_fire_department,
+                  colorScheme,
+                ),
               ),
               _buildTabContent(
-                child: _buildComingSoon('스트릭', Icons.local_fire_department),
+                child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
               ),
               _buildTabContent(
-                child: _buildComingSoon('분야별 티어', Icons.category),
-              ),
-              _buildTabContent(
-                child: _buildComingSoon('내 영상', Icons.video_library),
+                child: _buildComingSoon(
+                  '내 영상',
+                  Icons.video_library,
+                  colorScheme,
+                ),
               ),
             ],
           ),
@@ -139,7 +181,7 @@ class ProfilePage extends StatelessWidget {
           elevation: 0,
           currentIndex: 4,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: const Color(0xFF667EEA),
+          selectedItemColor: colorScheme.primary,
           unselectedItemColor: const Color(0xFF94A3B8),
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.w600,
@@ -201,7 +243,11 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildComingSoon(String title, IconData icon) {
+  Widget _buildComingSoon(
+    String title,
+    IconData icon,
+    TierColorScheme colorScheme,
+  ) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(32),
@@ -223,16 +269,10 @@ class ProfilePage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-              ),
+              gradient: colorScheme.gradient,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(
-              icon,
-              color: const Color(0xFFFFFFFF),
-              size: 32,
-            ),
+            child: Icon(icon, color: const Color(0xFFFFFFFF), size: 32),
           ),
           const SizedBox(height: 16),
           Text(
@@ -265,6 +305,7 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   double get minExtent => tabBar.preferredSize.height;
+
   @override
   double get maxExtent => tabBar.preferredSize.height;
 
