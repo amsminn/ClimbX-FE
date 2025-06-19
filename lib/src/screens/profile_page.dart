@@ -7,106 +7,293 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text('ClimbX', style: TextStyle(color: Colors.black)),
-        actions: const [
-          IconButton(
-            icon: Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: null,
+        backgroundColor: const Color(0xFFFFFFFF),
+        elevation: 0,
+        title: Text(
+          'ClimbX',
+          style: TextStyle(
+            color: const Color(0xFF1E293B),
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
           ),
-          IconButton(
-            icon: Icon(Icons.menu, color: Colors.black),
-            onPressed: null,
+        ),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.notifications_outlined,
+                color: Color(0xFF64748B),
+                size: 22,
+              ),
+              onPressed: () {},
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.menu_rounded,
+                color: Color(0xFF64748B),
+                size: 22,
+              ),
+              onPressed: () {},
+            ),
           ),
         ],
       ),
       body: DefaultTabController(
         length: 5,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const ProfileHeader(),
-            // 탭바
-            Container(
-              color: Colors.white,
-              child: const TabBar(
-                indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(width: 4, color: Colors.blue),
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverToBoxAdapter(
+                child: const ProfileHeader(),
+              ),
+
+              SliverPersistentHeader(
+                delegate: _StickyTabBarDelegate(
+                  TabBar(
+
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    labelColor: const Color(0xFFFFFFFF),
+                    unselectedLabelColor: const Color(0xFF64748B),
+                    indicator: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    overlayColor: MaterialStateProperty.all(Colors.transparent),
+                    tabs: [
+                      _buildTab('개요'),
+                      _buildTab('히스토리'),
+                      _buildTab('스트릭'),
+                      _buildTab('분야별 티어'),
+                      _buildTab('내 영상'),
+                    ],
+                  ),
                 ),
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                indicatorSize: TabBarIndicatorSize.label,
-                labelColor: Colors.blue,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Colors.blue,
-                tabs: [
-                  Tab(text: '개요'),
-                  Tab(text: '히스토리'),
-                  Tab(text: '스트릭'),
-                  Tab(text: '분야별 티어'),
-                  Tab(text: '내 영상'),
-                ],
+                pinned: true,
               ),
-            ),
-
-            // 탭 내용
-            // 탭 내용
-            Expanded(
-              child: TabBarView(
-                children: [
-                  Container(
-                    color: Colors.white,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [TierWidget()],
-                    ),
-                  ),
-
-                  Container(
-                    color: Colors.white,
-                    child: Center(child: Text('히스토리 콘텐츠')),
-                  ),
-                  Container(
-                    color: Colors.white,
-                    child: Center(child: Text('스트릭 콘텐츠')),
-                  ),
-                  Container(
-                    color: Colors.white,
-                    child: Center(child: Text('분야별 티어 콘텐츠')),
-                  ),
-
-                  Container(
-                    color: Colors.white,
-                    child: Center(
-                      child: Text('내 영상 콘텐츠'),
-                    ),
-                  ),
-                ],
+            ];
+          },
+          body: TabBarView(
+            children: [
+              _buildTabContent(
+                child: const TierWidget(),
               ),
+              _buildTabContent(
+                child: _buildComingSoon('히스토리', Icons.history),
+              ),
+              _buildTabContent(
+                child: _buildComingSoon('스트릭', Icons.local_fire_department),
+              ),
+              _buildTabContent(
+                child: _buildComingSoon('분야별 티어', Icons.category),
+              ),
+              _buildTabContent(
+                child: _buildComingSoon('내 영상', Icons.video_library),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFFFFF),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0x08000000),
+              blurRadius: 20,
+              offset: const Offset(0, -2),
+              spreadRadius: 0,
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFFEDEDED),
-        currentIndex: 4,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: '리더보드'),
-          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: '분석'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: '프로필'),
-        ],
-        onTap: (idx) {
-          // 페이지 전환 로직 추가
-        },
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          currentIndex: 4,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: const Color(0xFF667EEA),
+          unselectedItemColor: const Color(0xFF94A3B8),
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          ),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
+              label: '홈',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.leaderboard_outlined),
+              activeIcon: Icon(Icons.leaderboard),
+              label: '리더보드',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.camera_alt_outlined),
+              activeIcon: Icon(Icons.camera_alt),
+              label: '분석',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search_outlined),
+              activeIcon: Icon(Icons.search),
+              label: '검색',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person),
+              label: '프로필',
+            ),
+          ],
+          onTap: (idx) {
+            // 페이지 전환 로직 추가
+          },
+        ),
       ),
     );
+  }
+
+  Widget _buildTab(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: Text(text),
+    );
+  }
+
+  Widget _buildTabContent({required Widget child}) {
+    return Container(
+      color: const Color(0xFFF8FAFC),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildComingSoon(String title, IconData icon) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x08000000),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              icon,
+              color: const Color(0xFFFFFFFF),
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '곧 출시 예정입니다',
+            style: TextStyle(
+              fontSize: 14,
+              color: const Color(0xFF64748B),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
+  const _StickyTabBarDelegate(this.tabBar);
+
+  final TabBar tabBar;
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x08000000),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
+    return tabBar != oldDelegate.tabBar;
   }
 }

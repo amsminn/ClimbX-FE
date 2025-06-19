@@ -9,7 +9,7 @@ class TierInfo extends StatelessWidget {
     super.key,
     required this.tierName,
     required this.points,
-    this.textColor = const Color(0xFF00B4FC),
+    this.textColor = const Color(0xFF183FDA),
   });
 
   @override
