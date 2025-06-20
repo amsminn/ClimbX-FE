@@ -23,7 +23,7 @@ class HistoryChart extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -32,12 +32,12 @@ class HistoryChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             '경험치 변화',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1E293B),
+              color: Color(0xFF1E293B),
             ),
           ),
           const SizedBox(height: 20),
@@ -50,8 +50,8 @@ class HistoryChart extends StatelessWidget {
                   drawVerticalLine: false,
                   horizontalInterval: 400,
                   getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: const Color(0xFFF1F5F9),
+                    return const FlLine(
+                      color: Color(0xFFF1F5F9),
                       strokeWidth: 1,
                     );
                   },
@@ -95,7 +95,7 @@ class HistoryChart extends StatelessWidget {
                     gradient: colorScheme.gradient,
                     barWidth: 3,
                     isStrokeCapRound: true,
-                    dotData: FlDotData(
+                    dotData: const FlDotData(
                       show: false,
                     ),
                   ),
