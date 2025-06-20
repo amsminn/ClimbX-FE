@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/tier_widget.dart';
+import '../widgets/history_widget.dart';
 import '../utils/tier_test_helper.dart';
 import '../utils/tier_colors.dart';
 
@@ -12,6 +13,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  // 현재 티어를 저장 (임시로 디버깅용으로 이렇게 해두었음, 수정 예정)
   String currentTier = [
     'Bronze I',
     'Silver I',
@@ -29,9 +31,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
+
+      // 상단 앱바 (ClimbX, 팔레트(임시), 알림, 메뉴)
       appBar: AppBar(
+        // 앱바에 대한 설정
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+
+        // 로고
         title: const Text(
           'ClimbX',
           style: TextStyle(
@@ -41,7 +50,10 @@ class _ProfilePageState extends State<ProfilePage> {
             letterSpacing: -0.5,
           ),
         ),
+
+        // 액션들 (팔레트, 알림, 메뉴)
         actions: [
+          // 팔레트
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
@@ -63,6 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
           ),
+          // 알림
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
@@ -78,6 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () {},
             ),
           ),
+          // 메뉴
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
@@ -95,13 +109,17 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
+
+      // 가운데 body 부분
       body: DefaultTabController(
-        length: 5,
+        length: 5, // 탭바의 길이 (개요, 히스토리, 스트릭, 분야별 티어, 내 영상)
         child: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
+              // SliverToBoxAdapter로 감싸면 스크롤이 가능
               SliverToBoxAdapter(child: ProfileHeader(tierName: currentTier)),
 
+              // SliverPersistentHeader는 스크롤이 되지만 화면에 고정되는 것
               SliverPersistentHeader(
                 delegate: _StickyTabBarDelegate(
                   TabBar(
@@ -133,7 +151,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-                pinned: true,
+                pinned: true, // 탭바를 화면에 고정
               ),
             ];
           },
@@ -141,7 +159,7 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               _buildTabContent(child: TierWidget(tierName: currentTier)),
               _buildTabContent(
-                child: _buildComingSoon('히스토리', Icons.history, colorScheme),
+                child: HistoryWidget(tierName: currentTier),
               ),
               _buildTabContent(
                 child: _buildComingSoon(
@@ -226,6 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // 탭바에서 선택할 수 있는 텍스트
   Widget _buildTab(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -233,6 +252,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // 내용이 들어있는 탭바 위젯
   Widget _buildTabContent({required Widget child}) {
     return Container(
       color: const Color(0xFFF8FAFC),
@@ -243,6 +263,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // 출시 예정 탭바
   Widget _buildComingSoon(
     String title,
     IconData icon,

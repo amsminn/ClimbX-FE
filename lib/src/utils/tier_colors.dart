@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+// 가능한 티어의 종류들
 enum TierType { bronze, silver, gold, platinum, diamond, master }
 
+// 각 티어에 해당하는 색깔들
 class TierColors {
   static const Map<TierType, TierColorScheme> _tierColors = {
     TierType.bronze: TierColorScheme(
@@ -48,46 +50,38 @@ class TierColors {
     ),
   };
 
+  // 색상 반환해주는 메서드
   static TierColorScheme getColorScheme(TierType tier) {
     return _tierColors[tier]!;
   }
 
+  // 티어 타입 알려주는 함수
   static TierType getTierFromString(String tierName) {
     switch (tierName.toLowerCase()) {
       case 'bronze':
       case 'bronze i':
       case 'bronze ii':
       case 'bronze iii':
-      case 'bronze iv':
-      case 'bronze v':
         return TierType.bronze;
       case 'silver':
       case 'silver i':
       case 'silver ii':
       case 'silver iii':
-      case 'silver iv':
-      case 'silver v':
         return TierType.silver;
       case 'gold':
       case 'gold i':
       case 'gold ii':
       case 'gold iii':
-      case 'gold iv':
-      case 'gold v':
         return TierType.gold;
       case 'platinum':
       case 'platinum i':
       case 'platinum ii':
       case 'platinum iii':
-      case 'platinum iv':
-      case 'platinum v':
         return TierType.platinum;
       case 'diamond':
       case 'diamond i':
       case 'diamond ii':
       case 'diamond iii':
-      case 'diamond iv':
-      case 'diamond v':
         return TierType.diamond;
       case 'master':
         return TierType.master;
@@ -96,6 +90,7 @@ class TierColors {
     }
   }
 
+  // 티어의 이름
   static String getTierDisplayName(TierType tier) {
     switch (tier) {
       case TierType.bronze:
@@ -113,6 +108,7 @@ class TierColors {
     }
   }
 
+  // 아이콘 (추후 티어 모양으로 변환예정)
   static IconData getTierIcon(TierType tier) {
     switch (tier) {
       case TierType.bronze:
