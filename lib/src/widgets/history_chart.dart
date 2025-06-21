@@ -81,9 +81,7 @@ class HistoryChart extends StatelessWidget {
                     ),
                   ),
                 ),
-                borderData: FlBorderData(
-                  show: false,
-                ),
+                borderData: FlBorderData(show: false),
                 minX: 0,
                 maxX: (historyData.dataPoints.length - 1).toDouble(),
                 minY: _getMinY(),
@@ -95,9 +93,7 @@ class HistoryChart extends StatelessWidget {
                     gradient: colorScheme.gradient,
                     barWidth: 3,
                     isStrokeCapRound: true,
-                    dotData: const FlDotData(
-                      show: false,
-                    ),
+                    dotData: const FlDotData(show: false),
                   ),
                 ],
                 lineTouchData: LineTouchData(
@@ -107,7 +103,8 @@ class HistoryChart extends StatelessWidget {
                     tooltipRoundedRadius: 8,
                     getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                       return touchedBarSpots.map((barSpot) {
-                        final dataPoint = historyData.dataPoints[barSpot.x.toInt()];
+                        final dataPoint =
+                            historyData.dataPoints[barSpot.x.toInt()];
                         return LineTooltipItem(
                           '${dataPoint.date.month}/${dataPoint.date.day}\n',
                           const TextStyle(
@@ -162,13 +159,13 @@ class HistoryChart extends StatelessWidget {
   // 하단 타이틀 가져오기
   Widget _getBottomTitles(double value, TitleMeta meta) {
     final index = value.toInt();
-    
+
     // 범위 체크
     if (index >= historyData.dataPoints.length) return Container();
-    
+
     // 마지막 인덱스 체크 (글자 겹침 방지)
     if (index == historyData.dataPoints.length - 1) return Container();
-    
+
     final dataPoint = historyData.dataPoints[index];
     return SideTitleWidget(
       axisSide: meta.axisSide,
@@ -186,12 +183,12 @@ class HistoryChart extends StatelessWidget {
   Widget _getLeftTitles(double value, TitleMeta meta) {
     final minY = _getMinY();
     final maxY = _getMaxY();
-    
+
     // 최상단과 최하단 값은 겹칠 수 있으므로 숨김
     if (value >= maxY || value <= minY) {
       return Container();
     }
-    
+
     return SideTitleWidget(
       axisSide: meta.axisSide,
       child: Text(
@@ -204,4 +201,4 @@ class HistoryChart extends StatelessWidget {
       ),
     );
   }
-} 
+}
