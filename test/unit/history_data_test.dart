@@ -7,8 +7,8 @@ void main() {
       final historyData = HistoryData.generateMockData();
       
       // 기본적으로 데이터가 생성되는지만 확인
-      expect(historyData.dataPoints, isNotEmpty);
       expect(historyData, isNotNull);
+      expect(historyData.dataPoints, isNotEmpty);
     });
   });
 } 
