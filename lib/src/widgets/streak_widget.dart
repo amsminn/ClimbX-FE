@@ -193,7 +193,7 @@ class StreakWidget extends StatelessWidget {
             const SizedBox(width: 8),
 
             // 실제 그리드 (가로 스크롤)
-   함        // 현재 스트릭 데이터가 2차원 데이터
+            // 현재 스트릭 데이터가 2차원 데이터
             // streakData[weekIndex][dayIndex]로 있는데
             // 백에서 전처리하거나 프론트에서 바꿔야함
             Expanded(
@@ -350,9 +350,9 @@ class StreakWidget extends StatelessWidget {
   // 현재는 0 1 2 3 으로 구분 이후에는 최댓값 기준으로 수정 예정
   Color _getStreakColor(int submissions, TierColorScheme colorScheme) {
     if (submissions == 0) return const Color(0xFFF1F5F9); // 더 연한 회색 (제출 안함)
-    if (submissions == 1) return colorScheme.streakColor.withOpacity(0.3);
-    if (submissions == 2) return colorScheme.streakColor.withOpacity(0.5);
-    if (submissions == 3) return colorScheme.streakColor.withOpacity(0.7);
+    if (submissions == 1) return colorScheme.streakColor.withValues(alpha: 0.3);
+    if (submissions == 2) return colorScheme.streakColor.withValues(alpha: 0.5);
+    if (submissions == 3) return colorScheme.streakColor.withValues(alpha: 0.7);
     return colorScheme.streakColor; // 스트릭 전용 색상 사용
   }
 }
