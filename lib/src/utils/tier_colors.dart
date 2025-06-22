@@ -12,27 +12,31 @@ class TierColors {
       primary: Color(0xFFD2691E),
       light: Color(0xFFFFF8DC),
       shadow: Color(0x33D2691E),
+      streakColor: Color(0xFFB8860B),
     ),
     TierType.silver: TierColorScheme(
       gradientStart: Color(0xFF708090),
       gradientEnd: Color(0xFFC0C0C0),
-      primary: Color(0xFFC0C0C0),
+      primary: Color(0xFF708090),
       light: Color(0xFFF8F8FF),
-      shadow: Color(0x33C0C0C0),
+      shadow: Color(0x33708090),
+      streakColor: Color(0xFF708090),
     ),
     TierType.gold: TierColorScheme(
       gradientStart: Color(0xFFFFA500),
       gradientEnd: Color(0xFFFFD700),
-      primary: Color(0xFFFFD700),
+      primary: Color(0xFFFFA500),
       light: Color(0xFFFFFAF0),
-      shadow: Color(0x33FFD700),
+      shadow: Color(0x33FFA500),
+      streakColor: Color(0xFFFF8C00),
     ),
     TierType.platinum: TierColorScheme(
-      gradientStart: Color(0xFF38B2AC),
-      gradientEnd: Color(0xFF4FD1C7),
-      primary: Color(0xFF38B2AC),
+      gradientStart: Color(0xFF27CCCA),
+      gradientEnd: Color(0xFF6EEAC0),
+      primary: Color(0xFF3ED8C9),
       light: Color(0xFFF0FDFA),
-      shadow: Color(0x3338B2AC),
+      shadow: Color(0x3340E0D0),
+      streakColor: Color(0xFF2DD4CF),
     ),
     TierType.diamond: TierColorScheme(
       gradientStart: Color(0xFF1E90FF),
@@ -40,6 +44,7 @@ class TierColors {
       primary: Color(0xFF00BFFF),
       light: Color(0xFFF0F8FF),
       shadow: Color(0x3300BFFF),
+      streakColor: Color(0xFF1E90FF),
     ),
     TierType.master: TierColorScheme(
       gradientStart: Color(0xFF805AD5),
@@ -47,6 +52,7 @@ class TierColors {
       primary: Color(0xFF805AD5),
       light: Color(0xFFFDF2F8),
       shadow: Color(0x33805AD5),
+      streakColor: Color(0xFF6B46C1),
     ),
   };
 
@@ -133,6 +139,7 @@ class TierColorScheme {
   final Color primary;
   final Color light;
   final Color shadow;
+  final Color streakColor; // 스트릭 전용 색상 추가
 
   const TierColorScheme({
     required this.gradientStart,
@@ -140,6 +147,7 @@ class TierColorScheme {
     required this.primary,
     required this.light,
     required this.shadow,
+    required this.streakColor,
   });
 
   LinearGradient get gradient => LinearGradient(

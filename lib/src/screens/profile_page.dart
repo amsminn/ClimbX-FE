@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/tier_widget.dart';
 import '../widgets/history_widget.dart';
+import '../widgets/streak_widget.dart';
 import '../utils/tier_test_helper.dart';
 import '../utils/tier_colors.dart';
 
@@ -21,7 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
     'Platinum I',
     'Diamond I',
     'Master',
-  ][5];
+  ][3];
 
   @override
   Widget build(BuildContext context) {
@@ -158,16 +159,8 @@ class _ProfilePageState extends State<ProfilePage> {
           body: TabBarView(
             children: [
               _buildTabContent(child: TierWidget(tierName: currentTier)),
-              _buildTabContent(
-                child: HistoryWidget(tierName: currentTier),
-              ),
-              _buildTabContent(
-                child: _buildComingSoon(
-                  '스트릭',
-                  Icons.local_fire_department,
-                  colorScheme,
-                ),
-              ),
+              _buildTabContent(child: HistoryWidget(tierName: currentTier)),
+              _buildTabContent(child: StreakWidget(tierName: currentTier)),
               _buildTabContent(
                 child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
               ),
@@ -247,7 +240,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // 탭바에서 선택할 수 있는 텍스트
   Widget _buildTab(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Text(text),
     );
   }
