@@ -5,6 +5,7 @@ import '../widgets/history_widget.dart';
 import '../widgets/streak_widget.dart';
 import '../utils/tier_test_helper.dart';
 import '../utils/tier_colors.dart';
+import 'map_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -40,6 +41,7 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false, // 뒤로 가기 버튼 제거
 
         // 로고
         title: const Text(
@@ -230,7 +232,18 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
           onTap: (idx) {
-            // 페이지 전환 로직 추가
+            if (idx == 3) {
+              // 지도 탭을 눌렀을 때 - 애니메이션 없이 이동
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) => const MapPage(),
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                ),
+              );
+            }
+            // 다른 페이지 전환 로직 추가해야함
           },
         ),
       ),

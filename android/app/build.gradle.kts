@@ -7,8 +7,8 @@ plugins {
 
 android {
     namespace = "com.example.climbx_fe"
-    compileSdk = 34  // API 34 (Android 14) 사용
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 35  // API 35 (네이버 지도 요구사항)
+    ndkVersion = "27.0.12077973"  // 네이버 지도 요구사항
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -24,8 +24,8 @@ android {
         applicationId = "com.example.climbx_fe"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 21  // Android 5.0 이상 지원
-        targetSdk = 34  // API 34 (Android 14) 타겟
+        minSdk = 23  // Android 6.0 이상 지원 (네이버 지도 요구사항)
+        targetSdk = 35  // API 35 타겟
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
