@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../widgets/map_body.dart';
 import '../widgets/profile_body.dart';
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_test_helper.dart';
 import '../utils/tier_colors.dart';
+import '../utils/bottom_nav_tab.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -12,7 +15,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  int _currentIndex = 4; // 프로필 페이지가 기본
+  BottomNavTab _currentTab = BottomNavTab.profile; // 프로필 페이지가 기본
 
   // 현재 티어를 저장 (임시로 디버깅용으로 이렇게 해두었음, 수정 예정)
   String currentTier = [
@@ -34,83 +37,17 @@ class _MainPageState extends State<MainPage> {
       backgroundColor: const Color(0xFFF8FAFC),
 
       // 상단 앱바
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-
-        // 로고
-        title: const Text(
-          'ClimbX',
-          style: TextStyle(
-            color: Color(0xFF1E293B),
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-          ),
-        ),
-
-        // 액션들
-        actions: [
-          // 팔레트, 알림, 메뉴 (팔레트는 나중에 제거 예정
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.palette_outlined,
-                color: Color(0xFF64748B),
-                size: 22,
-              ),
-              onPressed: () {
-                TierTestHelper.showTierSelector(context, (String selectedTier) {
-                  setState(() {
-                    currentTier = selectedTier;
-                  });
-                });
-              },
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.notifications_outlined,
-                color: Color(0xFF64748B),
-                size: 22,
-              ),
-              onPressed: () {},
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.menu_rounded,
-                color: Color(0xFF64748B),
-                size: 22,
-              ),
-              onPressed: () {},
-            ),
-          ),
-        ],
+      appBar: CustomAppBar(
+        currentTier: currentTier,
+        onTierChanged: (String selectedTier) {
+          setState(() {
+            currentTier = selectedTier;
+          });
+        },
       ),
       // Body - Indexed Stack으로 화면 전환
       body: IndexedStack(
-        index: _currentIndex,
+        index: _currentTab.index,
         children: [
           // 0: 홈
           _buildComingSoon('홈', Icons.home, colorScheme),
@@ -126,66 +63,14 @@ class _MainPageState extends State<MainPage> {
       ),
 
       // 하단 네비게이션 바
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFFFFF),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 20,
-              offset: Offset(0, -2),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          currentIndex: _currentIndex,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: colorScheme.primary,
-          unselectedItemColor: const Color(0xFF94A3B8),
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 12,
-          ),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: '홈',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.leaderboard_outlined),
-              activeIcon: Icon(Icons.leaderboard),
-              label: '리더보드',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.camera_alt_outlined),
-              activeIcon: Icon(Icons.camera_alt),
-              label: '분석',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.map_outlined),
-              activeIcon: Icon(Icons.map),
-              label: '지도',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: '프로필',
-            ),
-          ],
-          onTap: (idx) {
-            setState(() {
-              _currentIndex = idx;
-            });
-          },
-        ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentTab: _currentTab,
+        colorScheme: colorScheme,
+        onTap: (tab) {
+          setState(() {
+            _currentTab = tab;
+          });
+        },
       ),
     );
   }

@@ -22,9 +22,7 @@ class ProfileBody extends StatelessWidget {
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
-            SliverToBoxAdapter(
-              child: ProfileHeader(tierName: currentTier),
-            ),
+            SliverToBoxAdapter(child: ProfileHeader(tierName: currentTier)),
             SliverPersistentHeader(
               delegate: _StickyTabBarDelegate(
                 TabBar(
@@ -46,9 +44,7 @@ class ProfileBody extends StatelessWidget {
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
-                  overlayColor: WidgetStateProperty.all(
-                    Colors.transparent,
-                  ),
+                  overlayColor: WidgetStateProperty.all(Colors.transparent),
                   tabs: [
                     _buildTab('개요'),
                     _buildTab('히스토리'),
@@ -68,18 +64,10 @@ class ProfileBody extends StatelessWidget {
             _buildTabContent(child: HistoryWidget(tierName: currentTier)),
             _buildTabContent(child: StreakWidget(tierName: currentTier)),
             _buildTabContent(
-              child: _buildComingSoon(
-                '분야별 티어',
-                Icons.category,
-                colorScheme,
-              ),
+              child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
             ),
             _buildTabContent(
-              child: _buildComingSoon(
-                '내 영상',
-                Icons.video_library,
-                colorScheme,
-              ),
+              child: _buildComingSoon('내 영상', Icons.video_library, colorScheme),
             ),
           ],
         ),
@@ -201,4 +189,4 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
     return tabBar != oldDelegate.tabBar;
   }
-} 
+}
