@@ -1,3 +1,5 @@
+// 티어 선택 가능하게 해주는 기능. 임시로 만든것이며 배포시에는 없어질 코드
+
 import 'package:flutter/material.dart';
 import 'tier_colors.dart';
 

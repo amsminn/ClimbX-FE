@@ -356,3 +356,4 @@ class StreakWidget extends StatelessWidget {
     return colorScheme.streakColor; // 스트릭 전용 색상 사용
   }
 }
+ 
