@@ -3,7 +3,6 @@ import '../widgets/map_body.dart';
 import '../widgets/profile_body.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
-import '../utils/tier_test_helper.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
 
@@ -82,10 +81,10 @@ class _MainPageState extends State<MainPage> {
     TierColorScheme colorScheme,
   ) {
     final screenSize = MediaQuery.of(context).size;
-    
+
     return Center(
       child: Container(
-        width: screenSize.width * 0.85, 
+        width: screenSize.width * 0.85,
         height: screenSize.height * 0.4,
         decoration: BoxDecoration(
           color: const Color(0xFFFFFFFF),
@@ -109,12 +108,12 @@ class _MainPageState extends State<MainPage> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
-                icon, 
-                color: const Color(0xFFFFFFFF), 
-                size: screenSize.width * 0.08, 
+                icon,
+                color: const Color(0xFFFFFFFF),
+                size: screenSize.width * 0.08,
               ),
             ),
-            SizedBox(height: screenSize.height * 0.02), 
+            SizedBox(height: screenSize.height * 0.02),
             Text(
               title,
               style: TextStyle(
@@ -123,11 +122,11 @@ class _MainPageState extends State<MainPage> {
                 color: const Color(0xFF1E293B),
               ),
             ),
-            SizedBox(height: screenSize.height * 0.01), 
+            SizedBox(height: screenSize.height * 0.01),
             Text(
               '곧 출시 예정입니다',
               style: TextStyle(
-                fontSize: screenSize.width * 0.035, 
+                fontSize: screenSize.width * 0.035,
                 color: const Color(0xFF64748B),
                 fontWeight: FontWeight.w500,
               ),
