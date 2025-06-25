@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/map_body.dart';
 import '../widgets/profile_body.dart';
+import '../widgets/leaderboard_body.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_colors.dart';
@@ -51,7 +52,7 @@ class _MainPageState extends State<MainPage> {
           // 0: 홈
           _buildComingSoon('홈', Icons.home, colorScheme),
           // 1: 리더보드
-          _buildComingSoon('리더보드', Icons.leaderboard, colorScheme),
+          const LeaderboardBody(),
           // 2: 분석
           _buildComingSoon('분석', Icons.camera_alt, colorScheme),
           // 3: 지도
