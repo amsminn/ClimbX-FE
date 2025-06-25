@@ -193,73 +193,70 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: LeaderboardType.values.length,
-      child: Column(
-        children: [
-          // 상단 탭바
-          Container(
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFFFFF),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x08000000),
-                  blurRadius: 10,
-                  offset: Offset(0, 2),
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              labelColor: const Color(0xFFFFFFFF),
-              unselectedLabelColor: const Color(0xFF64748B),
-              indicator: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF838383), Color(0xFF191919)],
-                ),
-                borderRadius: BorderRadius.circular(20),
+    return Column(
+      children: [
+        // 상단 탭바
+        Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFFFF),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x08000000),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+                spreadRadius: 0,
               ),
-              labelStyle: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-              unselectedLabelStyle: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-              ),
-              indicatorSize: TabBarIndicatorSize.tab,
-              dividerColor: Colors.transparent,
-              overlayColor: WidgetStateProperty.all(Colors.transparent),
-              onTap: (index) {
-                setState(() {
-                  _selectedType = LeaderboardType.values[index];
-                });
-              },
-              tabs: LeaderboardType.values
-                  .map((type) => _buildTab(type.label))
-                  .toList(),
-            ),
+            ],
           ),
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            labelColor: const Color(0xFFFFFFFF),
+            unselectedLabelColor: const Color(0xFF64748B),
+            indicator: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF838383), Color(0xFF191919)],
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            dividerColor: Colors.transparent,
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
+            onTap: (index) {
+              setState(() {
+                _selectedType = LeaderboardType.values[index];
+              });
+            },
+            tabs: LeaderboardType.values
+                .map((type) => _buildTab(type.label))
+                .toList(),
+          ),
+        ),
 
-          // 리더보드 리스트
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListView.builder(
-                itemCount: _currentUsers.length,
-                itemBuilder: (context, index) {
-                  return _buildLeaderboardItem(_currentUsers[index]);
-                },
-              ),
+        // 리더보드 리스트
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            child: ListView.builder(
+              itemCount: _currentUsers.length,
+              itemBuilder: (context, index) {
+                return _buildLeaderboardItem(_currentUsers[index]);
+              },
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
