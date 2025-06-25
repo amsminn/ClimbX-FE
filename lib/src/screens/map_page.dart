@@ -11,12 +11,20 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  // NaverMapController? _controller; // 추후 사용예정, 지도에서 코드로 제어할때 사용함
+  NaverMapController? _controller;
 
   // 티어 색상 (프로필 페이지와 동일하게해야함 추후 변경예정)
   final TierColorScheme colorScheme = TierColors.getColorScheme(
     TierType.platinum,
   );
+
+  @override
+  void dispose() {
+    // NaverMapController 정리 (메모리 누수 방지)
+    _controller?.dispose();
+    _controller = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +101,7 @@ class _MapPageState extends State<MapPage> {
           activeLayerGroups: [NLayerGroup.building, NLayerGroup.transit],
         ),
         onMapReady: (NaverMapController controller) {
-          // _controller = controller; // 여기도 추후 사용예정
+          _controller = controller;
         },
       ),
 
@@ -155,7 +163,10 @@ class _MapPageState extends State<MapPage> {
           ],
           onTap: (idx) {
             if (idx == 4) {
-              // 프로필 탭을 눌렀을 때
+              // 프로필 탭을 눌렀을 때 - 메모리 정리 후 이동
+              _controller?.dispose();
+              _controller = null;
+              
               Navigator.pushReplacement(
                 context,
                 PageRouteBuilder(

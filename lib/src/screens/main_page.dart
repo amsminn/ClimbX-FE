@@ -40,10 +40,10 @@ class _MainPageState extends State<MainPage> {
       appBar: CustomAppBar(
         currentTier: currentTier,
         onTierChanged: (String selectedTier) {
-          setState(() {
-            currentTier = selectedTier;
-          });
-        },
+                  setState(() {
+                    currentTier = selectedTier;
+                });
+              },
       ),
       // Body - Indexed Stack으로 화면 전환
       body: IndexedStack(
@@ -67,10 +67,10 @@ class _MainPageState extends State<MainPage> {
         currentTab: _currentTab,
         colorScheme: colorScheme,
         onTap: (tab) {
-          setState(() {
+            setState(() {
             _currentTab = tab;
-          });
-        },
+            });
+          },
       ),
     );
   }
@@ -82,10 +82,10 @@ class _MainPageState extends State<MainPage> {
     TierColorScheme colorScheme,
   ) {
     final screenSize = MediaQuery.of(context).size;
-
+    
     return Center(
       child: Container(
-        width: screenSize.width * 0.85,
+        width: screenSize.width * 0.85, 
         height: screenSize.height * 0.4,
         decoration: BoxDecoration(
           color: const Color(0xFFFFFFFF),
@@ -109,12 +109,12 @@ class _MainPageState extends State<MainPage> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
-                icon,
-                color: const Color(0xFFFFFFFF),
-                size: screenSize.width * 0.08,
+                icon, 
+                color: const Color(0xFFFFFFFF), 
+                size: screenSize.width * 0.08, 
               ),
             ),
-            SizedBox(height: screenSize.height * 0.02),
+            SizedBox(height: screenSize.height * 0.02), 
             Text(
               title,
               style: TextStyle(
@@ -123,11 +123,11 @@ class _MainPageState extends State<MainPage> {
                 color: const Color(0xFF1E293B),
               ),
             ),
-            SizedBox(height: screenSize.height * 0.01),
+            SizedBox(height: screenSize.height * 0.01), 
             Text(
               '곧 출시 예정입니다',
               style: TextStyle(
-                fontSize: screenSize.width * 0.035,
+                fontSize: screenSize.width * 0.035, 
                 color: const Color(0xFF64748B),
                 fontWeight: FontWeight.w500,
               ),

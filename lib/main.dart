@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'src/screens/main_page.dart';
+import 'src/widgets/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ClimbX',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const MainPage(),
+      home: const AuthWrapper(),
     );
   }
 }
