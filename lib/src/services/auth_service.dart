@@ -1,28 +1,25 @@
-import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'api_client.dart';
 
 class AuthService {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
   static const String _tokenKey = 'jwt_token';
 
-  // Mock API base URL
-  static const String _baseUrl = 'http://54.180.64.110:8080';
-
   /// Google OAuth로 토큰 발급 받기 (Mock 이라서 나중에 바꿔야 함)
   static Future<String?> signInWithGoogle() async {
-          try {
-        // log
-        developer.log('Google OAuth 토큰 발급 시작...', name: 'AuthService');
+    try {
+      developer.log('Google OAuth 토큰 발급 시작...', name: 'AuthService');
 
-      final response = await http.get(
-        Uri.parse('$_baseUrl/api/auth/oauth2/GOOGLE/callback?code=testCode'),
-        headers: {'Content-Type': 'application/json'},
+      // ApiClient를 사용하여 API 호출
+      final response = await ApiClient.get<Map<String, dynamic>>(
+        '/api/auth/oauth2/GOOGLE/callback',
+        queryParameters: {'code': 'testCode'},
+        needsAuth: false,
       );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+      if (response.success && response.data != null) {
+        final data = response.data!;
         developer.log('API 응답: $data', name: 'AuthService');
 
         final token = data['accessToken']; // accessToken 필드 사용
@@ -40,7 +37,7 @@ class AuthService {
           return null;
         }
       } else {
-        developer.log('API 호출 실패: ${response.statusCode}, Body: ${response.body}', name: 'AuthService');
+        developer.log('OAuth 토큰 발급 실패: ${response.error}', name: 'AuthService');
         return null;
       }
     } catch (e) {

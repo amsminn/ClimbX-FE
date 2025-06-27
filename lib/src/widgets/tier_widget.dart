@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
+import '../services/user_service.dart';
 
 class TierWidget extends StatelessWidget {
   final String tierName;
+  final UserProfile? userProfile;
 
-  const TierWidget({super.key, this.tierName = 'Diamond I'});
+  const TierWidget({
+    super.key, 
+    this.tierName = 'Diamond I',
+    this.userProfile,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +93,7 @@ class TierWidget extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          '#1',
+                          userProfile != null ? '#${userProfile!.ranking}' : '#---',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -143,7 +149,7 @@ class TierWidget extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          '2714',
+                          userProfile != null ? '${userProfile!.rating}' : '---',
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 28 : 32,
                             fontWeight: FontWeight.w900,

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
+import '../services/user_service.dart';
 
 class ProfileHeader extends StatelessWidget {
+  final UserProfile? userProfile;
   final String tierName;
 
-  const ProfileHeader({super.key, this.tierName = 'Bronze 3'});
+  const ProfileHeader({
+    super.key,
+    this.userProfile,
+    this.tierName = 'Bronze 3',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -77,23 +83,23 @@ class ProfileHeader extends StatelessWidget {
                 SizedBox(width: screenWidth * 0.04),
 
                 // 프로필 이름과 설명
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '이강민',
-                        style: TextStyle(
+                        userProfile!.nickname,
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF1E293B),
                           letterSpacing: -0.5,
                         ),
                       ),
-                      SizedBox(height: 6),
+                      const SizedBox(height: 6),
                       Text(
-                        '클라이밍해다오',
-                        style: TextStyle(
+                        userProfile!.statusMessage,
+                        style: const TextStyle(
                           fontSize: 13,
                           color: Color(0xFF64748B),
                           fontWeight: FontWeight.w500,
@@ -196,9 +202,9 @@ class ProfileHeader extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    '2714',
-                    style: TextStyle(
+                  Text(
+                    userProfile != null ? '${userProfile!.rating}' : '---',
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFFFFFFFF),

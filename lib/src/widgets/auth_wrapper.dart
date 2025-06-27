@@ -31,7 +31,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       developer.log('로그인 상태: $isLoggedIn', name: 'AuthWrapper');
       if (token != null) {
         developer.log(
-          '저장된 토큰 발견: ${token}...',
+          '저장된 토큰 발견: $token...',
           name: 'AuthWrapper',
         ); // 되면 토큰 출력 (나중에 제거)
       } else {

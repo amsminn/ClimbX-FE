@@ -5,6 +5,8 @@ import '../widgets/history_widget.dart';
 import '../widgets/streak_widget.dart';
 import '../utils/tier_test_helper.dart';
 import '../utils/tier_colors.dart';
+import '../services/user_service.dart';
+import '../utils/api_error_handler.dart';
 import 'map_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -25,8 +27,57 @@ class _ProfilePageState extends State<ProfilePage> {
     'Master',
   ][3];
 
+  // API 데이터
+  UserProfile? _userProfile;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    debugPrint('[ProfilePage] initState 호출됨');
+    super.initState();
+    _loadUserProfile();
+  }
+
+  /// 사용자 프로필 데이터 로드
+  Future<void> _loadUserProfile() async {
+    debugPrint('[ProfilePage] 프로필 로드 시작');
+    if (!mounted) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+
+    final userProfile = await ApiErrorHandler.handleApiCall<UserProfile>(
+      context,
+      UserService.getAliceProfile(),
+      showLoading: false, // 자체 로딩 상태가 있으므로 false
+      showErrorSnackBar: true,
+      onSuccess: () {
+        debugPrint('[ProfilePage] API 호출 성공');
+      },
+      onError: () {
+        debugPrint('[ProfilePage] API 호출 실패');
+      },
+      onRetry: () {
+        debugPrint('[ProfilePage] 재시도 중...');
+        _loadUserProfile();
+      },
+    );
+
+    if (!mounted) return;
+    
+    setState(() {
+      _userProfile = userProfile;
+      _isLoading = false;
+    });
+    
+    debugPrint('[ProfilePage] 최종 데이터: ${userProfile?.nickname ?? "null"}');
+  }
+
   @override
   Widget build(BuildContext context) {
+    debugPrint('[ProfilePage] build 호출됨 - isLoading: $_isLoading, userProfile: ${_userProfile?.nickname ?? "null"}');
+    
     // 현재 티어 색상 정보 가져옴
     final TierType tierType = TierColors.getTierFromString(currentTier);
     final TierColorScheme colorScheme = TierColors.getColorScheme(tierType);
@@ -54,8 +105,27 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
 
-        // 액션들 (팔레트, 알림, 메뉴)
+        // 액션들 (새로고침, 팔레트, 알림, 메뉴)
         actions: [
+          // 새로고침 버튼 (디버깅용)
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.refresh,
+                color: Color(0xFF64748B),
+                size: 22,
+              ),
+              onPressed: () {
+                debugPrint('[ProfilePage] 수동 새로고침 버튼 클릭');
+                _loadUserProfile();
+              },
+            ),
+          ),
           // 팔레트
           Container(
             margin: const EdgeInsets.only(right: 8),
@@ -114,13 +184,22 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
 
       // 가운데 body 부분
-      body: DefaultTabController(
+      body: _isLoading 
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : DefaultTabController(
         length: 5, // 탭바의 길이 (개요, 히스토리, 스트릭, 분야별 티어, 내 영상)
         child: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               // SliverToBoxAdapter로 감싸면 스크롤이 가능
-              SliverToBoxAdapter(child: ProfileHeader(tierName: currentTier)),
+              SliverToBoxAdapter(
+                child: ProfileHeader(
+                  userProfile: _userProfile,
+                  tierName: currentTier,
+                ),
+              ),
 
               // SliverPersistentHeader는 스크롤이 되지만 화면에 고정되는 것
               SliverPersistentHeader(
@@ -160,9 +239,15 @@ class _ProfilePageState extends State<ProfilePage> {
           },
           body: TabBarView(
             children: [
-              _buildTabContent(child: TierWidget(tierName: currentTier)),
+              _buildTabContent(child: TierWidget(
+                tierName: currentTier,
+                userProfile: _userProfile,
+              )),
               _buildTabContent(child: HistoryWidget(tierName: currentTier)),
-              _buildTabContent(child: StreakWidget(tierName: currentTier)),
+              _buildTabContent(child: StreakWidget(
+                tierName: currentTier,
+                userProfile: _userProfile,
+              )),
               _buildTabContent(
                 child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
               ),

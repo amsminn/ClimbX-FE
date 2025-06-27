@@ -4,8 +4,10 @@ import 'tier_widget.dart';
 import 'history_widget.dart';
 import 'streak_widget.dart';
 import '../utils/tier_colors.dart';
+import '../services/user_service.dart';
+import '../utils/api_error_handler.dart';
 
-class ProfileBody extends StatelessWidget {
+class ProfileBody extends StatefulWidget {
   final String currentTier;
   final TierColorScheme colorScheme;
 
@@ -16,13 +18,74 @@ class ProfileBody extends StatelessWidget {
   });
 
   @override
+  State<ProfileBody> createState() => _ProfileBodyState();
+}
+
+class _ProfileBodyState extends State<ProfileBody> {
+  // API 데이터
+  UserProfile? _userProfile;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    debugPrint('[ProfileBody] initState 호출됨');
+    super.initState();
+    _loadUserProfile();
+  }
+
+  /// 사용자 프로필 데이터 로드
+  Future<void> _loadUserProfile() async {
+    debugPrint('[ProfileBody] 프로필 로드 시작');
+    if (!mounted) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+
+    final userProfile = await ApiErrorHandler.handleApiCall<UserProfile>(
+      context,
+      UserService.getAliceProfile(),
+      showLoading: false, // 자체 로딩 상태가 있으므로 false
+      showErrorSnackBar: true,
+      onSuccess: () {
+        debugPrint('[ProfileBody] API 호출 성공');
+      },
+      onError: () {
+        debugPrint('[ProfileBody] API 호출 실패');
+      },
+      onRetry: () {
+        debugPrint('[ProfileBody] 재시도 중...');
+        _loadUserProfile();
+      },
+    );
+
+    if (!mounted) return;
+    
+    setState(() {
+      _userProfile = userProfile;
+      _isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     return DefaultTabController(
       length: 5,
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
-            SliverToBoxAdapter(child: ProfileHeader(tierName: currentTier)),
+            SliverToBoxAdapter(
+              child: ProfileHeader(
+                userProfile: _userProfile,
+                tierName: widget.currentTier,
+              ),
+            ),
             SliverPersistentHeader(
               delegate: _StickyTabBarDelegate(
                 TabBar(
@@ -30,10 +93,10 @@ class ProfileBody extends StatelessWidget {
                   tabAlignment: TabAlignment.start,
                   labelColor: const Color(0xFFFFFFFF),
                   unselectedLabelColor: const Color(0xFF64748B),
-                  indicator: BoxDecoration(
-                    gradient: colorScheme.gradient,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                                      indicator: BoxDecoration(
+                      gradient: widget.colorScheme.gradient,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -60,14 +123,20 @@ class ProfileBody extends StatelessWidget {
         },
         body: TabBarView(
           children: [
-            _buildTabContent(child: TierWidget(tierName: currentTier)),
-            _buildTabContent(child: HistoryWidget(tierName: currentTier)),
-            _buildTabContent(child: StreakWidget(tierName: currentTier)),
+            _buildTabContent(child: TierWidget(
+              tierName: widget.currentTier,
+              userProfile: _userProfile,
+            )),
+            _buildTabContent(child: HistoryWidget(tierName: widget.currentTier)),
+            _buildTabContent(child: StreakWidget(
+              tierName: widget.currentTier,
+              userProfile: _userProfile,
+            )),
             _buildTabContent(
-              child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
+              child: _buildComingSoon('분야별 티어', Icons.category, widget.colorScheme),
             ),
             _buildTabContent(
-              child: _buildComingSoon('내 영상', Icons.video_library, colorScheme),
+              child: _buildComingSoon('내 영상', Icons.video_library, widget.colorScheme),
             ),
           ],
         ),
