@@ -29,7 +29,7 @@ class ApiResponse<T> {
 
 /// API 클라이언트 공통 클래스
 class ApiClient {
-  static final String? _baseUrl = dotenv.env['BASE_URL'];
+  static final String _baseUrl = dotenv.env['BASE_URL'];
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
   static const String _tokenKey = 'jwt_token';
 
@@ -162,7 +162,7 @@ class ApiClient {
 
       final headers = await _getHeaders(needsAuth: needsAuth);
 
-      developer.log('GET 요청: ${finalUri.toString()}', name: 'ApiClient');
+      developer.log('GET 요청: $endpoint', name: 'ApiClient');
 
       final response = await http.get(finalUri, headers: headers);
       return _handleResponse<T>(response, fromJson);
@@ -184,7 +184,7 @@ class ApiClient {
       final headers = await _getHeaders(needsAuth: needsAuth);
 
       developer.log(
-        'POST 요청: ${uri.toString()}, Body: $body',
+        'POST 요청: $endpoint, Body: $body',
         name: 'ApiClient',
       );
 
@@ -213,7 +213,7 @@ class ApiClient {
       final headers = await _getHeaders(needsAuth: needsAuth);
 
       developer.log(
-        'PUT 요청: ${uri.toString()}, Body: $body',
+        'PUT 요청: $endpoint, Body: $body',
         name: 'ApiClient',
       );
 
@@ -240,7 +240,7 @@ class ApiClient {
       final uri = Uri.parse('$_baseUrl$endpoint');
       final headers = await _getHeaders(needsAuth: needsAuth);
 
-      developer.log('DELETE 요청: ${uri.toString()}', name: 'ApiClient');
+      developer.log('DELETE 요청: $endpoint', name: 'ApiClient');
 
       final response = await http.delete(uri, headers: headers);
       return _handleResponse<T>(response, fromJson);

@@ -71,9 +71,7 @@ class UserService {
     debugPrint('[UserService] Alice 프로필 조회 시작');
     developer.log('Alice 프로필 조회 시작', name: 'UserService');
 
-    debugPrint(
-      '[UserService] API 요청 URL: http://54.180.64.110:8080/api/users/alice',
-    );
+    debugPrint('[UserService] API 요청: /api/users/alice');
 
     final response = await ApiClient.get<UserProfile>(
       '/api/users/alice',
