@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import '../utils/tier_colors.dart';
-import 'profile_page.dart';
+import '../utils/bottom_nav_tab.dart';
+import '../utils/navigation_helper.dart';
+import '../widgets/custom_bottom_navigation_bar.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -11,12 +13,37 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  // NaverMapController? _controller; // 추후 사용예정, 지도에서 코드로 제어할때 사용함
+  NaverMapController? _controller;
 
   // 티어 색상 (프로필 페이지와 동일하게해야함 추후 변경예정)
   final TierColorScheme colorScheme = TierColors.getColorScheme(
     TierType.platinum,
   );
+
+  /// 메모리 정리 공통 메서드
+  void _cleanupResources() {
+    if (_controller != null) {
+      _controller?.dispose();
+      _controller = null;
+    }
+  }
+
+  /// 탭 변경 처리
+  void _handleTabChange(BottomNavTab tab) {
+    NavigationHelper.handleTabChange(
+      context,
+      BottomNavTab.map, // 현재 탭
+      tab, // 이동할 탭
+      onDispose: _cleanupResources, // 리소스 정리 콜백
+    );
+  }
+
+  @override
+  void dispose() {
+    // dispose에서도 정리 (중복 호출 방지 로직 포함)
+    _cleanupResources();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +108,7 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
 
-      // 가운데 body 부분 - 지도 표시
+      // 가운데 body 부분
       body: NaverMap(
         options: const NaverMapViewOptions(
           // 서울 중심으로 설정
@@ -93,82 +120,15 @@ class _MapPageState extends State<MapPage> {
           activeLayerGroups: [NLayerGroup.building, NLayerGroup.transit],
         ),
         onMapReady: (NaverMapController controller) {
-          // _controller = controller; // 여기도 추후 사용예정
+          _controller = controller;
         },
       ),
 
       // 하단 네비게이션 바
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFFFFF),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 20,
-              offset: Offset(0, -2),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          currentIndex: 3,
-          // 지도 탭이 선택된 상태
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: colorScheme.primary,
-          unselectedItemColor: const Color(0xFF94A3B8),
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 12,
-          ),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: '홈',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.leaderboard_outlined),
-              activeIcon: Icon(Icons.leaderboard),
-              label: '리더보드',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.camera_alt_outlined),
-              activeIcon: Icon(Icons.camera_alt),
-              label: '분석',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.map_outlined),
-              activeIcon: Icon(Icons.map),
-              label: '지도',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: '프로필',
-            ),
-          ],
-          onTap: (idx) {
-            if (idx == 4) {
-              // 프로필 탭을 눌렀을 때
-              Navigator.pushReplacement(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const ProfilePage(),
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
-                ),
-              );
-            }
-            // 다른 페이지 전환 로직 추가 가능
-          },
-        ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentTab: BottomNavTab.map,
+        colorScheme: colorScheme,
+        onTap: _handleTabChange,
       ),
     );
   }

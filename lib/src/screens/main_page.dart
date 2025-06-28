@@ -6,16 +6,19 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
+import '../utils/navigation_helper.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final BottomNavTab? initialTab;
+  
+  const MainPage({super.key, this.initialTab});
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  BottomNavTab _currentTab = BottomNavTab.profile; // 프로필 페이지가 기본
+  late BottomNavTab _currentTab;
 
   // 현재 티어를 저장 (임시로 디버깅용으로 이렇게 해두었음, 수정 예정)
   String currentTier = [
@@ -26,6 +29,13 @@ class _MainPageState extends State<MainPage> {
     'Diamond I',
     'Master',
   ][3];
+
+  @override
+  void initState() {
+    super.initState();
+    // 초기 탭 설정
+    _currentTab = widget.initialTab ?? BottomNavTab.profile;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +50,10 @@ class _MainPageState extends State<MainPage> {
       appBar: CustomAppBar(
         currentTier: currentTier,
         onTierChanged: (String selectedTier) {
-          setState(() {
-            currentTier = selectedTier;
-          });
-        },
+                  setState(() {
+                    currentTier = selectedTier;
+                });
+              },
       ),
       // Body - Indexed Stack으로 화면 전환
       body: IndexedStack(
@@ -67,9 +77,19 @@ class _MainPageState extends State<MainPage> {
         currentTab: _currentTab,
         colorScheme: colorScheme,
         onTap: (tab) {
-          setState(() {
-            _currentTab = tab;
-          });
+          // 지도 탭이면 MapPage로 이동, 아니면 현재 페이지에서 탭 변경
+          if (tab == BottomNavTab.map) {
+            NavigationHelper.handleTabChange(
+              context,
+              _currentTab, // 현재 탭
+              tab, // 이동할 탭
+            );
+          } else {
+            // 현재 페이지 내에서 탭 변경
+            setState(() {
+              _currentTab = tab;
+            });
+          }
         },
       ),
     );
@@ -82,10 +102,10 @@ class _MainPageState extends State<MainPage> {
     TierColorScheme colorScheme,
   ) {
     final screenSize = MediaQuery.of(context).size;
-
+    
     return Center(
       child: Container(
-        width: screenSize.width * 0.85,
+        width: screenSize.width * 0.85, 
         height: screenSize.height * 0.4,
         decoration: BoxDecoration(
           color: const Color(0xFFFFFFFF),
@@ -109,12 +129,12 @@ class _MainPageState extends State<MainPage> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
-                icon,
-                color: const Color(0xFFFFFFFF),
-                size: screenSize.width * 0.08,
+                icon, 
+                color: const Color(0xFFFFFFFF), 
+                size: screenSize.width * 0.08, 
               ),
             ),
-            SizedBox(height: screenSize.height * 0.02),
+            SizedBox(height: screenSize.height * 0.02), 
             Text(
               title,
               style: TextStyle(
@@ -123,11 +143,11 @@ class _MainPageState extends State<MainPage> {
                 color: const Color(0xFF1E293B),
               ),
             ),
-            SizedBox(height: screenSize.height * 0.01),
+            SizedBox(height: screenSize.height * 0.01), 
             Text(
               '곧 출시 예정입니다',
               style: TextStyle(
-                fontSize: screenSize.width * 0.035,
+                fontSize: screenSize.width * 0.035, 
                 color: const Color(0xFF64748B),
                 fontWeight: FontWeight.w500,
               ),

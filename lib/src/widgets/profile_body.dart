@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fquery/fquery.dart';
 import 'profile_header.dart';
 import 'tier_widget.dart';
 import 'history_widget.dart';
 import 'streak_widget.dart';
 import '../utils/tier_colors.dart';
+import '../services/user_service.dart';
+import '../services/user_query_service.dart';
 
-class ProfileBody extends StatelessWidget {
+class ProfileBody extends HookWidget {
   final String currentTier;
   final TierColorScheme colorScheme;
 
@@ -17,12 +21,48 @@ class ProfileBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // fquery로 데이터 get
+    final userQuery = useQuery<UserProfile, Exception>(
+      UserQueryKeys.userProfile(),
+      UserQueryService.getUserProfile,
+    );
+
+    // 로딩 상태
+    if (userQuery.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // 에러 상태
+    if (userQuery.isError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text('프로필을 불러올 수 없습니다'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => userQuery.refetch(),
+              child: const Text('다시 시도'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final userProfile = userQuery.data;
     return DefaultTabController(
       length: 5,
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
-            SliverToBoxAdapter(child: ProfileHeader(tierName: currentTier)),
+            SliverToBoxAdapter(
+              child: ProfileHeader(
+                userProfile: userProfile,
+                tierName: currentTier,
+              ),
+            ),
             SliverPersistentHeader(
               delegate: _StickyTabBarDelegate(
                 TabBar(
@@ -60,9 +100,19 @@ class ProfileBody extends StatelessWidget {
         },
         body: TabBarView(
           children: [
-            _buildTabContent(child: TierWidget(tierName: currentTier)),
+            _buildTabContent(
+              child: TierWidget(
+                tierName: currentTier,
+                userProfile: userProfile,
+              ),
+            ),
             _buildTabContent(child: HistoryWidget(tierName: currentTier)),
-            _buildTabContent(child: StreakWidget(tierName: currentTier)),
+            _buildTabContent(
+              child: StreakWidget(
+                tierName: currentTier,
+                userProfile: userProfile,
+              ),
+            ),
             _buildTabContent(
               child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
             ),

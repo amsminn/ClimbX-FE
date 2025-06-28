@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
+import '../services/user_service.dart';
 
 class StreakWidget extends StatelessWidget {
   final String tierName;
+  final UserProfile? userProfile;
 
-  const StreakWidget({super.key, this.tierName = 'Diamond I'});
+  const StreakWidget({
+    super.key,
+    this.tierName = 'Diamond I',
+    this.userProfile,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +92,9 @@ class StreakWidget extends StatelessWidget {
                     children: [
                       const TextSpan(text: '최대 '),
                       TextSpan(
-                        text: '6',
+                        text: userProfile != null
+                            ? '${userProfile!.longestStreak}'
+                            : '0',
                         style: TextStyle(color: colorScheme.primary),
                       ),
                       const TextSpan(text: '주 출석'),
@@ -127,10 +135,22 @@ class StreakWidget extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildStatItem('현재 스트릭', '5일', colorScheme),
+                        child: _buildStatItem(
+                          '현재 스트릭',
+                          userProfile != null
+                              ? '${userProfile!.currentStreak}일'
+                              : '0일',
+                          colorScheme,
+                        ),
                       ),
                       Expanded(
-                        child: _buildStatItem('최장 스트릭', '42일', colorScheme),
+                        child: _buildStatItem(
+                          '최장 스트릭',
+                          userProfile != null
+                              ? '${userProfile!.longestStreak}일'
+                              : '0일',
+                          colorScheme,
+                        ),
                       ),
                     ],
                   ),
@@ -141,7 +161,13 @@ class StreakWidget extends StatelessWidget {
                         child: _buildStatItem('이번 주', '4/7일', colorScheme),
                       ),
                       Expanded(
-                        child: _buildStatItem('총 제출일', '134일', colorScheme),
+                        child: _buildStatItem(
+                          '총 제출일',
+                          userProfile != null
+                              ? '${userProfile!.solvedProblemsCount}일'
+                              : '0일',
+                          colorScheme,
+                        ),
                       ),
                     ],
                   ),
@@ -356,4 +382,3 @@ class StreakWidget extends StatelessWidget {
     return colorScheme.streakColor; // 스트릭 전용 색상 사용
   }
 }
- 
