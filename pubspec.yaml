@@ -38,6 +38,10 @@ dependencies:
   fl_chart: ^0.68.0
   flutter_secure_storage: ^9.2.2
   http: ^1.1.0
+  dio: ^5.7.0
+  # React Query 스타일 데이터 페칭
+  fquery: ^1.5.4-beta.2
+  flutter_hooks: ^0.21.2
 
 dev_dependencies:
   flutter_test:

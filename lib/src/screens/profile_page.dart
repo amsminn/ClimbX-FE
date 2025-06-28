@@ -1,100 +1,36 @@
 import 'package:flutter/material.dart';
-import '../widgets/profile_header.dart';
-import '../widgets/tier_widget.dart';
-import '../widgets/history_widget.dart';
-import '../widgets/streak_widget.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import '../widgets/profile_body.dart';
 import '../utils/tier_test_helper.dart';
 import '../utils/tier_colors.dart';
-import '../services/user_service.dart';
-import '../utils/api_error_handler.dart';
-import 'map_page.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends HookWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-  // 현재 티어를 저장 (임시로 디버깅용으로 이렇게 해두었음, 수정 예정)
-  String currentTier = [
-    'Bronze I',
-    'Silver I',
-    'Gold I',
-    'Platinum I',
-    'Diamond I',
-    'Master',
-  ][3];
-
-  // API 데이터
-  UserProfile? _userProfile;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    debugPrint('[ProfilePage] initState 호출됨');
-    super.initState();
-    _loadUserProfile();
-  }
-
-  /// 사용자 프로필 데이터 로드
-  Future<void> _loadUserProfile() async {
-    debugPrint('[ProfilePage] 프로필 로드 시작');
-    if (!mounted) return;
-    
-    setState(() {
-      _isLoading = true;
-    });
-
-    final userProfile = await ApiErrorHandler.handleApiCall<UserProfile>(
-      context,
-      UserService.getAliceProfile(),
-      showLoading: false, // 자체 로딩 상태가 있으므로 false
-      showErrorSnackBar: true,
-      onSuccess: () {
-        debugPrint('[ProfilePage] API 호출 성공');
-      },
-      onError: () {
-        debugPrint('[ProfilePage] API 호출 실패');
-      },
-      onRetry: () {
-        debugPrint('[ProfilePage] 재시도 중...');
-        _loadUserProfile();
-      },
-    );
-
-    if (!mounted) return;
-    
-    setState(() {
-      _userProfile = userProfile;
-      _isLoading = false;
-    });
-    
-    debugPrint('[ProfilePage] 최종 데이터: ${userProfile?.nickname ?? "null"}');
-  }
-
-  @override
   Widget build(BuildContext context) {
-    debugPrint('[ProfilePage] build 호출됨 - isLoading: $_isLoading, userProfile: ${_userProfile?.nickname ?? "null"}');
-    
+    // 현재 티어를 저장 (임시로 디버깅용으로 이렇게 해두었음, 수정 예정)
+    final currentTier = useState([
+      'Bronze I',
+      'Silver I',
+      'Gold I',
+      'Platinum I',
+      'Diamond I',
+      'Master',
+    ][3]);
+
     // 현재 티어 색상 정보 가져옴
-    final TierType tierType = TierColors.getTierFromString(currentTier);
+    final TierType tierType = TierColors.getTierFromString(currentTier.value);
     final TierColorScheme colorScheme = TierColors.getColorScheme(tierType);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-
-      // 상단 앱바 (ClimbX, 팔레트(임시), 알림, 메뉴)
       appBar: AppBar(
-        // 앱바에 대한 설정
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false, // 뒤로 가기 버튼 제거
-
-        // 로고
+        automaticallyImplyLeading: false,
         title: const Text(
           'ClimbX',
           style: TextStyle(
@@ -104,28 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
             letterSpacing: -0.5,
           ),
         ),
-
-        // 액션들 (새로고침, 팔레트, 알림, 메뉴)
         actions: [
-          // 새로고침 버튼 (디버깅용)
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.refresh,
-                color: Color(0xFF64748B),
-                size: 22,
-              ),
-              onPressed: () {
-                debugPrint('[ProfilePage] 수동 새로고침 버튼 클릭');
-                _loadUserProfile();
-              },
-            ),
-          ),
           // 팔레트
           Container(
             margin: const EdgeInsets.only(right: 8),
@@ -141,9 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               onPressed: () {
                 TierTestHelper.showTierSelector(context, (String selectedTier) {
-                  setState(() {
-                    currentTier = selectedTier;
-                  });
+                  currentTier.value = selectedTier;
                 });
               },
             ),
@@ -182,271 +95,10 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-
-      // 가운데 body 부분
-      body: _isLoading 
-        ? const Center(
-            child: CircularProgressIndicator(),
-          )
-        : DefaultTabController(
-        length: 5, // 탭바의 길이 (개요, 히스토리, 스트릭, 분야별 티어, 내 영상)
-        child: NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              // SliverToBoxAdapter로 감싸면 스크롤이 가능
-              SliverToBoxAdapter(
-                child: ProfileHeader(
-                  userProfile: _userProfile,
-                  tierName: currentTier,
-                ),
-              ),
-
-              // SliverPersistentHeader는 스크롤이 되지만 화면에 고정되는 것
-              SliverPersistentHeader(
-                delegate: _StickyTabBarDelegate(
-                  TabBar(
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    labelColor: const Color(0xFFFFFFFF),
-                    unselectedLabelColor: const Color(0xFF64748B),
-                    indicator: BoxDecoration(
-                      gradient: colorScheme.gradient,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                    unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 13,
-                    ),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    dividerColor: Colors.transparent,
-                    overlayColor: WidgetStateProperty.all(Colors.transparent),
-                    tabs: [
-                      _buildTab('개요'),
-                      _buildTab('히스토리'),
-                      _buildTab('스트릭'),
-                      _buildTab('분야별 티어'),
-                      _buildTab('내 영상'),
-                    ],
-                  ),
-                ),
-                pinned: true, // 탭바를 화면에 고정
-              ),
-            ];
-          },
-          body: TabBarView(
-            children: [
-              _buildTabContent(child: TierWidget(
-                tierName: currentTier,
-                userProfile: _userProfile,
-              )),
-              _buildTabContent(child: HistoryWidget(tierName: currentTier)),
-              _buildTabContent(child: StreakWidget(
-                tierName: currentTier,
-                userProfile: _userProfile,
-              )),
-              _buildTabContent(
-                child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
-              ),
-              _buildTabContent(
-                child: _buildComingSoon(
-                  '내 영상',
-                  Icons.video_library,
-                  colorScheme,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFFFFF),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 20,
-              offset: Offset(0, -2),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          currentIndex: 4,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: colorScheme.primary,
-          unselectedItemColor: const Color(0xFF94A3B8),
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 12,
-          ),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: '홈',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.leaderboard_outlined),
-              activeIcon: Icon(Icons.leaderboard),
-              label: '리더보드',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.camera_alt_outlined),
-              activeIcon: Icon(Icons.camera_alt),
-              label: '분석',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search_outlined),
-              activeIcon: Icon(Icons.search),
-              label: '검색',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: '프로필',
-            ),
-          ],
-          onTap: (idx) {
-            if (idx == 3) {
-              // 지도 탭을 눌렀을 때 - 애니메이션 없이 이동
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => const MapPage(),
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
-                ),
-              );
-            }
-            // 다른 페이지 전환 로직 추가해야함
-          },
-        ),
+      body: ProfileBody(
+        currentTier: currentTier.value,
+        colorScheme: colorScheme,
       ),
     );
-  }
-
-  // 탭바에서 선택할 수 있는 텍스트
-  Widget _buildTab(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Text(text),
-    );
-  }
-
-  // 내용이 들어있는 탭바 위젯
-  Widget _buildTabContent({required Widget child}) {
-    return Container(
-      color: const Color(0xFFF8FAFC),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: child,
-      ),
-    );
-  }
-
-  // 출시 예정 탭바
-  Widget _buildComingSoon(
-    String title,
-    IconData icon,
-    TierColorScheme colorScheme,
-  ) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 20,
-            offset: Offset(0, 4),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: colorScheme.gradient,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(icon, color: const Color(0xFFFFFFFF), size: 32),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1E293B),
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '곧 출시 예정입니다',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF64748B),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
-  const _StickyTabBarDelegate(this.tabBar);
-
-  final TabBar tabBar;
-
-  @override
-  double get minExtent => tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
-    return tabBar != oldDelegate.tabBar;
   }
 }

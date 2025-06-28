@@ -1,70 +1,108 @@
 import 'dart:developer' as developer;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'api_client.dart';
+import 'token_storage.dart';
+import 'auth_api_service.dart';
 
+/// 인증 비즈니스 로직 담당
 class AuthService {
-  static const FlutterSecureStorage _storage = FlutterSecureStorage();
-  static const String _tokenKey = 'jwt_token';
-
-  /// Google OAuth로 토큰 발급 받기 (Mock 이라서 나중에 바꿔야 함)
+  /// Google OAuth 로그인
   static Future<String?> signInWithGoogle() async {
     try {
-      developer.log('Google OAuth 토큰 발급 시작...', name: 'AuthService');
+      developer.log('Google OAuth 로그인 시작', name: 'AuthService');
 
-      // ApiClient를 사용하여 API 호출
-      final response = await ApiClient.get<Map<String, dynamic>>(
-        '/api/auth/oauth2/GOOGLE/callback',
-        queryParameters: {'code': 'testCode'},
-        needsAuth: false,
-      );
+      // 1. API를 통해 토큰 발급
+      final token = await AuthApiService.requestGoogleOAuthToken();
 
-      if (response.success && response.data != null) {
-        final data = response.data!;
-        developer.log('API 응답: $data', name: 'AuthService');
-
-        final token = data['accessToken']; // accessToken 필드 사용
-        final tokenType = data['tokenType']; // Bearer
-        final expiresIn = data['expiresIn']; // 3600
-
-        if (token != null) {
-          await _saveToken(token);
-          developer.log('토큰 발급 및 저장 성공 - Type: $tokenType, ExpiresIn: $expiresIn', name: 'AuthService');
-          // 임시 출력용 (나중에 지울 것)
-          developer.log('발급받은 토큰 내용: $token', name: 'AuthService');
-          return token;
-        } else {
-          developer.log('응답에서 accessToken을 찾을 수 없음', name: 'AuthService');
-          return null;
-        }
+      if (token != null) {
+        // 2. 토큰 저장
+        await TokenStorage.saveToken(token);
+        developer.log('Google OAuth 로그인 완료', name: 'AuthService');
+        return token;
       } else {
-        developer.log('OAuth 토큰 발급 실패: ${response.error}', name: 'AuthService');
+        developer.log('Google OAuth 로그인 실패: 토큰 발급 실패', name: 'AuthService');
         return null;
       }
     } catch (e) {
-      developer.log('OAuth 토큰 발급 실패: $e', name: 'AuthService');
+      developer.log('Google OAuth 로그인 중 예외 발생: $e', name: 'AuthService');
       return null;
     }
   }
 
-  /// 토큰 저장
-  static Future<void> _saveToken(String token) async {
-    await _storage.write(key: _tokenKey, value: token);
-    developer.log('토큰이 안전하게 저장되었습니다', name: 'AuthService'); // log 추가 (나중에 지움)
+  /// 로그아웃 (토큰 삭제)
+  static Future<void> logout() async {
+    try {
+      developer.log('로그아웃 시작', name: 'AuthService');
+      await TokenStorage.clearToken();
+      developer.log('로그아웃 완료', name: 'AuthService');
+    } catch (e) {
+      developer.log('로그아웃 중 예외 발생: $e', name: 'AuthService');
+    }
   }
 
-  /// 저장된 토큰 가져오기
-  static Future<String?> getToken() async {
-    return await _storage.read(key: _tokenKey);
-  }
-
-  /// 토큰 삭제 (로그아웃)
-  static Future<void> clearToken() async {
-    await _storage.delete(key: _tokenKey);
-  }
-
-  /// 로그인 상태 확인
+  /// 로그인 상태 확인 (토큰 존재 여부)
   static Future<bool> isLoggedIn() async {
-    final token = await getToken();
-    return token != null && token.isNotEmpty;
+    return await TokenStorage.hasToken();
+  }
+
+  /// 저장된 토큰 가져오기 (다른 서비스에서 사용)
+  static Future<String?> getToken() async {
+    return await TokenStorage.getToken();
+  }
+
+  /// 토큰 삭제 (다른 서비스에서 사용 - 예: API 401 에러 시)
+  static Future<void> clearToken() async {
+    await TokenStorage.clearToken();
+  }
+
+  /// 토큰 유효성 검증 (로컬 + 서버)
+  static Future<bool> validateCurrentToken() async {
+    try {
+      // 1. 로컬에서 토큰 형식 검증
+      final isLocalValid = await TokenStorage.isTokenValid();
+      if (!isLocalValid) {
+        developer.log('토큰 로컬 검증 실패', name: 'AuthService');
+        return false;
+      }
+
+      // 2. 서버에서 토큰 유효성 검증
+      final token = await TokenStorage.getToken();
+      if (token != null) {
+        final isServerValid = await AuthApiService.validateToken(token);
+        if (!isServerValid) {
+          developer.log('토큰 서버 검증 실패 - 토큰 삭제', name: 'AuthService');
+          await TokenStorage.clearToken();
+        }
+        return isServerValid;
+      }
+
+      return false;
+    } catch (e) {
+      developer.log('토큰 검증 중 예외 발생: $e', name: 'AuthService');
+      return false;
+    }
+  }
+
+  /// 토큰 자동 갱신
+  static Future<String?> refreshTokenIfNeeded() async {
+    try {
+      developer.log('토큰 갱신 시도', name: 'AuthService');
+
+      // 1. API를 통해 토큰 갱신
+      final newToken = await AuthApiService.refreshToken();
+
+      if (newToken != null) {
+        // 2. 새 토큰 저장
+        await TokenStorage.saveToken(newToken);
+        developer.log('토큰 갱신 완료', name: 'AuthService');
+        return newToken;
+      } else {
+        // 갱신 실패 시 기존 토큰 삭제
+        developer.log('토큰 갱신 실패 - 기존 토큰 삭제', name: 'AuthService');
+        await TokenStorage.clearToken();
+        return null;
+      }
+    } catch (e) {
+      developer.log('토큰 갱신 중 예외 발생: $e', name: 'AuthService');
+      return null;
+    }
   }
 }

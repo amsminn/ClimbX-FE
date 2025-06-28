@@ -6,16 +6,19 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
+import '../utils/navigation_helper.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final BottomNavTab? initialTab;
+  
+  const MainPage({super.key, this.initialTab});
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  BottomNavTab _currentTab = BottomNavTab.profile; // 프로필 페이지가 기본
+  late BottomNavTab _currentTab;
 
   // 현재 티어를 저장 (임시로 디버깅용으로 이렇게 해두었음, 수정 예정)
   String currentTier = [
@@ -26,6 +29,13 @@ class _MainPageState extends State<MainPage> {
     'Diamond I',
     'Master',
   ][3];
+
+  @override
+  void initState() {
+    super.initState();
+    // 초기 탭 설정
+    _currentTab = widget.initialTab ?? BottomNavTab.profile;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,10 +77,20 @@ class _MainPageState extends State<MainPage> {
         currentTab: _currentTab,
         colorScheme: colorScheme,
         onTap: (tab) {
+          // 지도 탭이면 MapPage로 이동, 아니면 현재 페이지에서 탭 변경
+          if (tab == BottomNavTab.map) {
+            NavigationHelper.handleTabChange(
+              context,
+              _currentTab, // 현재 탭
+              tab, // 이동할 탭
+            );
+          } else {
+            // 현재 페이지 내에서 탭 변경
             setState(() {
-            _currentTab = tab;
+              _currentTab = tab;
             });
-          },
+          }
+        },
       ),
     );
   }

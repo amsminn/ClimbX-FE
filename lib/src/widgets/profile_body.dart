@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fquery/fquery.dart';
 import 'profile_header.dart';
 import 'tier_widget.dart';
 import 'history_widget.dart';
 import 'streak_widget.dart';
 import '../utils/tier_colors.dart';
 import '../services/user_service.dart';
-import '../utils/api_error_handler.dart';
+import '../services/user_query_service.dart';
 
-class ProfileBody extends StatefulWidget {
+class ProfileBody extends HookWidget {
   final String currentTier;
   final TierColorScheme colorScheme;
 
@@ -18,63 +20,38 @@ class ProfileBody extends StatefulWidget {
   });
 
   @override
-  State<ProfileBody> createState() => _ProfileBodyState();
-}
-
-class _ProfileBodyState extends State<ProfileBody> {
-  // API 데이터
-  UserProfile? _userProfile;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    debugPrint('[ProfileBody] initState 호출됨');
-    super.initState();
-    _loadUserProfile();
-  }
-
-  /// 사용자 프로필 데이터 로드
-  Future<void> _loadUserProfile() async {
-    debugPrint('[ProfileBody] 프로필 로드 시작');
-    if (!mounted) return;
-    
-    setState(() {
-      _isLoading = true;
-    });
-
-    final userProfile = await ApiErrorHandler.handleApiCall<UserProfile>(
-      context,
-      UserService.getAliceProfile(),
-      showLoading: false, // 자체 로딩 상태가 있으므로 false
-      showErrorSnackBar: true,
-      onSuccess: () {
-        debugPrint('[ProfileBody] API 호출 성공');
-      },
-      onError: () {
-        debugPrint('[ProfileBody] API 호출 실패');
-      },
-      onRetry: () {
-        debugPrint('[ProfileBody] 재시도 중...');
-        _loadUserProfile();
-      },
+  Widget build(BuildContext context) {
+    // fquery로 데이터 get
+    final userQuery = useQuery<UserProfile, Exception>(
+      UserQueryKeys.userProfile(),
+      UserQueryService.getUserProfile,
     );
 
-    if (!mounted) return;
-    
-    setState(() {
-      _userProfile = userProfile;
-      _isLoading = false;
-    });
-  }
+    // 로딩 상태
+    if (userQuery.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+    // 에러 상태
+    if (userQuery.isError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text('프로필을 불러올 수 없습니다'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => userQuery.refetch(),
+              child: const Text('다시 시도'),
+            ),
+          ],
+        ),
       );
     }
+
+    final userProfile = userQuery.data;
     return DefaultTabController(
       length: 5,
       child: NestedScrollView(
@@ -82,8 +59,8 @@ class _ProfileBodyState extends State<ProfileBody> {
           return <Widget>[
             SliverToBoxAdapter(
               child: ProfileHeader(
-                userProfile: _userProfile,
-                tierName: widget.currentTier,
+                userProfile: userProfile,
+                tierName: currentTier,
               ),
             ),
             SliverPersistentHeader(
@@ -93,10 +70,10 @@ class _ProfileBodyState extends State<ProfileBody> {
                   tabAlignment: TabAlignment.start,
                   labelColor: const Color(0xFFFFFFFF),
                   unselectedLabelColor: const Color(0xFF64748B),
-                                      indicator: BoxDecoration(
-                      gradient: widget.colorScheme.gradient,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                  indicator: BoxDecoration(
+                    gradient: colorScheme.gradient,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -123,20 +100,24 @@ class _ProfileBodyState extends State<ProfileBody> {
         },
         body: TabBarView(
           children: [
-            _buildTabContent(child: TierWidget(
-              tierName: widget.currentTier,
-              userProfile: _userProfile,
-            )),
-            _buildTabContent(child: HistoryWidget(tierName: widget.currentTier)),
-            _buildTabContent(child: StreakWidget(
-              tierName: widget.currentTier,
-              userProfile: _userProfile,
-            )),
             _buildTabContent(
-              child: _buildComingSoon('분야별 티어', Icons.category, widget.colorScheme),
+              child: TierWidget(
+                tierName: currentTier,
+                userProfile: userProfile,
+              ),
+            ),
+            _buildTabContent(child: HistoryWidget(tierName: currentTier)),
+            _buildTabContent(
+              child: StreakWidget(
+                tierName: currentTier,
+                userProfile: userProfile,
+              ),
             ),
             _buildTabContent(
-              child: _buildComingSoon('내 영상', Icons.video_library, widget.colorScheme),
+              child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
+            ),
+            _buildTabContent(
+              child: _buildComingSoon('내 영상', Icons.video_library, colorScheme),
             ),
           ],
         ),

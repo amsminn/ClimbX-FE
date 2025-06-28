@@ -1,70 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fquery/fquery.dart';
 import 'dart:developer' as developer;
-import '../services/auth_service.dart';
+import '../services/user_query_service.dart';
 import '../screens/login_page.dart';
 import '../screens/main_page.dart';
 
-class AuthWrapper extends StatefulWidget {
+class AuthWrapper extends HookWidget {
   const AuthWrapper({super.key});
 
   @override
-  State<AuthWrapper> createState() => _AuthWrapperState();
-}
-
-class _AuthWrapperState extends State<AuthWrapper> {
-  bool _isLoading = true;
-  bool _isLoggedIn = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAuthStatus();
-  }
-
-  Future<void> _checkAuthStatus() async {
-    developer.log('토큰 상태 확인 중...', name: 'AuthWrapper');
-
-    try {
-      final isLoggedIn = await AuthService.isLoggedIn();
-      final token = await AuthService.getToken();
-
-      developer.log('로그인 상태: $isLoggedIn', name: 'AuthWrapper');
-      if (token != null) {
-        developer.log(
-          '저장된 토큰 발견: $token...',
-          name: 'AuthWrapper',
-        ); // 되면 토큰 출력 (나중에 제거)
-      } else {
-        developer.log('저장된 토큰 없음', name: 'AuthWrapper');
-      }
-
-      if (mounted) {
-        setState(() {
-          _isLoggedIn = isLoggedIn;
-          _isLoading = false;
-        });
-      }
-
-      if (isLoggedIn) {
-        developer.log('자동 로그인 성공 - MainPage로 이동', name: 'AuthWrapper');
-      } else {
-        developer.log('로그인 필요 - LoginPage 표시', name: 'AuthWrapper');
-      }
-    } catch (e) {
-      developer.log('토큰 확인 실패: $e', name: 'AuthWrapper');
-      if (mounted) {
-        setState(() {
-          _isLoggedIn = false;
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      // 로딩 중일 때 스플래시 화면
+    // fquery로 인증 상태 확인
+    final authQuery = useQuery<bool, Exception>(
+      UserQueryKeys.authStatus(),
+      AuthQueryService.checkAuthStatus,
+    );
+
+    // 로딩 중일 때 스플래시 화면
+    if (authQuery.isLoading) {
+      developer.log('토큰 상태 확인 중...', name: 'AuthWrapper');
+      
       return const Scaffold(
         backgroundColor: Color(0xFFF8FAFC),
         body: Center(
@@ -107,7 +63,20 @@ class _AuthWrapperState extends State<AuthWrapper> {
       );
     }
 
-    // 로딩 완료 후 적절한 페이지로 이동
-    return _isLoggedIn ? const MainPage() : const LoginPage();
+    // 에러 발생 시 로그인 페이지로
+    if (authQuery.isError) {
+      developer.log('토큰 확인 실패: ${authQuery.error}', name: 'AuthWrapper');
+      return const LoginPage();
+    }
+
+    final isLoggedIn = authQuery.data ?? false;
+    
+    if (isLoggedIn) {
+      developer.log('자동 로그인 성공 - MainPage로 이동', name: 'AuthWrapper');
+      return const MainPage();
+    } else {
+      developer.log('로그인 필요 - LoginPage 표시', name: 'AuthWrapper');
+      return const LoginPage();
+    }
   }
 }

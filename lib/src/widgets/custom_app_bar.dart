@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import '../utils/tier_test_helper.dart';
+import '../utils/navigation_helper.dart';
 import '../services/auth_service.dart';
-import '../screens/login_page.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String currentTier;
@@ -45,8 +45,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           child: IconButton(
             icon: const Icon(Icons.logout, color: Color(0xFF64748B), size: 22),
-            onPressed: () async {
-              await _handleLogout(context);
+            onPressed: () {
+              _handleLogout(context);
             },
           ),
         ),
@@ -108,25 +108,21 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   // 로그아웃 처리
-  static Future<void> _handleLogout(BuildContext context) async {
+  static void _handleLogout(BuildContext context) {
     developer.log('로그아웃 요청', name: 'CustomAppBar');
 
-    try {
-      // 토큰 삭제
-      await AuthService.clearToken();
-      developer.log('토큰 삭제 완료', name: 'CustomAppBar');
-
-      // LoginPage로 이동 (현재 페이지 스택을 모두 지우고 새로 시작)
-      if (context.mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (route) => false, // 모든 이전 페이지 제거
-        );
-        developer.log('LoginPage로 이동 완료', name: 'CustomAppBar');
-      }
-    } catch (e) {
-      developer.log('로그아웃 실패: $e', name: 'CustomAppBar');
-    }
+    AuthService.clearToken()
+        .then((_) {
+          developer.log('토큰 삭제 완료', name: 'CustomAppBar');
+          
+          // LoginPage로 이동
+          if (context.mounted) {
+            NavigationHelper.navigateToLoginAfterLogout(context);
+            developer.log('LoginPage로 이동 완료', name: 'CustomAppBar');
+          }
+        })
+        .catchError((error) {
+          developer.log('로그아웃 실패: $error', name: 'CustomAppBar');
+        });
   }
 }

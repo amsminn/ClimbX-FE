@@ -1,51 +1,32 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import 'main_page.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fquery/fquery.dart';
+import '../services/user_query_service.dart';
+import '../utils/navigation_helper.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends HookWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  bool _isLoading = false;
-
-  Future<void> _handleTokenRequest() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final token = await AuthService.signInWithGoogle();
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (token != null) {
-      // 토큰 발급 성공 - MainPage로 이동
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainPage()),
-        );
-      }
-    } else {
-      // 토큰 발급 실패 - 스낵바로 알림
-      if (mounted) {
+  Widget build(BuildContext context) {
+    // fquery mutation 사용
+    final signInMutation = useMutation(
+      AuthQueryService.signInWithGoogle,
+      onSuccess: (token, _, __) {
+        // 토큰 발급 성공 - MainPage로 이동
+        NavigationHelper.navigateToMainAfterLogin(context);
+      },
+      onError: (error, _, __) {
+        // 토큰 발급 실패 - 스낵바로 알림
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('토큰 발급에 실패했습니다. 다시 시도해주세요.'),
+          SnackBar(
+            content: Text(error.toString()),
             backgroundColor: Colors.red,
           ),
         );
-      }
-    }
-  }
+      },
+    );
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: Center(
@@ -98,9 +79,9 @@ class _LoginPageState extends State<LoginPage> {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                  onTap: _isLoading ? null : _handleTokenRequest,
+                  onTap: signInMutation.isPending ? null : () => signInMutation.mutate(null),
                   child: Center(
-                    child: _isLoading
+                    child: signInMutation.isPending
                         ? const SizedBox(
                             width: 24,
                             height: 24,
