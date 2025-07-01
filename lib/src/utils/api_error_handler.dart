@@ -5,22 +5,23 @@ import '../services/api_client.dart';
 class ApiErrorHandler {
   /// 에러 메시지를 스낵바로 표시
   static void showSnackBar(BuildContext context, ApiResponse response) {
-    if (!response.success && response.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(response.error!),
-          backgroundColor: _getErrorColor(response.statusCode),
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: '닫기',
-            textColor: Colors.white,
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          ),
+    // 성공하거나 에러 메시지가 없으면 바로 리턴
+    if (response.success || response.error == null) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(response.error!),
+        backgroundColor: _getErrorColor(response.statusCode),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: '닫기',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
         ),
-      );
-    }
+      ),
+    );
   }
 
   /// 에러 다이얼로그 표시
@@ -30,34 +31,35 @@ class ApiErrorHandler {
     String? title,
     VoidCallback? onRetry,
   }) async {
-    if (!response.success && response.error != null) {
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(title ?? '오류'),
-            content: Text(response.error!),
-            actions: [
-              if (onRetry != null && _shouldShowRetry(response.statusCode))
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    onRetry();
-                  },
-                  child: const Text('다시 시도'),
-                ),
+    // 성공하거나 에러 메시지가 없으면 바로 리턴
+    if (response.success || response.error == null) return;
+    
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title ?? '오류'),
+          content: Text(response.error!),
+          actions: [
+            if (onRetry != null && _shouldShowRetry(response.statusCode))
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+                  onRetry();
                 },
-                child: const Text('확인'),
+                child: const Text('다시 시도'),
               ),
-            ],
-          );
-        },
-      );
-    }
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   /// 상태 코드에 따른 에러 색상 반환
@@ -79,30 +81,31 @@ class ApiErrorHandler {
 
   /// 인증 오류 처리 (로그인 페이지로 이동)
   static void handleAuthError(BuildContext context, ApiResponse response) {
-    if (response.statusCode == 401) {
-      // 토큰 만료 또는 인증 실패
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('인증 만료'),
-            content: const Text('로그인이 만료되었습니다. 다시 로그인해주세요.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // 로그인 페이지로 이동 (라우팅 구조에 따라 수정 필요)
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil('/login', (route) => false);
-                },
-                child: const Text('로그인'),
-              ),
-            ],
-          );
-        },
-      );
-    }
+    // 401 에러가 아니면 바로 리턴
+    if (response.statusCode != 401) return;
+    
+    // 토큰 만료 또는 인증 실패
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('인증 만료'),
+          content: const Text('로그인이 만료되었습니다. 다시 로그인해주세요.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // 로그인 페이지로 이동 (라우팅 구조에 따라 수정 필요)
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/login', (route) => false);
+              },
+              child: const Text('로그인'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

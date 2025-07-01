@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:developer' as developer;
+import 'token_storage.dart';
 
 /// API 응답 결과를 담는 클래스
 class ApiResponse<T> {
@@ -30,11 +30,12 @@ class ApiResponse<T> {
 /// Dio 기반 API 클라이언트
 class ApiClient {
   static final String _baseUrl = dotenv.env['BASE_URL'] ?? '';
-  static const FlutterSecureStorage _storage = FlutterSecureStorage();
-  static const String _tokenKey = 'jwt_token';
   
   late final Dio _dio;
   static ApiClient? _instance;
+  
+  // 401 에러 발생 시 호출할 콜백 함수
+  Function()? onUnauthorized;
 
   // 싱글톤 패턴
   static ApiClient get instance {
@@ -60,8 +61,8 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // JWT 토큰 자동 추가
-          final token = await _storage.read(key: _tokenKey);
+          // JWT 토큰 자동 추가 (TokenStorage 사용)
+          final token = await TokenStorage.getToken();
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
@@ -107,19 +108,14 @@ class ApiClient {
 
     switch (statusCode) {
       case 401:
-        // 인증 만료 처리 - 토큰 삭제
-        _clearStoredToken();
+        // 인증 만료 시 콜백 호출 (AuthService에서 처리하도록)
+        developer.log('인증 만료 감지 - 토큰 정리 콜백 호출', name: 'ApiClient');
+        onUnauthorized?.call();
         break;
       case 500:
         developer.log('서버 오류 발생', name: 'ApiClient');
         break;
     }
-  }
-
-  /// 저장된 토큰 삭제
-  Future<void> _clearStoredToken() async {
-    await _storage.delete(key: _tokenKey);
-    developer.log('만료된 토큰이 삭제되었습니다.', name: 'ApiClient');
   }
 
   /// Dio Response를 ApiResponse로 변환
@@ -130,19 +126,39 @@ class ApiClient {
     try {
       final statusCode = response.statusCode ?? 0;
       
-      if (statusCode >= 200 && statusCode < 300) {
-        if (response.data == null) {
-          return ApiResponse.success(null as T, statusCode);
-        }
-
-        if (fromJson != null && response.data is Map<String, dynamic>) {
-          return ApiResponse.success(fromJson(response.data), statusCode);
-        } else {
-          return ApiResponse.success(response.data as T, statusCode);
-        }
+      // 응답 실패 시 바로 리턴
+      if (statusCode < 200 || statusCode >= 300) {
+        return ApiResponse.failure('요청 처리 중 오류가 발생했습니다.', statusCode);
       }
 
-      return ApiResponse.failure('요청 처리 중 오류가 발생했습니다.', statusCode);
+      // 데이터가 null일 때 바로 리턴
+      if (response.data == null) {
+        return ApiResponse.success(null as T, statusCode);
+      }
+
+      // 데이터가 Map이 아닐 때 바로 리턴 (wrapper 없는 경우)
+      if (response.data is! Map<String, dynamic>) {
+        return ApiResponse.success(response.data as T, statusCode);
+      }
+
+      final responseData = response.data as Map<String, dynamic>;
+      final httpStatus = responseData['httpStatus'] as int;
+      
+      // httpStatus가 실패일 때 바로 리턴
+      if (httpStatus < 200 || httpStatus >= 300) {
+        final statusMessage = responseData['statusMessage'] ?? '요청 처리 실패';
+        return ApiResponse.failure(statusMessage, httpStatus);
+      }
+
+      // 성공 케이스 - data 필드 추출
+      final actualData = responseData['data'];
+      
+      // fromJson이 있으면 변환, 없으면 data를 그대로 반환
+      if (fromJson != null) {
+        return ApiResponse.success(fromJson(actualData), statusCode);
+      } else {
+        return ApiResponse.success(actualData as T, statusCode);
+      }
     } catch (e) {
       developer.log('응답 변환 오류: $e', name: 'ApiClient');
       return ApiResponse.failure('응답 데이터 파싱 오류', response.statusCode ?? 0);
@@ -175,19 +191,37 @@ class ApiClient {
 
   /// 에러 메시지 추출
   String _getErrorMessage(int statusCode, dynamic responseData) {
+    // 응답 데이터에서 에러 메시지 추출 시도
     try {
-      if (responseData is Map<String, dynamic>) {
-        if (responseData.containsKey('message')) {
-          return responseData['message'];
-        } else if (responseData.containsKey('error')) {
-          return responseData['error'];
-        }
+      // responseData가 Map이 아니면 바로 기본 메시지로
+      if (responseData is! Map<String, dynamic>) {
+        return _getDefaultErrorMessage(statusCode);
+      }
+      
+      // statusMessage 키가 있으면 바로 리턴
+      if (responseData.containsKey('statusMessage')) {
+        return responseData['statusMessage'];
+      }
+      
+      // message 키가 있으면 바로 리턴
+      if (responseData.containsKey('message')) {
+        return responseData['message'];
+      }
+      
+      // error 키가 있으면 바로 리턴
+      if (responseData.containsKey('error')) {
+        return responseData['error'];
       }
     } catch (e) {
       developer.log('에러 메시지 파싱 실패: $e', name: 'ApiClient');
     }
 
-    // 기본 에러 메시지
+    // 기본 에러 메시지 반환
+    return _getDefaultErrorMessage(statusCode);
+  }
+
+  /// 상태 코드에 따른 기본 에러 메시지 반환
+  String _getDefaultErrorMessage(int statusCode) {
     switch (statusCode) {
       case 401:
         return '인증이 만료되었습니다. 다시 로그인해주세요.';
@@ -207,7 +241,6 @@ class ApiClient {
   /// GET 요청
   Future<ApiResponse<T>> get<T>(
     String endpoint, {
-    bool needsAuth = false, // 기존 인터페이스 호환성을 위해 유지 (실제로는 자동 처리)
     T Function(Map<String, dynamic>)? fromJson,
     Map<String, dynamic>? queryParameters,
   }) async {
@@ -225,8 +258,7 @@ class ApiClient {
   /// POST 요청
   Future<ApiResponse<T>> post<T>(
     String endpoint, {
-    bool needsAuth = false, // 기존 인터페이스 호환성을 위해 유지
-    Map<String, dynamic>? body, // 기존 파라미터명 유지
+    Map<String, dynamic>? body,
     T Function(Map<String, dynamic>)? fromJson,
   }) async {
     try {
@@ -240,8 +272,7 @@ class ApiClient {
   /// PUT 요청
   Future<ApiResponse<T>> put<T>(
     String endpoint, {
-    bool needsAuth = false, // 기존 인터페이스 호환성을 위해 유지
-    Map<String, dynamic>? body, // 기존 파라미터명 유지
+    Map<String, dynamic>? body,
     T Function(Map<String, dynamic>)? fromJson,
   }) async {
     try {
@@ -255,7 +286,6 @@ class ApiClient {
   /// DELETE 요청
   Future<ApiResponse<T>> delete<T>(
     String endpoint, {
-    bool needsAuth = false, // 기존 인터페이스 호환성을 위해 유지
     T Function(Map<String, dynamic>)? fromJson,
   }) async {
     try {
@@ -266,6 +296,6 @@ class ApiClient {
     }
   }
 
-  /// 기본 URL 반환 (기존 인터페이스 호환성)
+  /// 기본 URL 반환
   static String? get baseUrl => _baseUrl;
 }
