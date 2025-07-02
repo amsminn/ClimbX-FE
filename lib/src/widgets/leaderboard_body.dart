@@ -277,7 +277,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(16),
@@ -369,15 +369,22 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             ),
           ),
 
-          // 값
-          Text(
-            user.value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-              color: Color(0xFF1E293B),
+          // 값 (티어 그라디언트 적용)
+          ShaderMask(
+            shaderCallback: (bounds) => tierColorScheme.gradient.createShader(
+              Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+            ),
+            child: Text(
+              user.value,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+                color: Colors.white, // ShaderMask를 위해 흰색으로 설정
+              ),
             ),
           ),
+
+          const SizedBox(width: 4),
         ],
       ),
     );

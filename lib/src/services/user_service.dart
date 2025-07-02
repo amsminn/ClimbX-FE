@@ -70,7 +70,6 @@ class UserService {
   static Future<ApiResponse<UserProfile>> getCurrentUserProfile() async {
     return await _apiClient.get<UserProfile>(
       '/api/users/alice',
-      needsAuth: false, // 기존 인터페이스 유지
       fromJson: UserProfile.fromJson,
     );
   }
@@ -79,7 +78,6 @@ class UserService {
   static Future<ApiResponse<UserProfile>> getUserProfile(String username) async {
     return await _apiClient.get<UserProfile>(
       '/api/users/$username',
-      needsAuth: false,
       fromJson: UserProfile.fromJson,
     );
   }

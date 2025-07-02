@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_naver_map/flutter_naver_map.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/navigation_helper.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
+import '../widgets/map_body.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -13,8 +13,6 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  NaverMapController? _controller;
-
   // 티어 색상 (프로필 페이지와 동일하게해야함 추후 변경예정)
   final TierColorScheme colorScheme = TierColors.getColorScheme(
     TierType.platinum,
@@ -22,10 +20,7 @@ class _MapPageState extends State<MapPage> {
 
   /// 메모리 정리 공통 메서드
   void _cleanupResources() {
-    if (_controller != null) {
-      _controller?.dispose();
-      _controller = null;
-    }
+    // MapBody에서 자체적으로 리소스 정리를 하므로 여기서는 별도 처리 없음
   }
 
   /// 탭 변경 처리
@@ -36,13 +31,6 @@ class _MapPageState extends State<MapPage> {
       tab, // 이동할 탭
       onDispose: _cleanupResources, // 리소스 정리 콜백
     );
-  }
-
-  @override
-  void dispose() {
-    // dispose에서도 정리 (중복 호출 방지 로직 포함)
-    _cleanupResources();
-    super.dispose();
   }
 
   @override
@@ -108,21 +96,8 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
 
-      // 가운데 body 부분
-      body: NaverMap(
-        options: const NaverMapViewOptions(
-          // 서울 중심으로 설정
-          initialCameraPosition: NCameraPosition(
-            target: NLatLng(37.5665, 126.9780),
-            zoom: 14,
-          ),
-          mapType: NMapType.basic,
-          activeLayerGroups: [NLayerGroup.building, NLayerGroup.transit],
-        ),
-        onMapReady: (NaverMapController controller) {
-          _controller = controller;
-        },
-      ),
+      // 가운데 body 부분 - MapBody 위젯 사용
+      body: const MapBody(),
 
       // 하단 네비게이션 바
       bottomNavigationBar: CustomBottomNavigationBar(
