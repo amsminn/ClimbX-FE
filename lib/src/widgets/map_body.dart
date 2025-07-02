@@ -296,27 +296,27 @@ class MapBody extends HookWidget {
         // 기존 마커 제거
         await mapController.clearOverlays();
 
-        // 각 클라이밍장을 마커로 추가
-        for (int i = 0; i < gymList.length; i++) {
-          final gym = gymList[i];
+        // 각 클라이밍장을 마커로 병렬 추가 (성능 개선)
+        await Future.wait(
+          gymList.map((gym) async {
+            // 각 클라이밍장마다 개별 마커 아이콘 생성
+            final markerIcon = await createCustomMarkerIcon(gym.name);
 
-          // 각 클라이밍장마다 개별 마커 아이콘 생성
-          final markerIcon = await createCustomMarkerIcon(gym.name);
+            final marker = NMarker(
+              id: 'gym_${gym.gymId}',
+              position: NLatLng(gym.latitude, gym.longitude),
+              icon: markerIcon, // 클라이밍장 이름이 포함된 커스텀 마커
+            );
 
-          final marker = NMarker(
-            id: 'gym_${gym.gymId}',
-            position: NLatLng(gym.latitude, gym.longitude),
-            icon: markerIcon, // 클라이밍장 이름이 포함된 커스텀 마커
-          );
+            // 마커 클릭 이벤트
+            marker.setOnTapListener((NMarker marker) {
+              showGymDetailBottomSheet(gym);
+            });
 
-          // 마커 추가
-          await mapController.addOverlay(marker);
-
-          // 마커 클릭 이벤트
-          marker.setOnTapListener((NMarker marker) {
-            showGymDetailBottomSheet(gym);
-          });
-        }
+            // 마커 추가
+            await mapController.addOverlay(marker);
+          }),
+        );
 
         developer.log('${gymList.length}개 이름 포함 마커 추가 완료', name: 'MapBody');
       } catch (e) {
