@@ -575,48 +575,52 @@ class MapBody extends HookWidget {
     final minIndex = startIndex < endIndex ? startIndex : endIndex;
     final maxIndex = startIndex > endIndex ? startIndex : endIndex;
 
-    // 전체 높이 476 (500 - 24 padding)을 16개 티어로 나누기
-    const totalHeight = 476.0;
-    const tierHeight = totalHeight / 16;
+    // 전체 높이를 부모 컨테이너의 높이에 따라 동적으로 계산
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalHeight = constraints.maxHeight - 24; // 24 padding
+        final tierHeight = totalHeight / 16;
 
-    // 각 영역 높이 계산
-    final topSpaceHeight = minIndex * tierHeight;
-    final rangeBoxHeight = (maxIndex - minIndex + 1) * tierHeight;
-    final bottomSpaceHeight = (15 - maxIndex) * tierHeight;
+        // 각 영역 높이 계산
+        final topSpaceHeight = minIndex * tierHeight;
+        final rangeBoxHeight = (maxIndex - minIndex + 1) * tierHeight;
+        final bottomSpaceHeight = (15 - maxIndex) * tierHeight;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 1),
-      child: Column(
-        children: [
-          // 상단 여백
-          SizedBox(height: topSpaceHeight),
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 1),
+          child: Column(
+            children: [
+              // 상단 여백
+              SizedBox(height: topSpaceHeight),
 
-          // 범위 박스
-          Container(
-            width: double.infinity,
-            height: rangeBoxHeight,
-            decoration: BoxDecoration(
-              color: color == Colors.white
-                  ? Colors.grey[100]!.withValues(alpha: 0.9)
-                  : color.withValues(alpha: 0.8),
-              borderRadius: BorderRadius.circular(16),
-              border: color == Colors.white
-                  ? Border.all(color: Colors.grey[400]!, width: 1)
-                  : null,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+              // 범위 박스
+              Container(
+                width: double.infinity,
+                height: rangeBoxHeight,
+                decoration: BoxDecoration(
+                  color: color == Colors.white
+                      ? Colors.grey[100]!.withValues(alpha: 0.9)
+                      : color.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(16),
+                  border: color == Colors.white
+                      ? Border.all(color: Colors.grey[400]!, width: 1)
+                      : null,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          // 하단 여백
-          SizedBox(height: bottomSpaceHeight),
-        ],
-      ),
+              // 하단 여백
+              SizedBox(height: bottomSpaceHeight),
+            ],
+          ),
+        );
+      },
     );
   }
 
