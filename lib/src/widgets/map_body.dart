@@ -296,7 +296,7 @@ class MapBody extends HookWidget {
         // 기존 마커 제거
         await mapController.clearOverlays();
 
-        // 각 클라이밍장을 마커로 병렬 추가 (성능 개선)
+        // 각 클라이밍장을 마커로 병렬 추가
         await Future.wait(
           gymList.map((gym) async {
             // 각 클라이밍장마다 개별 마커 아이콘 생성
