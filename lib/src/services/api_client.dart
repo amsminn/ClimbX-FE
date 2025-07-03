@@ -130,38 +130,20 @@ class ApiClient {
 
       // 응답 실패 시 바로 리턴
       if (statusCode < 200 || statusCode >= 300) {
-        return ApiResponse.failure('요청 처리 중 오류가 발생했습니다.', statusCode);
-      }
-
-      // 데이터가 null일 때 바로 리턴
-      if (response.data == null) {
-        return ApiResponse.success(null as T, statusCode);
-      }
-
-      // 데이터가 Map이 아닐 때 바로 리턴 (wrapper 없는 경우)
-      if (response.data is! Map<String, dynamic>) {
-        return ApiResponse.success(response.data as T, statusCode);
+        final httpStatus = response.data['body']['httpStatus'] as int;
+        final statusMessage =
+            response.data['body']['statusMessage'] ?? '요청 처리 실패';
+        return ApiResponse.failure(statusMessage, httpStatus);
       }
 
       final responseData = response.data as Map<String, dynamic>;
 
-      // 새로운 API 구조: body 필드 확인
+      // body 필드 확인
       final bodyData = responseData['body'] as Map<String, dynamic>?;
-      if (bodyData == null) {
-        return ApiResponse.failure('응답 구조가 올바르지 않습니다.', statusCode);
-      }
-
-      final httpStatus = bodyData['httpStatus'] as int;
-
-      // httpStatus가 실패일 때 바로 리턴
-      if (httpStatus < 200 || httpStatus >= 300) {
-        final statusMessage = bodyData['statusMessage'] ?? '요청 처리 실패';
-        return ApiResponse.failure(statusMessage, httpStatus);
-      }
 
       // 성공 케이스 - data 필드 추출
-      final actualData = bodyData['data'];
-      
+      final actualData = bodyData?['data'];
+
       // fromJson이 있으면 변환, 없으면 data를 그대로 반환
       if (fromJson != null) {
         return ApiResponse.success(fromJson(actualData), statusCode);
