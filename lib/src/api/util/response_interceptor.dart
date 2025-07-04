@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:developer' as developer;
 import 'error_handler.dart';
 import 'api_client.dart';
@@ -37,16 +36,23 @@ class ResponseInterceptor {
         // 변환된 ApiResponse를 DioException의 response.data에 저장
         if (error.response != null) {
           error.response!.data = convertedError;
+          handler.next(error);
         } else {
-          // response가 없는 경우 새로 생성
-          error.response = Response(
+          // response가 없는 경우 새로운 DioException 생성
+          final newError = DioException(
             requestOptions: error.requestOptions,
-            statusCode: 0,
-            data: convertedError,
+            error: error.error,
+            type: error.type,
+            stackTrace: error.stackTrace,
+            message: error.message,
+            response: Response<dynamic>(
+              requestOptions: error.requestOptions,
+              statusCode: 0,
+              data: convertedError,
+            ),
           );
+          handler.next(newError);
         }
-        
-        handler.next(error);
       },
     );
   }
