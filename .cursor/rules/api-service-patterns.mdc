@@ -423,6 +423,3 @@ class NotificationApi {
   };
 }
 ```
-
-final apiKey = dotenv.env['API_KEY'];
-``` -->
