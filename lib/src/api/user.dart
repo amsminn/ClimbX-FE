@@ -58,7 +58,7 @@ class UserApi {
       });
   }
 
-  /// 사용자 히스토리 조회 (기존 방식과 동일한 쿼리 파라미터 처리)
+  /// 사용자 히스토리 조회 (queryParameters 방식 사용)
   static Future<HistoryData> getUserHistory({
     String username = 'alice',
     String? from,
@@ -67,19 +67,15 @@ class UserApi {
   }) {
     developer.log('사용자 히스토리 조회 시작 - $username', name: 'UserApi');
 
-    // 쿼리 파라미터 구성 (기존 UserService와 동일한 방식)
+    // 쿼리 파라미터 구성
     final queryParams = <String, String>{'criteria': criteria};
     if (from != null) queryParams['from'] = from;
     if (to != null) queryParams['to'] = to;
 
-    // URL 쿼리 문자열 생성 (기존 방식과 동일)
-    final queryString = queryParams.entries
-        .map((e) => '${e.key}=${e.value}')
-        .join('&');
-    
-    final url = '/api/users/$username/history${queryString.isNotEmpty ? '?$queryString' : ''}';
-
-    return _dio.get(url)
+    return _dio.get(
+      '/api/users/$username/history',
+      queryParameters: queryParams,
+    )
       .then((response) => response.data as ApiResponse<dynamic>)
       .then((apiResponse) {
         if (!apiResponse.success || apiResponse.data == null) {
