@@ -1,0 +1,184 @@
+---
+description: "Flutter 위젯 패턴, AppBar 커스터마이징, 상태 관리, 네비게이션, 비동기 처리"
+---
+
+# Flutter 위젯 패턴
+
+## 위젯 구조
+
+### StatelessWidget 기본 구조
+```dart
+class CustomWidget extends StatelessWidget {
+  final String title;
+  final VoidCallback? onPressed;
+
+  const CustomWidget({
+    super.key,
+    required this.title,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      // 위젯 구현
+    );
+  }
+}
+```
+
+### StatefulWidget 기본 구조
+```dart
+class MyWidget extends StatefulWidget {
+  const MyWidget({super.key});
+
+  @override
+  State<MyWidget> createState() => _MyWidgetState();
+}
+
+class _MyWidgetState extends State<MyWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      // 위젯 구현
+    );
+  }
+}
+```
+
+## AppBar 커스터마이징
+
+### 표준 AppBar 스타일
+```dart
+AppBar(
+  backgroundColor: const Color(0xFFFFFFFF),
+  elevation: 0,
+  surfaceTintColor: Colors.transparent,
+  scrolledUnderElevation: 0,
+  automaticallyImplyLeading: false,
+  // ...
+)
+```
+
+### 액션 버튼 스타일
+```dart
+Container(
+  margin: const EdgeInsets.only(right: 8),
+  decoration: BoxDecoration(
+    color: const Color(0xFFF8FAFC),
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: IconButton(
+    icon: const Icon(Icons.icon_name, color: Color(0xFF64748B), size: 22),
+    onPressed: () {
+      // 액션 로직
+    },
+  ),
+),
+```
+
+## 상태 관리
+
+### fquery (React Query 스타일) 사용
+```dart
+QueryClientProvider(
+  queryClient: QueryClient(),
+  child: MaterialApp(
+    // 앱 설정
+  ),
+)
+```
+
+### 콜백 함수 패턴
+```dart
+class ParentWidget extends StatefulWidget {
+  @override
+  State<ParentWidget> createState() => _ParentWidgetState();
+}
+
+class _ParentWidgetState extends State<ParentWidget> {
+  String currentValue = "";
+
+  void _handleValueChanged(String newValue) {
+    setState(() {
+      currentValue = newValue;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ChildWidget(
+      value: currentValue,
+      onValueChanged: _handleValueChanged,
+    );
+  }
+}
+```
+
+## 네비게이션
+
+### NavigationHelper 사용
+```dart
+import '../utils/navigation_helper.dart';
+
+// 페이지 이동
+NavigationHelper.navigateToLoginAfterLogout(context);
+```
+
+### Context 체크
+```dart
+if (context.mounted) {
+  // 네비게이션 또는 상태 변경
+}
+```
+
+## 차트 및 그래프
+
+### fl_chart 사용 패턴
+```dart
+import 'package:fl_chart/fl_chart.dart';
+
+// LineChart, BarChart 등 구현
+```
+
+## 테마 및 스타일
+
+### MaterialApp 테마
+```dart
+MaterialApp(
+  title: 'ClimbX',
+  theme: ThemeData(primarySwatch: Colors.blue),
+  home: const AuthWrapper(),
+)
+```
+
+### 일관된 색상 사용
+- 주요 배경: `Color(0xFFFFFFFF)`
+- 텍스트 색상: `Color(0xFF1E293B)`
+- 서브 색상: `Color(0xFF64748B)`
+- 컨테이너 배경: `Color(0xFFF8FAFC)`
+
+## 비동기 처리
+
+### Future와 async/await
+```dart
+Future<void> _handleAsyncOperation() async {
+  try {
+    final result = await someAsyncOperation();
+    // 성공 처리
+  } catch (e) {
+    developer.log('에러 발생: $e', name: 'WidgetName');
+    // 에러 처리
+  }
+}
+```
+
+### 조건부 렌더링
+```dart
+if (condition) ...[
+  Widget1(),
+  Widget2(),
+] else ...[
+  AlternativeWidget(),
+]
+```

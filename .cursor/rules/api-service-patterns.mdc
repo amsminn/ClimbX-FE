@@ -1,0 +1,428 @@
+---
+description: "API 요청 구조, 함수형 모나드 패턴, 인터셉터 아키텍처, 에러 핸들링 패턴"
+---
+
+# API 모듈 패턴 (Functional Monadic Style)
+
+## API 구조 개요
+
+### 폴더 구조
+```
+lib/src/api/
+├── util/                          # 공통 유틸리티
+│   ├── api_client.dart            # Dio 인스턴스 관리
+│   ├── auth_interceptor.dart      # JWT 토큰 관리
+│   ├── error_interceptor.dart     # 에러 로깅
+│   ├── response_interceptor.dart  # 응답 변환
+│   ├── error_handler.dart         # 에러 처리 + UI
+│   ├── token_storage.dart         # 토큰 저장소
+│   ├── dio_error_type.dart        # DioException enum
+│   └── http_error_code.dart       # HTTP 상태 코드 enum
+├── auth.dart                      # 인증 API 모듈
+├── user.dart                      # 사용자 API 모듈  
+├── gym.dart                       # 클라이밍장 API 모듈
+└── api.dart                       # 전체 export
+```
+
+## API 모듈 클래스 구조
+
+### 함수형 API 모듈 패턴
+```dart
+/// 인증 관련 API 호출 함수들
+class AuthApi {
+  static final _dio = ApiClient.instance.dio;
+
+  /// 함수형 모나드 패턴으로 API 호출
+  static final signInWithGoogle = () {
+    developer.log('Google OAuth 로그인 API 호출 시작', name: 'AuthApi');
+    
+    return _dio.get('/api/auth/oauth2/GOOGLE/callback')
+      .then((response) => response.data as ApiResponse<dynamic>)
+      .then((apiResponse) {
+        if (!apiResponse.success || apiResponse.data == null) {
+          throw Exception(apiResponse.error ?? 'OAuth API 호출 실패');
+        }
+        return apiResponse.data as Map<String, dynamic>;
+      })
+      .then((data) {
+        final token = data['accessToken'];
+        if (token == null || token.isEmpty) {
+          throw Exception('응답에서 accessToken을 찾을 수 없음');
+        }
+        developer.log('OAuth 토큰 발급 성공', name: 'AuthApi');
+        return token as String;
+      })
+      .catchError((e) {
+        developer.log('OAuth API 호출 중 예외 발생: $e', name: 'AuthApi');
+        throw Exception('Google 로그인에 실패했습니다: $e');
+      });
+  };
+}
+```
+
+### 파라미터가 있는 함수형 API
+```dart
+/// 특정 사용자 프로필 조회 (확장 가능)
+static final getUserProfileByUsername = (String username) {
+  developer.log('사용자 프로필 조회 시작 - $username', name: 'UserApi');
+  
+  return _dio.get('/api/users/$username')
+    .then((response) => response.data as ApiResponse<dynamic>)
+    .then((apiResponse) {
+      if (!apiResponse.success || apiResponse.data == null) {
+        throw Exception(apiResponse.error ?? '사용자 프로필 조회 실패');
+      }
+      return apiResponse.data as Map<String, dynamic>;
+    })
+    .then((data) {
+      final userProfile = UserProfile.fromJson(data);
+      developer.log('사용자 프로필 조회 성공 - $username', name: 'UserApi');
+      return userProfile;
+    })
+    .catchError((e) {
+      developer.log('사용자 프로필 조회 중 예외 발생: $e', name: 'UserApi');
+      throw Exception('프로필 정보를 불러올 수 없습니다: $e');
+    });
+};
+```
+
+### Named Parameter 패턴
+```dart
+/// 복잡한 파라미터를 가진 API 호출
+static final getUserHistory = ({
+  String username = 'alice',
+  String? from,
+  String? to,
+  String criteria = 'RATING',
+}) {
+  developer.log('사용자 히스토리 조회 시작 - $username', name: 'UserApi');
+
+  // 쿼리 파라미터 구성
+  final queryParams = <String, String>{'criteria': criteria};
+  if (from != null) queryParams['from'] = from;
+  if (to != null) queryParams['to'] = to;
+
+  return _dio.get('/api/users/$username/history', queryParameters: queryParams)
+    .then((response) => response.data as ApiResponse<dynamic>)
+    .then((apiResponse) {
+      if (!apiResponse.success || apiResponse.data == null) {
+        throw Exception(apiResponse.error ?? '히스토리 데이터 조회 실패');
+      }
+      return apiResponse.data;
+    })
+    .then((data) => HistoryData.fromJson(data is List ? data : []))
+    .catchError((e) {
+      developer.log('사용자 히스토리 조회 중 예외 발생: $e', name: 'UserApi');
+      throw Exception('히스토리 데이터를 불러올 수 없습니다: $e');
+    });
+};
+```
+
+## API 호출 모나드 패턴
+
+### 기본 GET 요청 패턴
+```dart
+static final getData = () {
+  return _dio.get('/api/endpoint')
+    .then((response) => response.data as ApiResponse<dynamic>)
+    .then((apiResponse) {
+      if (!apiResponse.success || apiResponse.data == null) {
+        throw Exception(apiResponse.error ?? 'API 호출 실패');
+      }
+      return apiResponse.data as ExpectedType;
+    })
+    .then((data) {
+      // 성공 로깅 및 데이터 변환
+      developer.log('API 호출 성공', name: 'ApiModule');
+      return processedData;
+    })
+    .catchError((e) {
+      // 에러 로깅 및 사용자 친화적 메시지
+      developer.log('API 호출 중 예외 발생: $e', name: 'ApiModule');
+      throw Exception('사용자 친화적 에러 메시지: $e');
+    });
+};
+```
+
+### POST 요청 패턴
+```dart
+static final postData = (Map<String, dynamic> requestData) {
+  return _dio.post('/api/endpoint', data: requestData)
+    .then((response) => response.data as ApiResponse<dynamic>)
+    .then((apiResponse) {
+      if (!apiResponse.success) {
+        throw Exception(apiResponse.error ?? 'POST 요청 실패');
+      }
+      return apiResponse.data;
+    })
+    .then((data) {
+      developer.log('POST 요청 성공', name: 'ApiModule');
+      return data;
+    })
+    .catchError((e) {
+      developer.log('POST 요청 중 예외 발생: $e', name: 'ApiModule');
+      throw Exception('요청 처리에 실패했습니다: $e');
+    });
+};
+```
+
+### 복잡한 응답 변환 패턴
+```dart
+static final getComplexData = () {
+  return _dio.get('/api/complex-endpoint')
+    .then((response) => response.data as ApiResponse<dynamic>)
+    .then((apiResponse) {
+      if (!apiResponse.success || apiResponse.data == null) {
+        throw Exception(apiResponse.error ?? '데이터 조회 실패');
+      }
+      return apiResponse.data;
+    })
+    .then((data) {
+      // 복잡한 데이터 변환 로직
+      if (data is List) {
+        return data
+            .map((item) => Model.fromJson(item as Map<String, dynamic>))
+            .toList();
+      } else if (data is Map<String, dynamic>) {
+        return Model.fromJson(data);
+      } else {
+        developer.log('예상하지 못한 데이터 형식, 기본값 사용', name: 'ApiModule');
+        return defaultValue;
+      }
+    })
+    .then((processedData) {
+      developer.log('데이터 변환 완료', name: 'ApiModule');
+      return processedData;
+    })
+    .catchError((e) {
+      developer.log('데이터 처리 중 예외 발생: $e', name: 'ApiModule');
+      throw Exception('데이터를 불러올 수 없습니다: $e');
+    });
+};
+```
+
+## ApiClient 및 인터셉터 패턴
+
+### ApiClient 초기화
+```dart
+// main.dart에서
+void main() async {
+  // API 클라이언트는 자동 초기화됨
+  final apiClient = ApiClient.instance;
+  
+  // 인터셉터 콜백 설정
+  apiClient.setInterceptorCallbacks(
+    onUnauthorized: () async {
+      await TokenStorage.clearToken();
+      // 로그인 페이지로 리디렉션 등
+    },
+  );
+  
+  runApp(MyApp());
+}
+```
+
+### Dio 직접 접근 패턴
+```dart
+class CustomApi {
+  static final _dio = ApiClient.instance.dio;  // Dio 직접 접근
+
+  static final customRequest = () {
+    return _dio.request(
+      '/custom/endpoint',
+      options: Options(method: 'PATCH'),
+    )
+      .then((response) => response.data as ApiResponse<dynamic>)
+      .catchError((e) => throw Exception('Custom request failed: $e'));
+  };
+}
+```
+
+## 에러 처리 패턴
+
+### ApiResponse 타입 확인
+```dart
+// 모든 응답은 자동으로 ApiResponse로 변환됨
+.then((response) => response.data as ApiResponse<dynamic>)
+.then((apiResponse) {
+  // 성공 여부 확인
+  if (!apiResponse.success || apiResponse.data == null) {
+    throw Exception(apiResponse.error ?? '기본 에러 메시지');
+  }
+  
+  // 데이터 안전하게 추출
+  return apiResponse.data as ExpectedType;
+})
+```
+
+### 에러 체이닝 패턴
+```dart
+.catchError((e) {
+  developer.log('API 호출 중 예외 발생: $e', name: 'ApiModule');
+  
+  // 원본 에러를 사용자 친화적 메시지로 변환
+  if (e.toString().contains('network')) {
+    throw Exception('네트워크 연결을 확인해주세요');
+  } else if (e.toString().contains('timeout')) {
+    throw Exception('요청 시간이 초과되었습니다');
+  } else {
+    throw Exception('서비스에 일시적인 문제가 발생했습니다');
+  }
+})
+```
+
+## 토큰 관리 패턴
+
+### 헬퍼 함수 패턴
+```dart
+/// 인증 상태 관리 헬퍼 함수들 (로컬 저장소 기반)
+class AuthHelpers {
+  /// 로그인 상태 확인
+  static final isLoggedIn = () async {
+    return await TokenStorage.hasToken();
+  };
+
+  /// 토큰 삭제
+  static final clearToken = () async {
+    await TokenStorage.clearToken();
+  };
+}
+```
+
+### 토큰 자동 관리
+```dart
+// 토큰은 AuthInterceptor에서 자동으로 추가됨
+// 401 에러 시 자동으로 토큰 삭제됨
+// 수동 토큰 관리가 필요한 경우만 직접 호출
+```
+
+## API 모듈 사용 패턴
+
+### Widget에서 직접 호출
+```dart
+class MyWidget extends StatefulWidget {
+  @override
+  _MyWidgetState createState() => _MyWidgetState();
+}
+
+class _MyWidgetState extends State<MyWidget> {
+  UserProfile? _userProfile;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final profile = await UserApi.getCurrentUserProfile();
+      setState(() {
+        _userProfile = profile;
+      });
+    } catch (e) {
+      // 에러는 이미 사용자 친화적 메시지로 변환됨
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+}
+```
+
+### FutureBuilder 패턴
+```dart
+FutureBuilder<List<Gym>>(
+  future: GymApi.getAllGyms(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return CircularProgressIndicator();
+    }
+    
+    if (snapshot.hasError) {
+      return Text('오류: ${snapshot.error}');
+    }
+    
+    final gyms = snapshot.data ?? [];
+    return ListView.builder(
+      itemCount: gyms.length,
+      itemBuilder: (context, index) => GymListItem(gym: gyms[index]),
+    );
+  },
+)
+```
+
+## 모나드 패턴의 장점
+
+### 1. 가독성
+- 데이터 흐름이 파이프라인 방식으로 명확함
+- 각 단계별 변환 로직이 분리됨
+
+### 2. 성능
+- 중간 변수 제거로 메모리 효율성 향상
+- async/await 오버헤드 제거
+
+### 3. 일관성
+- 모든 API 함수가 동일한 `.then().catchError()` 패턴 사용
+- 표준화된 에러 처리
+
+### 4. 함수형 특성
+- Immutable 데이터 흐름
+- Side Effect 최소화
+- 체이닝을 통한 조합 가능성
+
+## API Export 패턴
+
+### 중앙 집중식 Export
+```dart
+// lib/src/api/api.dart
+export 'util/api_client.dart';
+export 'util/error_handler.dart';
+export 'util/token_storage.dart';
+export 'auth.dart';
+export 'user.dart';
+export 'gym.dart';
+
+// 사용할 때
+import 'package:your_app/src/api/api.dart';
+
+// 또는 개별 import
+import 'package:your_app/src/api/user.dart';
+```
+
+### 네이밍 규칙
+- API 모듈: `ModuleApi` (예: AuthApi, UserApi, GymApi)
+- 헬퍼 클래스: `ModuleHelpers` (예: AuthHelpers)
+- 함수: camelCase (예: getCurrentUserProfile, signInWithGoogle)
+- 상수: UPPER_SNAKE_CASE
+
+## 확장 패턴
+
+### 새로운 API 모듈 추가
+```dart
+/// 새로운 모듈 추가 시 동일한 패턴 따름
+class NotificationApi {
+  static final _dio = ApiClient.instance.dio;
+
+  static final getNotifications = () {
+    return _dio.get('/api/notifications')
+      .then((response) => response.data as ApiResponse<dynamic>)
+      .then((apiResponse) {
+        if (!apiResponse.success || apiResponse.data == null) {
+          throw Exception(apiResponse.error ?? '알림 조회 실패');
+        }
+        return apiResponse.data as List<dynamic>;
+      })
+      .then((data) => data
+          .map((item) => Notification.fromJson(item))
+          .toList())
+      .catchError((e) {
+        developer.log('알림 조회 중 예외 발생: $e', name: 'NotificationApi');
+        throw Exception('알림을 불러올 수 없습니다: $e');
+      });
+  };
+}
+```
+
+final apiKey = dotenv.env['API_KEY'];
+``` -->
