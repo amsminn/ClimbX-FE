@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'package:dio/dio.dart';
 import 'util/api_client.dart';
 import 'util/token_storage.dart';
 
@@ -8,7 +7,7 @@ class AuthApi {
   static final _dio = ApiClient.instance.dio;
 
   /// Google OAuth 로그인 API 호출
-  static final signInWithGoogle = () {
+  static Future<String> signInWithGoogle() {
     developer.log('Google OAuth 로그인 API 호출 시작', name: 'AuthApi');
     
     return _dio.get(
@@ -34,10 +33,10 @@ class AuthApi {
         developer.log('OAuth API 호출 중 예외 발생: $e', name: 'AuthApi');
         throw Exception('Google 로그인에 실패했습니다: $e');
       });
-  };
+  }
 
   /// 토큰 유효성 검증 API 호출
-  static final validateToken = () {
+  static Future<bool> validateToken() {
     developer.log('토큰 유효성 검증 API 호출', name: 'AuthApi');
     
     return _dio.get('/api/auth/validate')
@@ -55,10 +54,10 @@ class AuthApi {
         developer.log('토큰 유효성 검증 중 예외 발생: $e', name: 'AuthApi');
         return false;
       });
-  };
+  }
 
   /// 토큰 갱신 API 호출
-  static final refreshToken = () {
+  static Future<String> refreshToken() {
     developer.log('토큰 갱신 API 호출', name: 'AuthApi');
     
     return _dio.post('/api/auth/refresh')
@@ -81,18 +80,18 @@ class AuthApi {
         developer.log('토큰 갱신 중 예외 발생: $e', name: 'AuthApi');
         throw Exception('토큰 갱신에 실패했습니다: $e');
       });
-  };
+  }
 }
 
 /// 인증 상태 관리 헬퍼 함수들 (로컬 저장소 기반)
 class AuthHelpers {
   /// 로그인 상태 확인
-  static final isLoggedIn = () async {
+  static Future<bool> isLoggedIn() async {
     return await TokenStorage.hasToken();
-  };
+  }
 
   /// 토큰 삭제
-  static final clearToken = () async {
+  static Future<void> clearToken() async {
     await TokenStorage.clearToken();
-  };
+  }
 } 

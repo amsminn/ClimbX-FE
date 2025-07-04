@@ -29,7 +29,6 @@ enum ApiDioErrorType {
       case DioExceptionType.badCertificate:
         return ApiDioErrorType.badCertificate;
       case DioExceptionType.unknown:
-      default:
         return ApiDioErrorType.unknown;
     }
   }

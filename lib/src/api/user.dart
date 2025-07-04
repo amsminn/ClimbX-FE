@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'package:dio/dio.dart';
 import 'util/api_client.dart';
 import '../models/user_profile.dart';
 import '../models/history_data.dart';
@@ -9,7 +8,7 @@ class UserApi {
   static final _dio = ApiClient.instance.dio;
 
   /// 현재 사용자 프로필 조회 (기존 alice 엔드포인트)
-  static final getCurrentUserProfile = () {
+  static Future<UserProfile> getCurrentUserProfile() {
     developer.log('현재 사용자 프로필 조회 시작', name: 'UserApi');
     
     return _dio.get('/api/users/alice')
@@ -29,15 +28,15 @@ class UserApi {
         developer.log('사용자 프로필 조회 중 예외 발생: $e', name: 'UserApi');
         throw Exception('프로필 정보를 불러올 수 없습니다: $e');
       });
-  };
+  }
 
   /// 편의 메서드: getUserProfile() -> getCurrentUserProfile() 호출
-  static final getUserProfile = () async {
+  static Future<UserProfile> getUserProfile() async {
     return await getCurrentUserProfile();
-  };
+  }
 
   /// 특정 사용자 프로필 조회 (확장 가능)
-  static final getUserProfileByUsername = (String username) {
+  static Future<UserProfile> getUserProfileByUsername(String username) {
     developer.log('사용자 프로필 조회 시작 - $username', name: 'UserApi');
     
     return _dio.get('/api/users/$username')
@@ -57,10 +56,10 @@ class UserApi {
         developer.log('사용자 프로필 조회 중 예외 발생: $e', name: 'UserApi');
         throw Exception('프로필 정보를 불러올 수 없습니다: $e');
       });
-  };
+  }
 
   /// 사용자 히스토리 조회 (기존 방식과 동일한 쿼리 파라미터 처리)
-  static final getUserHistory = ({
+  static Future<HistoryData> getUserHistory({
     String username = 'alice',
     String? from,
     String? to,
@@ -105,10 +104,10 @@ class UserApi {
         developer.log('사용자 히스토리 조회 중 예외 발생: $e', name: 'UserApi');
         throw Exception('히스토리 데이터를 불러올 수 없습니다: $e');
       });
-  };
+  }
 
   /// 현재 사용자 히스토리 조회 (간편 메서드)
-  static final getCurrentUserHistory = ({
+  static Future<HistoryData> getCurrentUserHistory({
     String? from,
     String? to,
     String criteria = 'RATING',
@@ -119,5 +118,5 @@ class UserApi {
       to: to,
       criteria: criteria,
     );
-  };
+  }
 } 

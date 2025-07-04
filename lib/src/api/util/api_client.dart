@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:developer' as developer;
-import 'error_handler.dart';
 import 'auth_interceptor.dart';
 import 'error_interceptor.dart';
 import 'response_interceptor.dart';
