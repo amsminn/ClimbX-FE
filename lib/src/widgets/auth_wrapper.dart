@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
 import 'dart:developer' as developer;
-import '../services/user_query_service.dart';
+import '../api/auth.dart';
 import '../screens/login_page.dart';
 import '../screens/main_page.dart';
 
@@ -13,8 +13,8 @@ class AuthWrapper extends HookWidget {
   Widget build(BuildContext context) {
     // fquery로 인증 상태 확인
     final authQuery = useQuery<bool, Exception>(
-      UserQueryKeys.authStatus(),
-      AuthQueryService.checkAuthStatus,
+      ['auth_status'],
+      AuthHelpers.isLoggedIn,
     );
 
     // 로딩 중일 때 스플래시 화면

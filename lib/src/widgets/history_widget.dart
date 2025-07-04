@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
 import '../models/history_data.dart';
-import '../services/user_query_service.dart';
+import '../api/user.dart';
 import '../utils/tier_colors.dart';
 import 'history_period_selector.dart';
 import 'history_chart.dart';
@@ -62,8 +62,8 @@ class HistoryWidget extends HookWidget {
 
     // fquery로 히스토리 데이터 get
     final historyQuery = useQuery<HistoryData, Exception>(
-      UserQueryKeys.userHistory(),
-      UserQueryService.getUserHistory,
+      ['user_history'],
+      UserApi.getUserHistory,
     );
 
     final TierType tierType = TierColors.getTierFromString(tierName);

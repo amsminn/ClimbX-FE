@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import '../utils/tier_test_helper.dart';
 import '../utils/navigation_helper.dart';
-import '../services/auth_service.dart';
+import '../api/auth.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String currentTier;
@@ -111,7 +111,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   static void _handleLogout(BuildContext context) {
     developer.log('로그아웃 요청', name: 'CustomAppBar');
 
-    AuthService.clearToken()
+    AuthHelpers.clearToken()
         .then((_) {
           developer.log('토큰 삭제 완료', name: 'CustomAppBar');
           

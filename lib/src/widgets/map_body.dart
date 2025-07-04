@@ -3,7 +3,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'dart:developer' as developer;
 import 'dart:async';
-import '../services/gym_service.dart';
+import '../api/gym.dart';
 import '../models/gym.dart';
 
 class MapBody extends HookWidget {
@@ -20,9 +20,9 @@ class MapBody extends HookWidget {
     final gymsQuery = useFuture(
       useMemoized(() {
         if (searchQuery.value.trim().isEmpty) {
-          return GymService.getAllGyms();
+          return GymApi.getAllGyms();
         } else {
-          return GymService.searchGymsByKeyword(searchQuery.value.trim());
+          return GymApi.searchGymsByKeyword(searchQuery.value.trim());
         }
       }, [searchQuery.value]),
     );
