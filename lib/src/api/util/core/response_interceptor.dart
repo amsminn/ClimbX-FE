@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'dart:developer' as developer;
-import 'error_handler.dart';
-import 'api_client.dart';
+import '../error/error_handler.dart';
+import '../core/api_client.dart';
 
 /// Response를 ApiResponse로 변환하는 인터셉터
 class ResponseInterceptor {

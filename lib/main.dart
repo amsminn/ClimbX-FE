@@ -3,7 +3,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fquery/fquery.dart';
 import 'src/widgets/auth_wrapper.dart';
-import 'src/api/util/api_client.dart';
+import 'src/api/util/core/api_client.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

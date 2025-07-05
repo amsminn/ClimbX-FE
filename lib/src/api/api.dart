@@ -1,10 +1,11 @@
 // API 유틸리티
-export 'util/api_client.dart';
-export 'util/error_handler.dart';
-export 'util/token_storage.dart';
-export 'util/auth_interceptor.dart';
-export 'util/error_interceptor.dart';
-export 'util/response_interceptor.dart';
+export 'util/core/api_client.dart';
+export 'util/error/error_handler.dart';
+export 'util/auth/token_storage.dart';
+export 'util/auth/auth_interceptor.dart';
+export 'util/error/error_interceptor.dart';
+export 'util/core/response_interceptor.dart';
+export 'util/core/http_method.dart';
 
 // API 엔드포인트 모듈들
 export 'auth.dart';

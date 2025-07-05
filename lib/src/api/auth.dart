@@ -1,85 +1,62 @@
 import 'dart:developer' as developer;
-import 'util/api_client.dart';
-import 'util/token_storage.dart';
+import 'util/core/api_client.dart';
+import 'util/auth/token_storage.dart';
 
 /// 인증 관련 API 호출 함수들
 class AuthApi {
-  static final _dio = ApiClient.instance.dio;
+  static final _apiClient = ApiClient.instance;
 
   /// Google OAuth 로그인 API 호출
-  static Future<String> signInWithGoogle() {
-    developer.log('Google OAuth 로그인 API 호출 시작', name: 'AuthApi');
-    
-    return _dio.get(
-      '/api/auth/oauth2/GOOGLE/callback',
-      queryParameters: {'code': 'testCode'},
-    )
-      .then((response) => response.data as ApiResponse<dynamic>)
-      .then((apiResponse) {
-        if (!apiResponse.success || apiResponse.data == null) {
-          throw Exception(apiResponse.error ?? 'OAuth API 호출 실패');
-        }
-        return apiResponse.data as Map<String, dynamic>;
-      })
-      .then((data) {
-        final token = data['accessToken'];
-        if (token == null || token.isEmpty) {
-          throw Exception('응답에서 accessToken을 찾을 수 없음');
-        }
-        developer.log('OAuth 토큰 발급 성공', name: 'AuthApi');
-        return token as String;
-      })
-      .catchError((e) {
-        developer.log('OAuth API 호출 중 예외 발생: $e', name: 'AuthApi');
-        throw Exception('Google 로그인에 실패했습니다: $e');
-      });
+  static Future<String> signInWithGoogle() async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '/api/auth/oauth2/GOOGLE/callback',
+        queryParameters: {'code': 'testCode'},
+        logContext: 'AuthApi',
+      );
+      
+      final token = response['accessToken'];
+      if (token == null || token.isEmpty) {
+        throw Exception('응답에서 accessToken을 찾을 수 없음');
+      }
+      
+      return token as String;
+    } catch (e) {
+      throw Exception('Google 로그인에 실패했습니다: $e');
+    }
   }
 
   /// 토큰 유효성 검증 API 호출
-  static Future<bool> validateToken() {
-    developer.log('토큰 유효성 검증 API 호출', name: 'AuthApi');
-    
-    return _dio.get('/api/auth/validate')
-      .then((response) => response.data as ApiResponse<dynamic>)
-      .then((apiResponse) {
-        if (apiResponse.success) {
-          developer.log('토큰 유효성 검증 성공', name: 'AuthApi');
-          return true;
-        } else {
-          developer.log('토큰 유효성 검증 실패: ${apiResponse.error}', name: 'AuthApi');
-          return false;
-        }
-      })
-      .catchError((e) {
-        developer.log('토큰 유효성 검증 중 예외 발생: $e', name: 'AuthApi');
-        return false;
-      });
+  static Future<bool> validateToken() async {
+    try {
+      await _apiClient.get<Map<String, dynamic>>(
+        '/api/auth/validate',
+        logContext: 'AuthApi',
+      );
+      return true;
+    } catch (e) {
+      developer.log('토큰 유효성 검증 실패: $e', name: 'AuthApi');
+      return false;
+    }
   }
 
   /// 토큰 갱신 API 호출
-  static Future<String> refreshToken() {
-    developer.log('토큰 갱신 API 호출', name: 'AuthApi');
-    
-    return _dio.post('/api/auth/refresh')
-      .then((response) => response.data as ApiResponse<dynamic>)
-      .then((apiResponse) {
-        if (!apiResponse.success || apiResponse.data == null) {
-          throw Exception(apiResponse.error ?? '토큰 갱신 실패');
-        }
-        return apiResponse.data as Map<String, dynamic>;
-      })
-      .then((data) {
-        final newToken = data['accessToken'];
-        if (newToken == null || newToken.isEmpty) {
-          throw Exception('토큰 갱신 실패: accessToken을 찾을 수 없음');
-        }
-        developer.log('토큰 갱신 성공', name: 'AuthApi');
-        return newToken as String;
-      })
-      .catchError((e) {
-        developer.log('토큰 갱신 중 예외 발생: $e', name: 'AuthApi');
-        throw Exception('토큰 갱신에 실패했습니다: $e');
-      });
+  static Future<String> refreshToken() async {
+    try {
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '/api/auth/refresh',
+        logContext: 'AuthApi',
+      );
+      
+      final newToken = response['accessToken'];
+      if (newToken == null || newToken.isEmpty) {
+        throw Exception('토큰 갱신 실패: accessToken을 찾을 수 없음');
+      }
+      
+      return newToken as String;
+    } catch (e) {
+      throw Exception('토큰 갱신에 실패했습니다: $e');
+    }
   }
 }
 
