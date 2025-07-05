@@ -19,8 +19,22 @@ description: "Dart 코딩 컨벤션, 네이밍 규칙, 주석 스타일, 클래�
 - 예: `user_profile.dart`, `auth_service.dart`, `custom_app_bar.dart`
 
 ### 상수
+#### 컴파일 타임 상수 (const 객체, 문자열 키)
+- **camelCase** 사용
+- 예: `_secureStorage`, `_tokenKey`, `defaultTimeout`
+
+#### 환경 변수 및 외부 설정 상수
 - **SCREAMING_SNAKE_CASE** 사용
 - 예: `NAVER_MAP_CLIENT_ID`, `API_BASE_URL`
+
+```dart
+// 컴파일 타임 상수
+static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+static const String _tokenKey = 'jwt_token';
+
+// 환경 변수 상수
+static const String API_BASE_URL = 'https://api.example.com';
+```
 
 ## 주석 스타일
 
