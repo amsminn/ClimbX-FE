@@ -1,0 +1,75 @@
+---
+description: "ClimbX 프로젝트 구조, 폴더 구성, 파일 역할, 클린 아키텍처"
+alwaysApply: true
+---
+
+# ClimbX 프로젝트 구조 가이드
+
+이 프로젝트는 Flutter 앱이며 클린 아키텍처를 따릅니다.
+
+## 폴더 구조
+
+```
+lib/
+├── main.dart              # 앱 진입점
+└── src/
+    ├── api/              # API 관련 (함수형 모나드 패턴)
+    │   ├── util/         # API 유틸리티 (인터셉터, 에러 핸들러)
+    │   ├── auth.dart     # 인증 API 모듈
+    │   ├── user.dart     # 사용자 API 모듈
+    │   ├── gym.dart      # 클라이밍장 API 모듈
+    │   └── api.dart      # 전체 export
+    ├── models/           # 데이터 모델 클래스들
+    ├── screens/          # 화면 위젯들 (페이지)
+    ├── utils/           # 유틸리티 함수들
+    └── widgets/         # 재사용 가능한 위젯들
+```
+
+## 주요 파일들
+
+- [main.dart](mdc:lib/main.dart): 앱 초기화 및 진입점
+- [api_client.dart](mdc:lib/src/api/util/api_client.dart): HTTP 클라이언트 (Dio 기반)
+- [auth.dart](mdc:lib/src/api/auth.dart): 인증 관련 API 모듈
+- [user.dart](mdc:lib/src/api/user.dart): 사용자 관련 API 모듈
+- [gym.dart](mdc:lib/src/api/gym.dart): 클라이밍장 관련 API 모듈
+- [auth_wrapper.dart](mdc:lib/src/widgets/auth_wrapper.dart): 인증 상태 관리
+- [custom_app_bar.dart](mdc:lib/src/widgets/custom_app_bar.dart): 공통 앱바
+- [pubspec.yaml](mdc:pubspec.yaml): 의존성 관리
+
+## 설정 파일들
+
+- [.env](mdc:.env): 환경 변수 (Naver Map API 키 등)
+- [analysis_options.yaml](mdc:analysis_options.yaml): Dart 분석 옵션
+
+## 폴더별 역할
+
+### api/
+- 함수형 모나드 패턴 기반 API 모듈들
+- 인터셉터를 통한 자동 토큰 관리 및 에러 처리
+- 예: AuthApi, UserApi, GymApi
+
+### api/util/
+- API 관련 공통 유틸리티
+- 인터셉터, 에러 핸들러, 토큰 저장소
+- 예: ApiClient, AuthInterceptor, ErrorHandler
+
+### models/
+- 데이터 모델 클래스들
+- JSON 직렬화/역직렬화 로직 포함
+- 예: UserProfile, Gym, HistoryData
+
+### screens/
+- 각 화면의 메인 위젯들
+- 페이지 레벨의 상태 관리
+- 예: LoginPage, MainPage, ProfilePage
+
+### utils/
+- 공통 유틸리티 함수들
+- 헬퍼 클래스들
+- 상수 정의
+- 예: NavigationHelper, TierColors
+
+### widgets/
+- 재사용 가능한 UI 컴포넌트들
+- 화면 구성 요소들
+- 예: CustomAppBar, HistoryChart, ProfileHeader

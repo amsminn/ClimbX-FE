@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
-import '../services/user_query_service.dart';
+import '../api/auth.dart';
 import '../utils/navigation_helper.dart';
 
 class LoginPage extends HookWidget {
@@ -11,7 +11,7 @@ class LoginPage extends HookWidget {
   Widget build(BuildContext context) {
     // fquery mutation 사용
     final signInMutation = useMutation(
-      AuthQueryService.signInWithGoogle,
+      (void _) => AuthApi.signInWithGoogle(),
       onSuccess: (token, _, __) {
         // 토큰 발급 성공 - MainPage로 이동
         NavigationHelper.navigateToMainAfterLogin(context);

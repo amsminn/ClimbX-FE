@@ -7,7 +7,7 @@ import 'history_widget.dart';
 import 'streak_widget.dart';
 import '../utils/tier_colors.dart';
 import '../models/user_profile.dart';
-import '../services/user_query_service.dart';
+import '../api/user.dart';
 
 class ProfileBody extends HookWidget {
   final String currentTier;
@@ -23,8 +23,8 @@ class ProfileBody extends HookWidget {
   Widget build(BuildContext context) {
     // fquery로 데이터 get
     final userQuery = useQuery<UserProfile, Exception>(
-      UserQueryKeys.userProfile(),
-      UserQueryService.getUserProfile,
+      ['user_profile'],
+      UserApi.getUserProfile,
     );
 
     // 로딩 상태
