@@ -65,13 +65,13 @@ class StreakData {
 
   /// 1차원 스트릭 데이터를 24주 x 7일 2차원 배열로 변환
   static List<List<int>> _convertToWeeklyGrid(List<StreakItem> items) {
-    const int weeks = 24;
-    const int daysPerWeek = 7;
+    const int WEEKS = 24;
+    const int DAYS_PER_WEEK = 7;
 
     // 24주 x 7일 배열 초기화 (기본값 0)
     final grid = List.generate(
-      weeks,
-      (week) => List.generate(daysPerWeek, (day) => 0),
+      WEEKS,
+      (week) => List.generate(DAYS_PER_WEEK, (day) => 0),
     );
 
     // 현재 날짜에서 정확히 24주 전의 월요일을 찾기 (GitHub 스타일)
@@ -84,7 +84,7 @@ class StreakData {
 
     // 24주 전의 월요일 (그리드의 시작점)
     final startDate = thisWeekMonday.subtract(
-      const Duration(days: (weeks - 1) * daysPerWeek),
+      const Duration(days: (WEEKS - 1) * DAYS_PER_WEEK),
     );
 
     // 각 스트릭 항목을 그리드에 매핑
@@ -92,11 +92,11 @@ class StreakData {
       final itemDate = DateTime(item.date.year, item.date.month, item.date.day);
       final daysDiff = itemDate.difference(startDate).inDays;
 
-      if (daysDiff >= 0 && daysDiff < weeks * daysPerWeek) {
-        final weekIndex = daysDiff ~/ daysPerWeek;
-        final dayIndex = daysDiff % daysPerWeek;
+      if (daysDiff >= 0 && daysDiff < WEEKS * DAYS_PER_WEEK) {
+        final weekIndex = daysDiff ~/ DAYS_PER_WEEK;
+        final dayIndex = daysDiff % DAYS_PER_WEEK;
 
-        if (weekIndex < weeks && dayIndex < daysPerWeek) {
+        if (weekIndex < WEEKS && dayIndex < DAYS_PER_WEEK) {
           grid[weekIndex][dayIndex] = item.value;
         }
       }
@@ -107,72 +107,118 @@ class StreakData {
 
   /// 스트릭 통계 계산
   static Map<String, int> _calculateStats(List<StreakItem> items) {
+    // 데이터가 없는 경우 기본값 반환
     if (items.isEmpty) {
       return {'currentStreak': 0, 'longestStreak': 0, 'totalDays': 0};
     }
 
-    // 날짜순 정렬
-    final sortedItems = [...items]..sort((a, b) => a.date.compareTo(b.date));
+    // 날짜순 정렬 (과거 -> 최신)
+    final sortedItems = [...items]..sort((item1, item2) => item1.date.compareTo(item2.date));
 
-    // 현재 스트릭 계산
-    int currentStreak = 0;
-    int longestStreak = 0;
-    int tempStreak = 0;
-    DateTime? lastDate;
-
+    // 주별 기록 여부 맵 생성 (key: 주의 시작일(일요일), value: 기록 여부)
+    final weekMap = <DateTime, bool>{};
     for (final item in sortedItems) {
-      if (item.value > 0) {
-        if (lastDate != null) {
-          final daysDiff = item.date.difference(lastDate).inDays;
-          if (daysDiff == 1) {
-            // 연속된 날짜
-            tempStreak++;
-          } else {
-            // 연속이 끊김
-            longestStreak = tempStreak > longestStreak
-                ? tempStreak
-                : longestStreak;
-            tempStreak = 1;
-          }
-        } else {
-          // 첫 번째 항목
-          tempStreak = 1;
-        }
-        lastDate = item.date;
-      }
+      if (item.value <= 0) continue;
+      
+      // 해당 날짜가 속한 주의 시작일(일요일) 계산
+      final weekStart = _getWeekStart(item.date);
+      weekMap[weekStart] = true;
     }
 
-    // 마지막 스트릭 체크
-    longestStreak = tempStreak > longestStreak ? tempStreak : longestStreak;
+    // 주별 기록을 날짜순으로 정렬
+    final weekDates = weekMap.keys.toList()..sort();
 
-    // 현재 스트릭 계산 (오늘까지 연속인지 확인)
-    final today = DateTime.now();
-    final todayDateOnly = DateTime(today.year, today.month, today.day);
-
-    if (lastDate != null) {
-      final lastDateOnly = DateTime(
-        lastDate.year,
-        lastDate.month,
-        lastDate.day,
-      );
-      final daysDiff = todayDateOnly.difference(lastDateOnly).inDays;
-
-      if (daysDiff <= 1) {
-        // 어제 또는 오늘까지 연속
-        currentStreak = tempStreak;
-      } else {
-        currentStreak = 0;
-      }
-    }
-
-    // 총 제출일수 계산
-    final totalDays = sortedItems.where((item) => item.value > 0).length;
+    // 각각의 통계 계산
+    final longestStreak = _calculateLongestStreak(weekDates);
+    final currentStreak = _calculateCurrentStreak(weekMap);
+    final totalDays = _calculateTotalDays(sortedItems);
 
     return {
       'currentStreak': currentStreak,
       'longestStreak': longestStreak,
       'totalDays': totalDays,
     };
+  }
+
+  /// 최장 연속 주간 스트릭 계산
+  static int _calculateLongestStreak(List<DateTime> weekDates) {
+    if (weekDates.isEmpty) return 0;
+
+    // 스트릭 카운트 변수들
+    int longestStreak = 0;  // 가장 길었던 연속 주간 스트릭
+    int tempStreak = 0;     // 현재까지의 연속 주간 스트릭
+    DateTime? lastWeek;     // 마지막으로 기록된 주
+
+    // 주별 기록을 순회하며 연속 스트릭 계산
+    for (final weekStart in weekDates) {
+      if (lastWeek == null) {
+        tempStreak = 1;
+        lastWeek = weekStart;
+        continue;
+      }
+
+      // 이전 주와의 차이 계산 (7일이면 연속된 주)
+      final weekDiff = weekStart.difference(lastWeek).inDays;
+      if (weekDiff == 7) {
+        // 연속된 주간 기록
+        tempStreak++;
+      } else {
+        // 연속이 끊긴 경우 최장 기록 업데이트 후 새로운 스트릭 시작
+        longestStreak = tempStreak > longestStreak ? tempStreak : longestStreak;
+        tempStreak = 1;
+      }
+      lastWeek = weekStart;
+    }
+
+    // 마지막 스트릭이 최장 기록인지 확인
+    return tempStreak > longestStreak ? tempStreak : longestStreak;
+  }
+
+  /// 현재 진행 중인 스트릭 계산
+  static int _calculateCurrentStreak(Map<DateTime, bool> weekMap) {
+    if (weekMap.isEmpty) return 0;
+
+    final today = DateTime.now();
+    final currentWeekStart = _getWeekStart(today);
+    final lastWeekStart = _getWeekStart(today.subtract(const Duration(days: 7)));
+
+    // 이번 주에 방문 기록이 있으면 스트릭 유지
+    if (weekMap.containsKey(currentWeekStart)) {
+      return _getStreakLength(weekMap, currentWeekStart);
+    }
+
+    // 지난 주에 방문했으면 스트릭 유지 (이번 주는 아직 기회 있음)
+    if (weekMap.containsKey(lastWeekStart)) {
+      return _getStreakLength(weekMap, lastWeekStart);
+    }
+
+    // 지난 주에도 안 갔으면 스트릭 끊김
+    return 0;
+  }
+
+  /// 특정 주차부터의 연속 스트릭 길이 계산
+  static int _getStreakLength(Map<DateTime, bool> weekMap, DateTime weekStart) {
+    int streak = 0;
+    var currentWeek = weekStart;
+
+    // 과거로 거슬러 올라가며 연속된 주 계산
+    while (weekMap.containsKey(currentWeek)) {
+      streak++;
+      currentWeek = currentWeek.subtract(const Duration(days: 7));
+    }
+
+    return streak;
+  }
+
+  /// 총 방문 일수 계산
+  static int _calculateTotalDays(List<StreakItem> items) {
+    return items.where((item) => item.value > 0).length;
+  }
+
+  /// 주의 시작일(일요일) 계산
+  static DateTime _getWeekStart(DateTime date) {
+    final weekday = date.weekday % 7;  // 0: 일요일, 1-6: 월-토
+    return DateTime(date.year, date.month, date.day).subtract(Duration(days: weekday));
   }
 
   @override
