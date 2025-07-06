@@ -7,6 +7,7 @@ import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/navigation_helper.dart';
+import '../screens/analysis_page.dart';
 
 class MainPage extends StatefulWidget {
   final BottomNavTab? initialTab;
@@ -64,7 +65,7 @@ class _MainPageState extends State<MainPage> {
           // 1: 리더보드
           const LeaderboardBody(),
           // 2: 분석
-          _buildComingSoon('분석', Icons.camera_alt, colorScheme),
+          AnalysisPage(isActive: _currentTab == BottomNavTab.analysis),
           // 3: 지도
           const MapBody(),
           // 4: 프로필

@@ -178,7 +178,7 @@ class StreakWidget extends HookWidget {
                             : '0',
                         style: TextStyle(color: colorScheme.primary),
                       ),
-                      const TextSpan(text: '일 출석'),
+                      const TextSpan(text: '주 출석'),
                     ],
                   ),
                 ),
@@ -219,8 +219,8 @@ class StreakWidget extends HookWidget {
                         child: _buildStatItem(
                           '현재 스트릭',
                           streakData != null
-                              ? '${streakData.currentStreak}일'
-                              : '0일',
+                              ? '${streakData.currentStreak}주'
+                              : '0주',
                           colorScheme,
                         ),
                       ),
@@ -228,8 +228,8 @@ class StreakWidget extends HookWidget {
                         child: _buildStatItem(
                           '최장 스트릭',
                           streakData != null
-                              ? '${streakData.longestStreak}일'
-                              : '0일',
+                              ? '${streakData.longestStreak}주'
+                              : '0주',
                           colorScheme,
                         ),
                       ),
@@ -398,8 +398,9 @@ class StreakWidget extends HookWidget {
     String value,
     TierColorScheme colorScheme,
   ) {
-    // "일"만 검은색으로, 나머지는 티어 색상으로 표시
-    if (value.endsWith('일')) {
+    // 단위("일", "주")만 검은색으로, 숫자는 티어 색상으로 표시
+    if (value.endsWith('일') || value.endsWith('주')) {
+      final unit = value.endsWith('일') ? '일' : '주';
       final numberPart = value.substring(0, value.length - 1);
       return RichText(
         text: TextSpan(
@@ -412,9 +413,9 @@ class StreakWidget extends HookWidget {
                 color: colorScheme.primary,
               ),
             ),
-            const TextSpan(
-              text: '일',
-              style: TextStyle(
+            TextSpan(
+              text: unit,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF1E293B),
@@ -435,8 +436,6 @@ class StreakWidget extends HookWidget {
       ),
     );
   }
-
-
 
   // 현재는 0 1 2 3 으로 구분 이후에는 최댓값 기준으로 수정 예정
   Color _getStreakColor(int submissions, TierColorScheme colorScheme) {

@@ -85,7 +85,7 @@ class HistoryWidget extends HookWidget {
             ? List.generate(
                 filteredPoints.length - 1, 
                 (i) => (filteredPoints[i + 1].experience - filteredPoints[i].experience).abs()
-              ).reduce((a, b) => a > b ? a : b) 
+              ).reduce((curr, next) => curr > next ? curr : next) 
             : 0.0,
       );
     }
@@ -168,7 +168,7 @@ class HistoryWidget extends HookWidget {
     final now = DateTime.now();
     // 오름차순 정렬 후 필터링
     final sorted = [...historyData.dataPoints]
-      ..sort((a, b) => a.date.compareTo(b.date));
+      ..sort((item1, item2) => item1.date.compareTo(item2.date));
     if (duration == null) return sorted;
     return sorted.where((e) => e.date.isAfter(now.subtract(duration))).toList();
   }

@@ -230,14 +230,14 @@ class _HistoryChartState extends State<HistoryChart>
   double _getMinY() {
     final minExp = widget.historyData.dataPoints
         .map((e) => e.experience)
-        .reduce((a, b) => a < b ? a : b);
+        .reduce((curr, next) => curr < next ? curr : next);
     return (minExp - 50).floorToDouble();
   }
 
   double _getMaxY() {
     final maxExp = widget.historyData.dataPoints
         .map((e) => e.experience)
-        .reduce((a, b) => a > b ? a : b);
+        .reduce((curr, next) => curr > next ? curr : next);
     return (maxExp + 50).ceilToDouble();
   }
 

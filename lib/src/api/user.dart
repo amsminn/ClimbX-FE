@@ -29,10 +29,10 @@ class UserApi {
   }
 
   /// 특정 사용자 프로필 조회 (확장 가능)
-  static Future<UserProfile> getUserProfileByUsername(String username) async {
+  static Future<UserProfile> getUserProfileByNickname(String nickname) async {
     try {
       return await _apiClient.get<UserProfile>(
-        '/api/users/$username',
+        '/api/users/$nickname',
         fromJson: (data) => UserProfile.fromJson(data as Map<String, dynamic>),
         logContext: 'UserApi',
       );
@@ -45,7 +45,7 @@ class UserApi {
 
   /// 사용자 히스토리 조회 (queryParameters 방식 사용)
   static Future<HistoryData> getUserHistory({
-    String username = 'alice',
+    String nickname = 'alice',
     String? from,
     String? to,
     String criteria = 'RATING',
@@ -57,18 +57,12 @@ class UserApi {
       if (to != null) queryParams['to'] = to;
 
       final data = await _apiClient.get<dynamic>(
-        '/api/users/$username/history',
+        '/api/users/$nickname/history',
         queryParameters: queryParams,
         logContext: 'UserApi',
       );
 
-      // HistoryData는 List<dynamic>을 기대하므로 타입 체크
-      if (data is List) {
-        return HistoryData.fromJson(data);
-      } else {
-        developer.log('HistoryData: List가 아닌 데이터, 빈 리스트 사용', name: 'UserApi');
-        return HistoryData.fromJson([]);
-      }
+      return HistoryData.fromJson(data);
     } catch (e) {
       // 디버깅용 상세 로그 남기기
       developer.log('히스토리 데이터 조회 실패: $e', name: 'UserApi', error: e);
@@ -83,7 +77,7 @@ class UserApi {
     String criteria = 'RATING',
   }) async {
     return await getUserHistory(
-      username: 'alice',
+      nickname: 'alice',
       from: from,
       to: to,
       criteria: criteria,
@@ -92,7 +86,7 @@ class UserApi {
 
   /// 사용자 스트릭 조회 (queryParameters 방식 사용)
   static Future<StreakData> getUserStreak({
-    String username = 'alice',
+    String nickname = 'alice',
     String? from,
     String? to,
   }) async {
@@ -103,20 +97,12 @@ class UserApi {
       if (to != null) queryParams['to'] = to;
 
       final data = await _apiClient.get<dynamic>(
-        '/api/users/$username/streak',
+        '/api/users/$nickname/streak',
         queryParameters: queryParams,
         logContext: 'UserApi',
       );
 
-      // StreakData는 List<dynamic>을 기대하므로 타입 체크
-      if (data is List) {
-        final streakData = StreakData.fromJson(data);
-        developer.log('스트릭 데이터 ${streakData.items.length}개 조회 성공', name: 'UserApi');
-        return streakData;
-      } else {
-        developer.log('StreakData: List가 아닌 데이터, 빈 리스트 사용', name: 'UserApi');
-        return StreakData.fromJson([]);
-      }
+      return StreakData.fromJson(data);
     } catch (e) {
       // 디버깅용 상세 로그 남기기
       developer.log('스트릭 데이터 조회 실패: $e', name: 'UserApi', error: e);
@@ -130,7 +116,7 @@ class UserApi {
     String? to,
   }) async {
     return await getUserStreak(
-      username: 'alice',
+      nickname: 'alice',
       from: from,
       to: to,
     );
