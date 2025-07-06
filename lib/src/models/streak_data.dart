@@ -3,10 +3,7 @@ class StreakItem {
   final DateTime date;
   final int value;
 
-  StreakItem({
-    required this.date,
-    required this.value,
-  });
+  StreakItem({required this.date, required this.value});
 
   /// 서버 응답에서 생성
   factory StreakItem.fromJson(Map<String, dynamic> json) {
@@ -70,25 +67,35 @@ class StreakData {
   static List<List<int>> _convertToWeeklyGrid(List<StreakItem> items) {
     const int weeks = 24;
     const int daysPerWeek = 7;
-    
+
     // 24주 x 7일 배열 초기화 (기본값 0)
     final grid = List.generate(
       weeks,
       (week) => List.generate(daysPerWeek, (day) => 0),
     );
 
-    // 현재 날짜 기준으로 24주 전, 월요일부터 시작
+    // 현재 날짜에서 정확히 24주 전의 월요일을 찾기 (GitHub 스타일)
     final now = DateTime.now();
-    final currentWeekday = now.weekday; // 1 = 월요일, 7 = 일요일
-    final startDate = now.subtract(Duration(days: weeks * daysPerWeek - 1 + currentWeekday - 1));
+    final today = DateTime(now.year, now.month, now.day);
+
+    // 오늘이 속한 주의 월요일 찾기
+    final currentWeekday = today.weekday; // 1 = 월요일, 7 = 일요일
+    final thisWeekMonday = today.subtract(Duration(days: currentWeekday - 1));
+
+    // 24주 전의 월요일 (그리드의 시작점)
+    final startDate = thisWeekMonday.subtract(
+      const Duration(days: (weeks - 1) * daysPerWeek),
+    );
 
     // 각 스트릭 항목을 그리드에 매핑
     for (final item in items) {
-      final daysDiff = item.date.difference(startDate).inDays;
+      final itemDate = DateTime(item.date.year, item.date.month, item.date.day);
+      final daysDiff = itemDate.difference(startDate).inDays;
+
       if (daysDiff >= 0 && daysDiff < weeks * daysPerWeek) {
         final weekIndex = daysDiff ~/ daysPerWeek;
         final dayIndex = daysDiff % daysPerWeek;
-        
+
         if (weekIndex < weeks && dayIndex < daysPerWeek) {
           grid[weekIndex][dayIndex] = item.value;
         }
@@ -101,16 +108,11 @@ class StreakData {
   /// 스트릭 통계 계산
   static Map<String, int> _calculateStats(List<StreakItem> items) {
     if (items.isEmpty) {
-      return {
-        'currentStreak': 0,
-        'longestStreak': 0,
-        'totalDays': 0,
-      };
+      return {'currentStreak': 0, 'longestStreak': 0, 'totalDays': 0};
     }
 
     // 날짜순 정렬
-    final sortedItems = [...items]
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final sortedItems = [...items]..sort((a, b) => a.date.compareTo(b.date));
 
     // 현재 스트릭 계산
     int currentStreak = 0;
@@ -127,7 +129,9 @@ class StreakData {
             tempStreak++;
           } else {
             // 연속이 끊김
-            longestStreak = tempStreak > longestStreak ? tempStreak : longestStreak;
+            longestStreak = tempStreak > longestStreak
+                ? tempStreak
+                : longestStreak;
             tempStreak = 1;
           }
         } else {
@@ -144,11 +148,15 @@ class StreakData {
     // 현재 스트릭 계산 (오늘까지 연속인지 확인)
     final today = DateTime.now();
     final todayDateOnly = DateTime(today.year, today.month, today.day);
-    
+
     if (lastDate != null) {
-      final lastDateOnly = DateTime(lastDate.year, lastDate.month, lastDate.day);
+      final lastDateOnly = DateTime(
+        lastDate.year,
+        lastDate.month,
+        lastDate.day,
+      );
       final daysDiff = todayDateOnly.difference(lastDateOnly).inDays;
-      
+
       if (daysDiff <= 1) {
         // 어제 또는 오늘까지 연속
         currentStreak = tempStreak;
@@ -171,4 +179,4 @@ class StreakData {
   String toString() {
     return 'StreakData(items: ${items.length}, currentStreak: $currentStreak, longestStreak: $longestStreak, totalDays: $totalDays)';
   }
-} 
+}

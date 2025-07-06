@@ -17,7 +17,9 @@ class UserApi {
         logContext: 'UserApi',
       );
     } catch (e) {
-      throw Exception('프로필 정보를 불러올 수 없습니다: $e');
+      // 디버깅용 상세 로그 남기기
+      developer.log('프로필 조회 실패: $e', name: 'UserApi', error: e);
+      throw Exception('프로필 정보를 불러올 수 없습니다');
     }
   }
 
@@ -35,7 +37,9 @@ class UserApi {
         logContext: 'UserApi',
       );
     } catch (e) {
-      throw Exception('프로필 정보를 불러올 수 없습니다: $e');
+      // 디버깅용 상세 로그 남기기
+      developer.log('프로필 조회 실패: $e', name: 'UserApi', error: e);
+      throw Exception('프로필 정보를 불러올 수 없습니다');
     }
   }
 
@@ -66,7 +70,9 @@ class UserApi {
         return HistoryData.fromJson([]);
       }
     } catch (e) {
-      throw Exception('히스토리 데이터를 불러올 수 없습니다: $e');
+      // 디버깅용 상세 로그 남기기
+      developer.log('히스토리 데이터 조회 실패: $e', name: 'UserApi', error: e);
+      throw Exception('히스토리 데이터를 불러올 수 없습니다');
     }
   }
 
@@ -112,7 +118,9 @@ class UserApi {
         return StreakData.fromJson([]);
       }
     } catch (e) {
-      throw Exception('스트릭 데이터를 불러올 수 없습니다: $e');
+      // 디버깅용 상세 로그 남기기
+      developer.log('스트릭 데이터 조회 실패: $e', name: 'UserApi', error: e);
+      throw Exception('스트릭 데이터를 불러올 수 없습니다');
     }
   }
 
