@@ -235,7 +235,7 @@ class StreakData {
   static int _calculateTotalDays(List<StreakItem> items) {
     return items.where((item) => item.value > 0).length;
   }
-  
+
   /// 주의 시작일(일요일) 계산
   static DateTime _calcWeekStart(DateTime date) {
     final weekday = date.weekday % 7;  // 0: 일요일, 1-6: 월-토
