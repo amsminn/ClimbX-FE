@@ -59,7 +59,7 @@ class UserApi {
       return await _apiClient.get<HistoryData>(
         '/api/users/$nickname/history',
         queryParameters: queryParams,
-        fromJson: HistoryData.fromJson,
+        fromJson: (data) => HistoryData.fromJson(data as List<dynamic>),
         logContext: 'UserApi',
       );
     } catch (e) {
@@ -98,7 +98,7 @@ class UserApi {
       return await _apiClient.get<StreakData>(
         '/api/users/$nickname/streak',
         queryParameters: queryParams,
-        fromJson: StreakData.fromJson,
+        fromJson: (data) => StreakData.fromJson(data as List<dynamic>),
         logContext: 'UserApi',
       );
     } catch (e) {
