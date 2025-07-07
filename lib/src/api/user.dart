@@ -56,13 +56,12 @@ class UserApi {
       if (from != null) queryParams['from'] = from;
       if (to != null) queryParams['to'] = to;
 
-      final data = await _apiClient.get<dynamic>(
+      return await _apiClient.get<HistoryData>(
         '/api/users/$nickname/history',
         queryParameters: queryParams,
+        fromJson: HistoryData.fromJson,
         logContext: 'UserApi',
       );
-
-      return HistoryData.fromJson(data);
     } catch (e) {
       // 디버깅용 상세 로그 남기기
       developer.log('히스토리 데이터 조회 실패: $e', name: 'UserApi', error: e);
@@ -96,13 +95,12 @@ class UserApi {
       if (from != null) queryParams['from'] = from;
       if (to != null) queryParams['to'] = to;
 
-      final data = await _apiClient.get<dynamic>(
+      return await _apiClient.get<StreakData>(
         '/api/users/$nickname/streak',
         queryParameters: queryParams,
+        fromJson: StreakData.fromJson,
         logContext: 'UserApi',
       );
-
-      return StreakData.fromJson(data);
     } catch (e) {
       // 디버깅용 상세 로그 남기기
       developer.log('스트릭 데이터 조회 실패: $e', name: 'UserApi', error: e);

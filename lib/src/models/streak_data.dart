@@ -26,6 +26,33 @@ class StreakItem {
   }
 }
 
+/// 스트릭 통계 데이터
+class StreakStats {
+  final int currentStreak;   // 현재 연속 주간 스트릭
+  final int longestStreak;   // 최장 연속 주간 스트릭
+  final int totalDays;       // 총 방문 일수
+
+  const StreakStats({
+    required this.currentStreak,
+    required this.longestStreak,
+    required this.totalDays,
+  });
+
+  /// 기본값 생성
+  factory StreakStats.empty() {
+    return const StreakStats(
+      currentStreak: 0,
+      longestStreak: 0,
+      totalDays: 0,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'StreakStats(currentStreak: $currentStreak, longestStreak: $longestStreak, totalDays: $totalDays)';
+  }
+}
+
 /// 스트릭 데이터 (2차원 배열 형태로 변환)
 class StreakData {
   final List<StreakItem> items;
@@ -57,9 +84,9 @@ class StreakData {
     return StreakData(
       items: items,
       weeklyData: weeklyData,
-      currentStreak: stats['currentStreak'] ?? 0,
-      longestStreak: stats['longestStreak'] ?? 0,
-      totalDays: stats['totalDays'] ?? 0,
+      currentStreak: stats.currentStreak,
+      longestStreak: stats.longestStreak,
+      totalDays: stats.totalDays,
     );
   }
 
@@ -67,12 +94,6 @@ class StreakData {
   static List<List<int>> _convertToWeeklyGrid(List<StreakItem> items) {
     const int WEEKS = 24;
     const int DAYS_PER_WEEK = 7;
-
-    // 24주 x 7일 배열 초기화 (기본값 0)
-    final grid = List.generate(
-      WEEKS,
-      (week) => List.generate(DAYS_PER_WEEK, (day) => 0),
-    );
 
     // 현재 날짜에서 정확히 24주 전의 월요일을 찾기 (GitHub 스타일)
     final now = DateTime.now();
@@ -87,41 +108,41 @@ class StreakData {
       const Duration(days: (WEEKS - 1) * DAYS_PER_WEEK),
     );
 
-    // 각 스트릭 항목을 그리드에 매핑
-    for (final item in items) {
-      final itemDate = DateTime(item.date.year, item.date.month, item.date.day);
-      final daysDiff = itemDate.difference(startDate).inDays;
-
-      if (daysDiff >= 0 && daysDiff < WEEKS * DAYS_PER_WEEK) {
-        final weekIndex = daysDiff ~/ DAYS_PER_WEEK;
-        final dayIndex = daysDiff % DAYS_PER_WEEK;
-
-        if (weekIndex < WEEKS && dayIndex < DAYS_PER_WEEK) {
-          grid[weekIndex][dayIndex] = item.value;
-        }
-      }
-    }
-
-    return grid;
+    // 24주 x 7일 배열 생성 및 데이터 채우기
+    return List.generate(
+      WEEKS,
+      (weekIndex) => List.generate(DAYS_PER_WEEK, (dayIndex) {
+        final targetDate = startDate.add(
+          Duration(days: weekIndex * DAYS_PER_WEEK + dayIndex),
+        );
+        
+        // 해당 날짜에 맞는 item 찾기
+        final item = items.firstWhere(
+          (item) => item.date.year == targetDate.year &&
+                    item.date.month == targetDate.month &&
+                    item.date.day == targetDate.day,
+          orElse: () => StreakItem(date: targetDate, value: 0),
+        );
+        
+        return item.value;
+      }),
+    );
   }
 
   /// 스트릭 통계 계산
-  static Map<String, int> _calculateStats(List<StreakItem> items) {
+  static StreakStats _calculateStats(List<StreakItem> items) {
     // 데이터가 없는 경우 기본값 반환
     if (items.isEmpty) {
-      return {'currentStreak': 0, 'longestStreak': 0, 'totalDays': 0};
+      return StreakStats.empty();
     }
-
-    // 날짜순 정렬 (과거 -> 최신)
-    final sortedItems = [...items]..sort((item1, item2) => item1.date.compareTo(item2.date));
 
     // 주별 기록 여부 맵 생성 (key: 주의 시작일(일요일), value: 기록 여부)
     final weekMap = <DateTime, bool>{};
-    for (final item in sortedItems) {
+    for (final item in items) {
       if (item.value <= 0) continue;
       
       // 해당 날짜가 속한 주의 시작일(일요일) 계산
-      final weekStart = _getWeekStart(item.date);
+      final weekStart = _calcWeekStart(item.date);
       weekMap[weekStart] = true;
     }
 
@@ -131,13 +152,13 @@ class StreakData {
     // 각각의 통계 계산
     final longestStreak = _calculateLongestStreak(weekDates);
     final currentStreak = _calculateCurrentStreak(weekMap);
-    final totalDays = _calculateTotalDays(sortedItems);
+    final totalDays = _calculateTotalDays(items);
 
-    return {
-      'currentStreak': currentStreak,
-      'longestStreak': longestStreak,
-      'totalDays': totalDays,
-    };
+    return StreakStats(
+      currentStreak: currentStreak,
+      longestStreak: longestStreak,
+      totalDays: totalDays,
+    );
   }
 
   /// 최장 연속 주간 스트릭 계산
@@ -179,8 +200,8 @@ class StreakData {
     if (weekMap.isEmpty) return 0;
 
     final today = DateTime.now();
-    final currentWeekStart = _getWeekStart(today);
-    final lastWeekStart = _getWeekStart(today.subtract(const Duration(days: 7)));
+    final currentWeekStart = _calcWeekStart(today);
+    final lastWeekStart = _calcWeekStart(today.subtract(const Duration(days: 7)));
 
     // 이번 주에 방문 기록이 있으면 스트릭 유지
     if (weekMap.containsKey(currentWeekStart)) {
@@ -216,7 +237,7 @@ class StreakData {
   }
 
   /// 주의 시작일(일요일) 계산
-  static DateTime _getWeekStart(DateTime date) {
+  static DateTime _calcWeekStart(DateTime date) {
     final weekday = date.weekday % 7;  // 0: 일요일, 1-6: 월-토
     return DateTime(date.year, date.month, date.day).subtract(Duration(days: weekday));
   }
