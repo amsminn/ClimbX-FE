@@ -10,30 +10,29 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 
 class AnalysisPage extends HookWidget {
   final bool isActive;
-  
-  const AnalysisPage({
-    super.key,
-    required this.isActive,
-  });
+
+  const AnalysisPage({super.key, required this.isActive});
 
   @override
   Widget build(BuildContext context) {
     final videos = useState<List<AssetEntity>>([]);
     final isLoading = useState(false);
     final picker = useMemoized(() => ImagePicker(), []);
-    final uploadedVideos = useState<List<Video>>([]); // 업로드된 영상을 임시로 구현해둠 (API개발 이후에는 캐싱으로 사용 또는 제거할듯)
+    final uploadedVideos = useState<List<Video>>(
+      [],
+    ); // 업로드된 영상을 임시로 구현해둠 (API개발 이후에는 캐싱으로 사용 또는 제거할듯)
 
     // 갤러리에서 비디오 로드
     Future<void> loadGalleryVideos() async {
       if (!isActive) return;
-      
+
       isLoading.value = true;
-      
+
       try {
         // 권한 요청
         final PermissionState ps = await PhotoManager.requestPermissionExtend();
         developer.log('권한 상태: $ps', name: 'AnalysisPage');
-        
+
         if (!ps.hasAccess) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -71,10 +70,7 @@ class AnalysisPage extends HookWidget {
               max: DateTime.now(),
             ),
             orders: [
-              const OrderOption(
-                type: OrderOptionType.createDate,
-                asc: false,
-              ),
+              const OrderOption(type: OrderOptionType.createDate, asc: false),
             ],
           ),
         );
@@ -84,16 +80,19 @@ class AnalysisPage extends HookWidget {
         if (paths.isNotEmpty) {
           final recentPath = paths.first;
           final assetCount = await recentPath.assetCountAsync;
-          developer.log('첫 번째 앨범: ${recentPath.name}, 비디오 개수: $assetCount', name: 'AnalysisPage');
-          
-          final assets = await recentPath.getAssetListRange(
-            start: 0,
-            end: 100,
+          developer.log(
+            '첫 번째 앨범: ${recentPath.name}, 비디오 개수: $assetCount',
+            name: 'AnalysisPage',
           );
-          
+
+          final assets = await recentPath.getAssetListRange(start: 0, end: 100);
+
           if (context.mounted) {
             videos.value = assets;
-            developer.log('갤러리에서 ${assets.length}개의 비디오 로드됨', name: 'AnalysisPage');
+            developer.log(
+              '갤러리에서 ${assets.length}개의 비디오 로드됨',
+              name: 'AnalysisPage',
+            );
           }
         } else {
           developer.log('사용 가능한 앨범이 없음', name: 'AnalysisPage');
@@ -123,9 +122,9 @@ class AnalysisPage extends HookWidget {
       );
       uploadedVideos.value = [...uploadedVideos.value, video];
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(successMsg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(successMsg)));
       }
     }
 
@@ -135,7 +134,7 @@ class AnalysisPage extends HookWidget {
         // 카메라 권한 요청
         final cameraStatus = await Permission.camera.request();
         developer.log('카메라 권한 상태: $cameraStatus', name: 'AnalysisPage');
-        
+
         if (!cameraStatus.isGranted) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -159,7 +158,7 @@ class AnalysisPage extends HookWidget {
           source: ImageSource.camera,
           maxDuration: const Duration(minutes: 1),
         );
-        
+
         if (video != null) {
           await handleVideoUpload(video, '촬영 영상 임시 업로드 완료');
         }
@@ -191,42 +190,44 @@ class AnalysisPage extends HookWidget {
       backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         child: isLoading.value
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  Expanded(
+                    child: GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
+                      itemCount: 2 + uploadedVideos.value.length,
+                      // 촬영 버튼 + 갤러리에서 선택 버튼 + 서버의 영상
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          // 촬영 버튼
+                          return _buildGridTile(
+                            icon: Icons.videocam_outlined,
+                            label: '촬영하기',
+                            onTap: recordVideo,
+                          );
+                        } else if (index == 1) {
+                          // 갤러리에서 선택 버튼
+                          return _buildGridTile(
+                            icon: Icons.photo_library_outlined,
+                            label: '갤러리에서 선택',
+                            onTap: selectFromGallery,
+                          );
+                        } else {
+                          final uploadedVideo = uploadedVideos.value[index - 2];
+                          return _buildUploadedVideoTile(uploadedVideo);
+                        }
+                      },
                     ),
-                    itemCount: 2 + uploadedVideos.value.length, // 촬영 버튼 + 갤러리에서 선택 버튼 + 서버의 영상
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        // 촬영 버튼
-                        return _buildGridTile(
-                          icon: Icons.videocam_outlined,
-                          label: '촬영하기',
-                          onTap: recordVideo,
-                        );
-                      } else if (index == 1) {
-                        // 갤러리에서 선택 버튼
-                        return _buildGridTile(
-                          icon: Icons.photo_library_outlined,
-                          label: '갤러리에서 선택',
-                          onTap: selectFromGallery,
-                        );
-                      } else {
-                        final uploadedVideo = uploadedVideos.value[index - 2];
-                        return _buildUploadedVideoTile(uploadedVideo);
-                      }
-                    },
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
       ),
     );
   }
@@ -262,56 +263,6 @@ class AnalysisPage extends HookWidget {
     );
   }
 
-  Widget _buildVideoTile(AssetEntity video) {
-    return FutureBuilder<Uint8List?>(
-      future: video.thumbnailDataWithSize(const ThumbnailSize.square(200)),
-      builder: (context, snapshot) {
-        return Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
-            image: snapshot.hasData
-                ? DecorationImage(
-                    image: MemoryImage(snapshot.data!),
-                    fit: BoxFit.cover,
-                  )
-                : null,
-          ),
-          child: !snapshot.hasData
-              ? const Center(
-                  child: Icon(
-                    Icons.video_file_outlined,
-                    size: 32,
-                    color: Color(0xFF64748B),
-                  ),
-                )
-              : Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    // 비디오 길이 표시
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        _formatDuration(video.duration),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-        );
-      },
-    );
-  }
-
   Widget _buildUploadedVideoTile(Video video) {
     final thumb = video.videoMetadata?['thumbnail'];
     return Container(
@@ -325,7 +276,11 @@ class AnalysisPage extends HookWidget {
           if (thumb != null && thumb is Uint8List)
             Image.memory(thumb, width: 80, height: 80, fit: BoxFit.cover)
           else
-            Icon(Icons.video_file_outlined, size: 32, color: const Color(0xFF64748B)),
+            const Icon(
+              Icons.video_file_outlined,
+              size: 32,
+              color: Color(0xFF64748B),
+            ),
           const SizedBox(height: 8),
           Text(
             video.videoUrl.split('/').last,
@@ -340,11 +295,4 @@ class AnalysisPage extends HookWidget {
       ),
     );
   }
-
-  String _formatDuration(int seconds) {
-    final duration = Duration(seconds: seconds);
-    final minutes = duration.inMinutes;
-    final remainingSeconds = duration.inSeconds - minutes * 60;
-    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
-  }
-} 
+}
