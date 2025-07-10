@@ -48,8 +48,8 @@ class AnalysisPage extends HookWidget {
                 duration: const Duration(seconds: 5),
               ),
             );
+            isLoading.value = false;
           }
-          isLoading.value = false;
           return;
         }
 
@@ -120,8 +120,8 @@ class AnalysisPage extends HookWidget {
         videoUrl: picked.path,
         videoMetadata: thumb != null ? {'thumbnail': thumb} : null,
       );
-      uploadedVideos.value = [...uploadedVideos.value, video];
       if (context.mounted) {
+        uploadedVideos.value = [...uploadedVideos.value, video];
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(successMsg)));

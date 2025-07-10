@@ -15,14 +15,10 @@ class Video {
 
   factory Video.fromJson(Map<String, dynamic> json) {
     // 썸네일은 video_metadata['thumbnail']에 Uint8List로 저장
-    final Map<String, dynamic>? metadata =
-        json['video_metadata'] as Map<String, dynamic>?;
-    if (metadata != null &&
-        metadata['thumbnail'] != null &&
-        metadata['thumbnail'] is List) {
-      metadata['thumbnail'] = Uint8List.fromList(
-        List<int>.from(metadata['thumbnail']),
-      );
+    Map<String, dynamic>? metadata = json['video_metadata'] as Map<String, dynamic>?;
+    if (metadata != null && metadata['thumbnail'] != null && metadata['thumbnail'] is List) {
+      metadata = Map<String, dynamic>.from(metadata); // 불변 map으로 인한 런타임 에러 방지
+      metadata['thumbnail'] = Uint8List.fromList(List<int>.from(metadata['thumbnail'] as List));
     }
     return Video(
       videoId: json['video_id'] as int,
