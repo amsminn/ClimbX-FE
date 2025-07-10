@@ -5,6 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'dart:developer' as developer;
 import 'dart:typed_data';
+import '../models/video.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 class AnalysisPage extends HookWidget {
   final bool isActive;
@@ -19,6 +21,7 @@ class AnalysisPage extends HookWidget {
     final videos = useState<List<AssetEntity>>([]);
     final isLoading = useState(false);
     final picker = useMemoized(() => ImagePicker(), []);
+    final uploadedVideos = useState<List<Video>>([]); // 업로드된 영상을 임시로 구현해둠 (API개발 이후에는 캐싱으로 사용 또는 제거할듯)
 
     // 갤러리에서 비디오 로드
     Future<void> loadGalleryVideos() async {
@@ -104,6 +107,28 @@ class AnalysisPage extends HookWidget {
       }
     }
 
+    // XFile을 받아서 업로드 처리 (썸네일 생성, Video 객체 생성, 리스트 추가, 스낵바 안내)
+    Future<void> handleVideoUpload(XFile picked, String successMsg) async {
+      final Uint8List? thumb = await VideoThumbnail.thumbnailData(
+        video: picked.path,
+        imageFormat: ImageFormat.PNG,
+        maxWidth: 200,
+        quality: 75,
+      );
+      final video = Video(
+        videoId: DateTime.now().millisecondsSinceEpoch,
+        userId: 0,
+        videoUrl: picked.path,
+        videoMetadata: thumb != null ? {'thumbnail': thumb} : null,
+      );
+      uploadedVideos.value = [...uploadedVideos.value, video];
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(successMsg)),
+        );
+      }
+    }
+
     // 비디오 촬영
     Future<void> recordVideo() async {
       try {
@@ -136,13 +161,21 @@ class AnalysisPage extends HookWidget {
         );
         
         if (video != null) {
-          // 새로 촬영한 비디오가 갤러리에 저장되면 자동으로 목록에 표시되도록
-          // 갤러리를 다시 로드
-          loadGalleryVideos();
-          developer.log('비디오 촬영 완료: ${video.path}', name: 'AnalysisPage');
+          await handleVideoUpload(video, '촬영 영상 임시 업로드 완료');
         }
       } catch (e) {
         developer.log('비디오 촬영 실패: $e', name: 'AnalysisPage', error: e);
+      }
+    }
+
+    // 갤러리에서 영상 선택 후 업로드 (임시 메모리에 올라감. 실제로는 서버로 보내야함)
+    Future<void> selectFromGallery() async {
+      final XFile? picked = await picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(minutes: 5),
+      );
+      if (picked != null) {
+        await handleVideoUpload(picked, '갤러리 영상 임시 업로드 완료');
       }
     }
 
@@ -159,28 +192,40 @@ class AnalysisPage extends HookWidget {
       body: SafeArea(
         child: isLoading.value
           ? const Center(child: CircularProgressIndicator())
-          : GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: videos.value.length + 1, // 촬영 버튼 + 비디오들
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  // 촬영 버튼
-                  return _buildGridTile(
-                    icon: Icons.videocam_outlined,
-                    label: '촬영하기',
-                    onTap: recordVideo,
-                  );
-                } else {
-                  // 비디오 썸네일
-                  final video = videos.value[index - 1];
-                  return _buildVideoTile(video);
-                }
-              },
+          : Column(
+              children: [
+                Expanded(
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemCount: 2 + uploadedVideos.value.length, // 촬영 버튼 + 갤러리에서 선택 버튼 + 서버의 영상
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        // 촬영 버튼
+                        return _buildGridTile(
+                          icon: Icons.videocam_outlined,
+                          label: '촬영하기',
+                          onTap: recordVideo,
+                        );
+                      } else if (index == 1) {
+                        // 갤러리에서 선택 버튼
+                        return _buildGridTile(
+                          icon: Icons.photo_library_outlined,
+                          label: '갤러리에서 선택',
+                          onTap: selectFromGallery,
+                        );
+                      } else {
+                        final uploadedVideo = uploadedVideos.value[index - 2];
+                        return _buildUploadedVideoTile(uploadedVideo);
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
       ),
     );
@@ -264,6 +309,35 @@ class AnalysisPage extends HookWidget {
                 ),
         );
       },
+    );
+  }
+
+  Widget _buildUploadedVideoTile(Video video) {
+    final thumb = video.videoMetadata?['thumbnail'];
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (thumb != null && thumb is Uint8List)
+            Image.memory(thumb, width: 80, height: 80, fit: BoxFit.cover)
+          else
+            Icon(Icons.video_file_outlined, size: 32, color: const Color(0xFF64748B)),
+          const SizedBox(height: 8),
+          Text(
+            video.videoUrl.split('/').last,
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
