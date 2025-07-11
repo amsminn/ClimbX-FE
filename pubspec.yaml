@@ -42,6 +42,14 @@ dependencies:
   # React Query 스타일 데이터 페칭
   fquery: ^1.5.4-beta.2
   flutter_hooks: ^0.21.2
+  # 미디어 선택 및 촬영
+  image_picker: ^1.0.7
+  # 권한 관리
+  permission_handler: ^11.3.0
+  # 갤러리 미디어 접근
+  photo_manager: ^3.0.0
+  # 비디오 썸네일
+  video_thumbnail: ^0.5.3
 
 dev_dependencies:
   flutter_test:

@@ -18,3 +18,9 @@ Closes: 이슈키 (예: SWM-1)
 
 ## 📋 앞으로의 과제 (Todo)
 [ ] ex) google OAuth 연동
+
+ ## 💎 **To. Gemini Code Assistant**
+
+> 아래 가이드라인에 맞춰 PR 요약, 코드 리뷰를 진행해 주세요.
+
+* **리뷰 언어:** **모든 설명과 제안은 반드시 한국어(Korean Language)로 작성해 주세요.**
