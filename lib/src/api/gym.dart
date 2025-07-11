@@ -10,7 +10,7 @@ class GymApi {
   static Future<List<Gym>> getAllGyms() async {
     try {
       final data = await _apiClient.get<List<dynamic>>(
-        '/api/gyms',
+        '/api/gyms/search',
         logContext: 'GymApi',
       );
       
@@ -45,7 +45,7 @@ class GymApi {
   }) async {
     try {
       final data = await _apiClient.get<List<dynamic>>(
-        '/api/gyms',
+        '/api/gyms/nearby',
         queryParameters: {
           'latitude': latitude,
           'longitude': longitude,
@@ -73,7 +73,7 @@ class GymApi {
       }
 
       final data = await _apiClient.get<List<dynamic>>(
-        '/api/gyms',
+        '/api/gyms/search',
         queryParameters: {
           'keyword': keyword.trim(),
         },
