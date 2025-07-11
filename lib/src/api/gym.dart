@@ -10,7 +10,7 @@ class GymApi {
   static Future<List<Gym>> getAllGyms() async {
     try {
       final data = await _apiClient.get<List<dynamic>>(
-        '/api/gyms',
+        '/api/gyms/search',
         logContext: 'GymApi',
       );
       
