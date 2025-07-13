@@ -7,6 +7,7 @@ import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/navigation_helper.dart';
+import '../utils/color_schemes.dart';
 import '../screens/analysis_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -45,7 +46,7 @@ class _MainPageState extends State<MainPage> {
     final TierColorScheme colorScheme = TierColors.getColorScheme(tierType);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColorSchemes.backgroundSecondary,
 
       // 상단 앱바
       appBar: CustomAppBar(
@@ -109,16 +110,9 @@ class _MainPageState extends State<MainPage> {
         width: screenSize.width * 0.85, 
         height: screenSize.height * 0.4,
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+          color: AppColorSchemes.backgroundPrimary,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 20,
-              offset: Offset(0, 4),
-              spreadRadius: 0,
-            ),
-          ],
+          boxShadow: AppColorSchemes.lightShadow,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -131,7 +125,7 @@ class _MainPageState extends State<MainPage> {
               ),
               child: Icon(
                 icon, 
-                color: const Color(0xFFFFFFFF), 
+                color: AppColorSchemes.backgroundPrimary, 
                 size: screenSize.width * 0.08, 
               ),
             ),
@@ -141,7 +135,7 @@ class _MainPageState extends State<MainPage> {
               style: TextStyle(
                 fontSize: screenSize.width * 0.05,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1E293B),
+                color: AppColorSchemes.textPrimary,
               ),
             ),
             SizedBox(height: screenSize.height * 0.01), 
@@ -149,7 +143,7 @@ class _MainPageState extends State<MainPage> {
               '곧 출시 예정입니다',
               style: TextStyle(
                 fontSize: screenSize.width * 0.035, 
-                color: const Color(0xFF64748B),
+                color: AppColorSchemes.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),

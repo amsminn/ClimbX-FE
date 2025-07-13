@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../widgets/profile_body.dart';
 import '../utils/tier_test_helper.dart';
 import '../utils/tier_colors.dart';
+import '../utils/color_schemes.dart';
 
 class ProfilePage extends HookWidget {
   const ProfilePage({super.key});
@@ -24,9 +25,9 @@ class ProfilePage extends HookWidget {
     final TierColorScheme colorScheme = TierColors.getColorScheme(tierType);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColorSchemes.backgroundSecondary,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: AppColorSchemes.backgroundPrimary,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
@@ -34,7 +35,7 @@ class ProfilePage extends HookWidget {
         title: const Text(
           'ClimbX',
           style: TextStyle(
-            color: Color(0xFF1E293B),
+            color: AppColorSchemes.textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
@@ -45,13 +46,13 @@ class ProfilePage extends HookWidget {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppColorSchemes.backgroundSecondary,
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
               icon: const Icon(
                 Icons.palette_outlined,
-                color: Color(0xFF64748B),
+                color: AppColorSchemes.textSecondary,
                 size: 22,
               ),
               onPressed: () {
@@ -65,13 +66,13 @@ class ProfilePage extends HookWidget {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppColorSchemes.backgroundSecondary,
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
               icon: const Icon(
                 Icons.notifications_outlined,
-                color: Color(0xFF64748B),
+                color: AppColorSchemes.textSecondary,
                 size: 22,
               ),
               onPressed: () {},
@@ -81,13 +82,13 @@ class ProfilePage extends HookWidget {
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppColorSchemes.backgroundSecondary,
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
               icon: const Icon(
                 Icons.menu_rounded,
-                color: Color(0xFF64748B),
+                color: AppColorSchemes.textSecondary,
                 size: 22,
               ),
               onPressed: () {},

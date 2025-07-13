@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/navigation_helper.dart';
+import '../utils/color_schemes.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 import '../widgets/map_body.dart';
 
@@ -36,12 +37,12 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColorSchemes.backgroundSecondary,
 
       // 상단 앱바 (프로필 페이지와 동일한 구조)
       appBar: AppBar(
         // 앱바에 대한 설정
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: AppColorSchemes.backgroundPrimary,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
@@ -52,7 +53,7 @@ class _MapPageState extends State<MapPage> {
         title: const Text(
           'ClimbX',
           style: TextStyle(
-            color: Color(0xFF1E293B),
+            color: AppColorSchemes.textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
@@ -65,13 +66,13 @@ class _MapPageState extends State<MapPage> {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppColorSchemes.backgroundSecondary,
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
               icon: const Icon(
                 Icons.notifications_outlined,
-                color: Color(0xFF64748B),
+                color: AppColorSchemes.textSecondary,
                 size: 22,
               ),
               onPressed: () {},
@@ -81,13 +82,13 @@ class _MapPageState extends State<MapPage> {
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppColorSchemes.backgroundSecondary,
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
               icon: const Icon(
                 Icons.menu_rounded,
-                color: Color(0xFF64748B),
+                color: AppColorSchemes.textSecondary,
                 size: 22,
               ),
               onPressed: () {},

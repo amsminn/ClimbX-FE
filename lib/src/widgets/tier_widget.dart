@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
+import '../utils/color_schemes.dart';
 import '../models/user_profile.dart';
 
 class TierWidget extends StatelessWidget {
@@ -26,11 +27,7 @@ class TierWidget extends StatelessWidget {
       ),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
-        ),
+        gradient: AppColorSchemes.defaultGradient,
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
@@ -70,7 +67,7 @@ class TierWidget extends StatelessWidget {
                       'USER RATING',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFFFFFFFF),
+                        color: AppColorSchemes.backgroundPrimary,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.5,
                       ),
@@ -86,7 +83,7 @@ class TierWidget extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: AppColorSchemes.backgroundTertiary,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -106,7 +103,7 @@ class TierWidget extends StatelessWidget {
                             '상위 0.1%',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF64748B),
+                              color: AppColorSchemes.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -153,7 +150,7 @@ class TierWidget extends StatelessWidget {
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 28 : 32,
                             fontWeight: FontWeight.w900,
-                            color: const Color(0xFF1E293B),
+                            color: AppColorSchemes.textPrimary,
                             letterSpacing: -1,
                           ),
                         ),
@@ -185,7 +182,7 @@ class TierWidget extends StatelessWidget {
                   ),
                   child: Icon(
                     TierColors.getTierIcon(currentTier),
-                    color: const Color(0xFFFFFFFF),
+                    color: AppColorSchemes.backgroundPrimary,
                     size: screenWidth * 0.07,
                   ),
                 ),
@@ -199,9 +196,9 @@ class TierWidget extends StatelessWidget {
               width: double.infinity,
               padding: EdgeInsets.all(screenWidth * 0.04),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: AppColorSchemes.backgroundSecondary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                border: Border.all(color: AppColorSchemes.borderPrimary, width: 1),
               ),
               child: Row(
                 children: [
@@ -212,7 +209,7 @@ class TierWidget extends StatelessWidget {
                       '상위 50문제 난이도 합',
                       style: TextStyle(
                         fontSize: screenWidth < 360 ? 12 : 13,
-                        color: const Color(0xFF64748B),
+                        color: AppColorSchemes.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                       overflow: TextOverflow.ellipsis,
