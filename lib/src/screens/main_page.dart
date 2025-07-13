@@ -6,13 +6,12 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
-import '../utils/navigation_helper.dart';
 import '../utils/color_schemes.dart';
 import '../screens/analysis_page.dart';
 
 class MainPage extends StatefulWidget {
   final BottomNavTab? initialTab;
-  
+
   const MainPage({super.key, this.initialTab});
 
   @override
@@ -52,10 +51,10 @@ class _MainPageState extends State<MainPage> {
       appBar: CustomAppBar(
         currentTier: currentTier,
         onTierChanged: (String selectedTier) {
-                  setState(() {
-                    currentTier = selectedTier;
-                });
-              },
+          setState(() {
+            currentTier = selectedTier;
+          });
+        },
       ),
       // Body - Indexed Stack으로 화면 전환
       body: IndexedStack(
@@ -79,19 +78,10 @@ class _MainPageState extends State<MainPage> {
         currentTab: _currentTab,
         colorScheme: colorScheme,
         onTap: (tab) {
-          // 지도 탭이면 MapPage로 이동, 아니면 현재 페이지에서 탭 변경
-          if (tab == BottomNavTab.map) {
-            NavigationHelper.handleTabChange(
-              context,
-              _currentTab, // 현재 탭
-              tab, // 이동할 탭
-            );
-          } else {
-            // 현재 페이지 내에서 탭 변경
-            setState(() {
-              _currentTab = tab;
-            });
-          }
+          // 현재 페이지 내에서 탭 변경
+          setState(() {
+            _currentTab = tab;
+          });
         },
       ),
     );
@@ -104,10 +94,10 @@ class _MainPageState extends State<MainPage> {
     TierColorScheme colorScheme,
   ) {
     final screenSize = MediaQuery.of(context).size;
-    
+
     return Center(
       child: Container(
-        width: screenSize.width * 0.85, 
+        width: screenSize.width * 0.85,
         height: screenSize.height * 0.4,
         decoration: BoxDecoration(
           color: AppColorSchemes.backgroundPrimary,
@@ -124,12 +114,12 @@ class _MainPageState extends State<MainPage> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
-                icon, 
-                color: AppColorSchemes.backgroundPrimary, 
-                size: screenSize.width * 0.08, 
+                icon,
+                color: AppColorSchemes.backgroundPrimary,
+                size: screenSize.width * 0.08,
               ),
             ),
-            SizedBox(height: screenSize.height * 0.02), 
+            SizedBox(height: screenSize.height * 0.02),
             Text(
               title,
               style: TextStyle(
@@ -138,11 +128,11 @@ class _MainPageState extends State<MainPage> {
                 color: AppColorSchemes.textPrimary,
               ),
             ),
-            SizedBox(height: screenSize.height * 0.01), 
+            SizedBox(height: screenSize.height * 0.01),
             Text(
               '곧 출시 예정입니다',
               style: TextStyle(
-                fontSize: screenSize.width * 0.035, 
+                fontSize: screenSize.width * 0.035,
                 color: AppColorSchemes.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
