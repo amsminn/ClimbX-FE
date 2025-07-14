@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../utils/color_schemes.dart';
 import '../models/history_data.dart';
 import '../utils/tier_colors.dart';
 import 'dart:math';
@@ -111,7 +112,7 @@ class _HistoryChartState extends State<HistoryChart>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1E293B),
+              color: AppColorSchemes.textPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -125,7 +126,7 @@ class _HistoryChartState extends State<HistoryChart>
                   horizontalInterval: yInterval,
                   getDrawingHorizontalLine: (value) {
                     return const FlLine(
-                      color: Color(0xFFF1F5F9),
+                      color: AppColorSchemes.backgroundTertiary,
                       strokeWidth: 1,
                     );
                   },
@@ -174,7 +175,8 @@ class _HistoryChartState extends State<HistoryChart>
                 lineTouchData: LineTouchData(
                   enabled: true,
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (touchedSpot) => const Color(0xFF1E293B),
+                    getTooltipColor: (touchedSpot) =>
+                        AppColorSchemes.textPrimary,
                     getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                       return touchedBarSpots.map((barSpot) {
                         final dataPoint =
@@ -255,7 +257,7 @@ class _HistoryChartState extends State<HistoryChart>
     return Text(
       '${dataPoint.date.month}/${dataPoint.date.day}',
       style: const TextStyle(
-        color: Color(0xFF64748B),
+        color: AppColorSchemes.textSecondary,
         fontSize: 11,
         fontWeight: FontWeight.w500,
       ),
@@ -274,7 +276,7 @@ class _HistoryChartState extends State<HistoryChart>
     return Text(
       '${value.toInt()}',
       style: const TextStyle(
-        color: Color(0xFF64748B),
+        color: AppColorSchemes.textSecondary,
         fontSize: 11,
         fontWeight: FontWeight.w500,
       ),

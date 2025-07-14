@@ -6,6 +6,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'dart:developer' as developer;
 import 'dart:typed_data';
 import '../models/video.dart';
+import '../utils/color_schemes.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 class AnalysisPage extends HookWidget {
@@ -187,7 +188,7 @@ class AnalysisPage extends HookWidget {
     }, [isActive]);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: AppColorSchemes.backgroundPrimary,
       body: SafeArea(
         child: isLoading.value
             ? const Center(child: CircularProgressIndicator())
@@ -241,18 +242,18 @@ class AnalysisPage extends HookWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: AppColorSchemes.backgroundSecondary,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 32, color: const Color(0xFF64748B)),
+            Icon(icon, size: 32, color: AppColorSchemes.textSecondary),
             const SizedBox(height: 8),
             Text(
               label,
               style: const TextStyle(
-                color: Color(0xFF64748B),
+                color: AppColorSchemes.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -267,7 +268,7 @@ class AnalysisPage extends HookWidget {
     final thumb = video.videoMetadata?['thumbnail'];
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AppColorSchemes.backgroundSecondary,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -279,13 +280,13 @@ class AnalysisPage extends HookWidget {
             const Icon(
               Icons.video_file_outlined,
               size: 32,
-              color: Color(0xFF64748B),
+              color: AppColorSchemes.textSecondary,
             ),
           const SizedBox(height: 8),
           Text(
             video.videoUrl.split('/').last,
             style: const TextStyle(
-              color: Color(0xFF64748B),
+              color: AppColorSchemes.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

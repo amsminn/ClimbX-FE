@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
 import '../utils/tier_colors.dart';
+import '../utils/color_schemes.dart';
 import '../models/user_profile.dart';
 import '../models/streak_data.dart';
 import '../api/user.dart';
@@ -23,10 +24,9 @@ class StreakWidget extends HookWidget {
     final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
 
     // fquery로 스트릭 데이터 get
-    final streakQuery = useQuery<StreakData, Exception>(
-      ['user_streak'],
-      UserApi.getCurrentUserStreak,
-    );
+    final streakQuery = useQuery<StreakData, Exception>([
+      'user_streak',
+    ], UserApi.getCurrentUserStreak);
 
     // 로딩 상태
     if (streakQuery.isLoading) {
@@ -35,24 +35,11 @@ class StreakWidget extends HookWidget {
         height: 400,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
-          ),
+          gradient: AppColorSchemes.defaultGradient,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 20,
-              offset: Offset(0, 4),
-              spreadRadius: 0,
-            ),
-          ],
+          boxShadow: AppColorSchemes.lightShadow,
         ),
-        child: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -63,20 +50,9 @@ class StreakWidget extends HookWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
-          ),
+          gradient: AppColorSchemes.defaultGradient,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 20,
-              offset: Offset(0, 4),
-              spreadRadius: 0,
-            ),
-          ],
+          boxShadow: AppColorSchemes.lightShadow,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -106,26 +82,9 @@ class StreakWidget extends HookWidget {
       ),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
-        ),
+        gradient: AppColorSchemes.defaultGradient,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 20,
-            offset: Offset(0, 4),
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-            spreadRadius: -2,
-          ),
-        ],
+        boxShadow: AppColorSchemes.defaultShadow,
       ),
       child: Padding(
         padding: EdgeInsets.all(screenWidth * 0.04),
@@ -144,7 +103,7 @@ class StreakWidget extends HookWidget {
                 'SUBMISSION STREAK',
                 style: TextStyle(
                   fontSize: 11,
-                  color: Color(0xFFFFFFFF),
+                  color: AppColorSchemes.backgroundPrimary,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
                 ),
@@ -168,7 +127,7 @@ class StreakWidget extends HookWidget {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
+                      color: AppColorSchemes.textPrimary,
                     ),
                     children: [
                       const TextSpan(text: '최대 '),
@@ -197,9 +156,12 @@ class StreakWidget extends HookWidget {
               width: double.infinity,
               padding: EdgeInsets.all(screenWidth * 0.04),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: AppColorSchemes.backgroundSecondary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                border: Border.all(
+                  color: AppColorSchemes.borderPrimary,
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +171,7 @@ class StreakWidget extends HookWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B),
+                      color: AppColorSchemes.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -267,7 +229,8 @@ class StreakWidget extends HookWidget {
     const int daysPerWeek = 7;
 
     // 실제 API 데이터 사용, 없으면 빈 데이터
-    final List<List<int>> weeklyData = streakData?.weeklyData ?? 
+    final List<List<int>> weeklyData =
+        streakData?.weeklyData ??
         List.generate(weeks, (_) => List.generate(daysPerWeek, (_) => 0));
 
     return Column(
@@ -289,7 +252,7 @@ class StreakWidget extends HookWidget {
                         day,
                         style: const TextStyle(
                           fontSize: 10,
-                          color: Color(0xFF64748B),
+                          color: AppColorSchemes.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
@@ -340,7 +303,7 @@ class StreakWidget extends HookWidget {
               '적음',
               style: TextStyle(
                 fontSize: 10,
-                color: Color(0xFF64748B),
+                color: AppColorSchemes.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -362,7 +325,7 @@ class StreakWidget extends HookWidget {
               '많음',
               style: TextStyle(
                 fontSize: 10,
-                color: Color(0xFF64748B),
+                color: AppColorSchemes.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -384,7 +347,7 @@ class StreakWidget extends HookWidget {
           label,
           style: const TextStyle(
             fontSize: 12,
-            color: Color(0xFF64748B),
+            color: AppColorSchemes.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -418,7 +381,7 @@ class StreakWidget extends HookWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1E293B),
+                color: AppColorSchemes.textPrimary,
               ),
             ),
           ],
@@ -439,7 +402,7 @@ class StreakWidget extends HookWidget {
 
   // 현재는 0 1 2 3 으로 구분 이후에는 최댓값 기준으로 수정 예정
   Color _getStreakColor(int submissions, TierColorScheme colorScheme) {
-    if (submissions == 0) return const Color(0xFFF1F5F9); // 더 연한 회색 (제출 안함)
+    if (submissions == 0) return AppColorSchemes.backgroundTertiary; // 더 연한 회색
     if (submissions == 1) return colorScheme.streakColor.withValues(alpha: 0.3);
     if (submissions == 2) return colorScheme.streakColor.withValues(alpha: 0.5);
     if (submissions == 3) return colorScheme.streakColor.withValues(alpha: 0.7);

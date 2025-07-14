@@ -6,6 +6,7 @@ import 'tier_widget.dart';
 import 'history_widget.dart';
 import 'streak_widget.dart';
 import '../utils/tier_colors.dart';
+import '../utils/color_schemes.dart';
 import '../models/user_profile.dart';
 import '../api/user.dart';
 
@@ -68,8 +69,8 @@ class ProfileBody extends HookWidget {
                 TabBar(
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
-                  labelColor: const Color(0xFFFFFFFF),
-                  unselectedLabelColor: const Color(0xFF64748B),
+                  labelColor: AppColorSchemes.backgroundPrimary,
+                  unselectedLabelColor: AppColorSchemes.textSecondary,
                   indicator: BoxDecoration(
                     gradient: colorScheme.gradient,
                     borderRadius: BorderRadius.circular(20),
@@ -136,7 +137,7 @@ class ProfileBody extends HookWidget {
   // 내용이 들어있는 탭바 위젯
   Widget _buildTabContent({required Widget child}) {
     return Container(
-      color: const Color(0xFFF8FAFC),
+      color: AppColorSchemes.backgroundSecondary,
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 20),
         child: child,
@@ -154,7 +155,7 @@ class ProfileBody extends HookWidget {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: AppColorSchemes.backgroundPrimary,
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
@@ -174,7 +175,7 @@ class ProfileBody extends HookWidget {
               gradient: colorScheme.gradient,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(icon, color: const Color(0xFFFFFFFF), size: 32),
+            child: Icon(icon, color: AppColorSchemes.backgroundPrimary, size: 32),
           ),
           const SizedBox(height: 16),
           Text(
@@ -182,7 +183,7 @@ class ProfileBody extends HookWidget {
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1E293B),
+              color: AppColorSchemes.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -190,7 +191,7 @@ class ProfileBody extends HookWidget {
             '곧 출시 예정입니다',
             style: TextStyle(
               fontSize: 14,
-              color: Color(0xFF64748B),
+              color: AppColorSchemes.textSecondary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -220,7 +221,7 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: AppColorSchemes.backgroundPrimary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(

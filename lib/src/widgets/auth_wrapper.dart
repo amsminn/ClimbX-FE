@@ -5,6 +5,7 @@ import 'dart:developer' as developer;
 import '../api/auth.dart';
 import '../screens/login_page.dart';
 import '../screens/main_page.dart';
+import '../utils/color_schemes.dart';
 
 class AuthWrapper extends HookWidget {
   const AuthWrapper({super.key});
@@ -12,17 +13,16 @@ class AuthWrapper extends HookWidget {
   @override
   Widget build(BuildContext context) {
     // fquery로 인증 상태 확인
-    final authQuery = useQuery<bool, Exception>(
-      ['auth_status'],
-      AuthHelpers.isLoggedIn,
-    );
+    final authQuery = useQuery<bool, Exception>([
+      'auth_status',
+    ], AuthHelpers.isLoggedIn);
 
     // 로딩 중일 때 스플래시 화면
     if (authQuery.isLoading) {
       developer.log('토큰 상태 확인 중...', name: 'AuthWrapper');
-      
+
       return const Scaffold(
-        backgroundColor: Color(0xFFF8FAFC),
+        backgroundColor: AppColorSchemes.backgroundSecondary,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -31,7 +31,7 @@ class AuthWrapper extends HookWidget {
               Text(
                 'ClimbX',
                 style: TextStyle(
-                  color: Color(0xFF1E293B),
+                  color: AppColorSchemes.textPrimary,
                   fontSize: 48,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -1.0,
@@ -42,7 +42,9 @@ class AuthWrapper extends HookWidget {
 
               // 로딩 인디케이터
               CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColorSchemes.accentBlue,
+                ),
                 strokeWidth: 3,
               ),
 
@@ -52,7 +54,7 @@ class AuthWrapper extends HookWidget {
               Text(
                 '로그인 상태 확인 중...',
                 style: TextStyle(
-                  color: Color(0xFF64748B),
+                  color: AppColorSchemes.textSecondary,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -70,7 +72,7 @@ class AuthWrapper extends HookWidget {
     }
 
     final isLoggedIn = authQuery.data ?? false;
-    
+
     if (isLoggedIn) {
       developer.log('자동 로그인 성공 - MainPage로 이동', name: 'AuthWrapper');
       return const MainPage();

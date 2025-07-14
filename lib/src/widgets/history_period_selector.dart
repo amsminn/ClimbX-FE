@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
+import '../utils/color_schemes.dart';
 import 'history_widget.dart';
 
 class HistoryPeriodSelector extends StatelessWidget {
@@ -30,16 +31,16 @@ class HistoryPeriodSelector extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 gradient: isSelected ? colorScheme.gradient : null,
-                color: isSelected ? null : const Color(0xFFF1F5F9),
+                color: isSelected ? null : AppColorSchemes.backgroundTertiary,
                 borderRadius: BorderRadius.circular(20),
                 border: isSelected
                     ? null
-                    : Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                    : Border.all(color: AppColorSchemes.borderPrimary, width: 1),
               ),
               child: Text(
                 period.label,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : const Color(0xFF64748B),
+                  color: isSelected ? Colors.white : AppColorSchemes.textSecondary,
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),

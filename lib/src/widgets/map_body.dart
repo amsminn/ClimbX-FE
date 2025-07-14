@@ -5,6 +5,8 @@ import 'dart:developer' as developer;
 import 'dart:async';
 import '../api/gym.dart';
 import '../models/gym.dart';
+import '../utils/color_schemes.dart';
+import '../utils/tier_colors.dart';
 
 class MapBody extends HookWidget {
   const MapBody({super.key});
@@ -42,7 +44,7 @@ class MapBody extends HookWidget {
               // 마커 아이콘
               Icon(
                 Icons.location_on,
-                color: const Color(0xFFFF6B35), // 주황색 고정
+                color: AppColorSchemes.accentOrange, // 주황색 고정
                 size: 40,
                 shadows: [
                   Shadow(
@@ -71,7 +73,7 @@ class MapBody extends HookWidget {
                   style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E293B),
+                    color: AppColorSchemes.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -169,7 +171,7 @@ class MapBody extends HookWidget {
                                     style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1E293B),
+                                      color: AppColorSchemes.textPrimary,
                                     ),
                                   ),
                                   const SizedBox(height: 12),
@@ -182,7 +184,7 @@ class MapBody extends HookWidget {
                                       const Icon(
                                         Icons.location_on,
                                         size: 18,
-                                        color: Color(0xFF64748B),
+                                        color: AppColorSchemes.textSecondary,
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
@@ -190,7 +192,8 @@ class MapBody extends HookWidget {
                                           gym.address,
                                           style: const TextStyle(
                                             fontSize: 14,
-                                            color: Color(0xFF64748B),
+                                            color:
+                                                AppColorSchemes.textSecondary,
                                           ),
                                         ),
                                       ),
@@ -204,14 +207,14 @@ class MapBody extends HookWidget {
                                       Icon(
                                         Icons.access_time,
                                         size: 18,
-                                        color: Color(0xFF64748B),
+                                        color: AppColorSchemes.textSecondary,
                                       ),
                                       SizedBox(width: 8),
                                       Text(
                                         '영업 중',
                                         style: TextStyle(
                                           fontSize: 14,
-                                          color: Color(0xFF059669),
+                                          color: AppColorSchemes.accentGreen,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -219,7 +222,7 @@ class MapBody extends HookWidget {
                                         ', 24:00에 영업 종료',
                                         style: TextStyle(
                                           fontSize: 14,
-                                          color: Color(0xFF64748B),
+                                          color: AppColorSchemes.textSecondary,
                                         ),
                                       ),
                                     ],
@@ -232,14 +235,14 @@ class MapBody extends HookWidget {
                                       const Icon(
                                         Icons.phone,
                                         size: 18,
-                                        color: Color(0xFF64748B),
+                                        color: AppColorSchemes.textSecondary,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
                                         gym.phoneNumber,
                                         style: const TextStyle(
                                           fontSize: 14,
-                                          color: Color(0xFF64748B),
+                                          color: AppColorSchemes.textSecondary,
                                         ),
                                       ),
                                     ],
@@ -252,7 +255,7 @@ class MapBody extends HookWidget {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1E293B),
+                                      color: AppColorSchemes.textPrimary,
                                     ),
                                   ),
                                   const SizedBox(height: 12),
@@ -506,7 +509,7 @@ class MapBody extends HookWidget {
                   child: Text(
                     tier,
                     style: TextStyle(
-                      color: _getStandardTierColor(tier),
+                      color: _getTierColorForMap(tier),
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -624,21 +627,21 @@ class MapBody extends HookWidget {
     );
   }
 
-  /// 표준 티어 색상 반환
-  Color _getStandardTierColor(String tier) {
+  /// 지도용 티어 색상 반환 함수
+  Color _getTierColorForMap(String tier) {
     if (tier.startsWith('B')) {
-      return const Color(0xFFD2691E); // Bronze
+      return TierColors.getColorScheme(TierType.bronze).primary;
     } else if (tier.startsWith('S')) {
-      return const Color(0xFF708090); // Silver
+      return TierColors.getColorScheme(TierType.silver).primary;
     } else if (tier.startsWith('G')) {
-      return const Color(0xFFFFA500); // Gold
+      return TierColors.getColorScheme(TierType.gold).primary;
     } else if (tier.startsWith('P')) {
-      return const Color(0xFF27CCCA); // Platinum
+      return TierColors.getColorScheme(TierType.platinum).primary;
     } else if (tier.startsWith('D')) {
-      return const Color(0xFF1E90FF); // Diamond
+      return TierColors.getColorScheme(TierType.diamond).primary;
     } else if (tier == 'M') {
-      return const Color(0xFF805AD5); // Master
+      return TierColors.getColorScheme(TierType.master).primary;
     }
-    return Colors.grey;
+    return Colors.grey; // 기본값
   }
 }
