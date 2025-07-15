@@ -11,7 +11,7 @@ class LoginPage extends HookWidget {
   Widget build(BuildContext context) {
     // fquery mutation 사용
     final signInMutation = useMutation(
-      (void _) => AuthApi.signInWithGoogle(),
+      (void _) => AuthApi.signInWithKakao(),
       onSuccess: (token, _, __) {
         // 토큰 발급 성공 - MainPage로 이동
         NavigationHelper.navigateToMainAfterLogin(context);
@@ -48,7 +48,7 @@ class LoginPage extends HookWidget {
 
             // 서브 타이틀
             const Text(
-              '로그인 테스트',
+              '카카오로 로그인',
               style: TextStyle(
                 color: Color(0xFF64748B),
                 fontSize: 18,
@@ -58,18 +58,16 @@ class LoginPage extends HookWidget {
 
             const SizedBox(height: 64),
 
-            // 토큰 발급 버튼
+            // 카카오 로그인 버튼
             Container(
               width: 280,
               height: 56,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF3B82F6), Color(0xFF1E40AF)],
-                ),
+                color: const Color(0xFFFEE500),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                    color: const Color(0xFFFEE500).withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -88,14 +86,14 @@ class LoginPage extends HookWidget {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                                Color(0xFF3C1E1E),
                               ),
                             ),
                           )
                         : const Text(
-                            '로그인',
+                            '카카오 로그인',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF3C1E1E),
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                             ),
@@ -111,7 +109,7 @@ class LoginPage extends HookWidget {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
-                'Mock API를 사용한 테스트 환경입니다.\n버튼을 눌러 JWT 토큰을 발급받으세요.',
+                '카카오 계정으로 간편하게 로그인',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(0xFF94A3B8),

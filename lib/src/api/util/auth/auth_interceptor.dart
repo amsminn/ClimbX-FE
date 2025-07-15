@@ -29,7 +29,10 @@ class AuthInterceptor {
   }
 
   /// Request 인터셉터 핸들러 - JWT 토큰 자동 추가
-  static Future<void> _handleRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  static Future<void> _handleRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     try {
       // JWT 토큰 자동 추가
       final token = await TokenStorage.getToken();
@@ -40,13 +43,17 @@ class AuthInterceptor {
         }
       } else {
         if (kDebugMode) {
-          developer.log('JWT 토큰 없음 - 인증이 필요한 요청일 수 있음', name: 'AuthInterceptor');
+          developer.log(
+            'JWT 토큰 없음 - 인증이 필요한 요청일 수 있음',
+            name: 'AuthInterceptor',
+          );
         }
       }
 
       // 요청 ID 추가 (디버깅용)
       if (kDebugMode) {
-        options.headers['X-Request-ID'] = DateTime.now().millisecondsSinceEpoch.toString();
+        options.headers['X-Request-ID'] = DateTime.now().millisecondsSinceEpoch
+            .toString();
       }
 
       handler.next(options);
@@ -57,7 +64,10 @@ class AuthInterceptor {
   }
 
   /// Response 인터셉터 핸들러 - 인증 관련 응답 처리
-  static void _handleResponse(Response response, ResponseInterceptorHandler handler) {
+  static void _handleResponse(
+    Response response,
+    ResponseInterceptorHandler handler,
+  ) {
     if (kDebugMode) {
       final requestId = response.requestOptions.headers['X-Request-ID'];
       developer.log(
@@ -69,15 +79,17 @@ class AuthInterceptor {
   }
 
   /// Error 인터셉터 핸들러 - 인증 관련 에러 처리
-  static Future<void> _handleError(DioException error, ErrorInterceptorHandler handler) async {
+  static Future<void> _handleError(
+    DioException error,
+    ErrorInterceptorHandler handler,
+  ) async {
     final statusCode = error.response?.statusCode ?? 0;
-    
+
     // 401 Unauthorized 처리
     if (statusCode == 401) {
       developer.log('인증 만료 감지 - 토큰 정리 시작', name: 'AuthInterceptor');
       await _handle401Error();
     }
-    
     // 403 Forbidden 처리
     else if (statusCode == 403) {
       developer.log('접근 권한 없음 - 권한 확인 필요', name: 'AuthInterceptor');
@@ -89,9 +101,9 @@ class AuthInterceptor {
   /// 401 에러 처리 - 토큰 삭제 및 콜백 호출
   static Future<void> _handle401Error() async {
     try {
-      await TokenStorage.clearToken();
+      // await TokenStorage.clearToken();
       developer.log('만료된 토큰 삭제 완료', name: 'AuthInterceptor');
-      
+
       // 콜백 호출 (예: 로그인 페이지로 이동)
       _onUnauthorized?.call();
     } catch (e) {
@@ -106,7 +118,7 @@ class AuthInterceptor {
       if (token == null || token.isEmpty) {
         return false;
       }
-      
+
       // 토큰 만료 시간 확인 (JWT 디코딩)
       return await TokenStorage.isTokenValid();
     } catch (e) {
@@ -122,7 +134,7 @@ class AuthInterceptor {
       if (token == null || token.isEmpty) {
         return false;
       }
-      
+
       // TODO: JWT 만료 시간 확인하여 갱신 여부 결정
       // 현재는 간단히 토큰 존재 여부만 확인
       return await TokenStorage.isTokenValid();
@@ -131,4 +143,4 @@ class AuthInterceptor {
       return false;
     }
   }
-} 
+}
