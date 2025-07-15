@@ -12,7 +12,7 @@ class LoginPage extends HookWidget {
   Widget build(BuildContext context) {
     // fquery mutation 사용
     final signInMutation = useMutation(
-      (void _) => AuthApi.signInWithGoogle(),
+      (void _) => AuthApi.signInWithKakao(),
       onSuccess: (token, _, __) {
         // 토큰 발급 성공 - MainPage로 이동
         NavigationHelper.navigateToMainAfterLogin(context);
@@ -89,14 +89,14 @@ class LoginPage extends HookWidget {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                                Color(0xFF3C1E1E),
                               ),
                             ),
                           )
                         : const Text(
-                            '로그인',
+                            '카카오 로그인',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF3C1E1E),
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                             ),
@@ -112,7 +112,7 @@ class LoginPage extends HookWidget {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
-                'Mock API를 사용한 테스트 환경입니다.\n버튼을 눌러 JWT 토큰을 발급받으세요.',
+                '카카오 계정으로 간편하게 로그인',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColorSchemes.textTertiary,

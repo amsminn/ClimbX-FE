@@ -42,6 +42,8 @@ dependencies:
   # React Query 스타일 데이터 페칭
   fquery: ^1.5.4-beta.2
   flutter_hooks: ^0.21.2
+  # 카카오 로그인 SDK
+  kakao_flutter_sdk: ^1.7.0
   # 미디어 선택 및 촬영
   image_picker: ^1.0.7
   # 권한 관리
