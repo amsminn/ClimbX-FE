@@ -29,7 +29,7 @@ class LoginPage extends HookWidget {
     );
 
     return Scaffold(
-      backgroundColor: AppColorSchemes.backgroundSecondary,
+      backgroundColor: const Color(0xFFF8FAFC),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -38,7 +38,7 @@ class LoginPage extends HookWidget {
             const Text(
               'ClimbX',
               style: TextStyle(
-                color: AppColorSchemes.textPrimary,
+                color: Color(0xFF1E293B),
                 fontSize: 48,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -1.0,
@@ -49,9 +49,9 @@ class LoginPage extends HookWidget {
 
             // 서브 타이틀
             const Text(
-              '로그인 테스트',
+              '카카오로 로그인',
               style: TextStyle(
-                color: AppColorSchemes.textSecondary,
+                color: Color(0xFF64748B),
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
@@ -59,18 +59,16 @@ class LoginPage extends HookWidget {
 
             const SizedBox(height: 64),
 
-            // 토큰 발급 버튼
+            // 카카오 로그인 버튼
             Container(
               width: 280,
               height: 56,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColorSchemes.accentBlue, Color(0xFF1E40AF)],
-                ),
+                color: const Color(0xFFFEE500),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColorSchemes.accentBlue.withValues(alpha: 0.3),
+                    color: const Color(0xFFFEE500).withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -115,7 +113,7 @@ class LoginPage extends HookWidget {
                 '카카오 계정으로 간편하게 로그인',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColorSchemes.textTertiary,
+                  color: Color(0xFF94A3B8),
                   fontSize: 14,
                   height: 1.5,
                 ),
