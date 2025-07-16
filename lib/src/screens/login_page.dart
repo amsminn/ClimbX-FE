@@ -49,9 +49,9 @@ class LoginPage extends HookWidget {
 
             // 서브 타이틀
             const Text(
-              '로그인 테스트',
+              '카카오로 로그인',
               style: TextStyle(
-                color: AppColorSchemes.textSecondary,
+                color: Color(0xFF64748B),
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
@@ -59,18 +59,16 @@ class LoginPage extends HookWidget {
 
             const SizedBox(height: 64),
 
-            // 토큰 발급 버튼
+            // 카카오 로그인 버튼
             Container(
               width: 280,
               height: 56,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColorSchemes.accentBlue, Color(0xFF1E40AF)],
-                ),
+                color: const Color(0xFFFEE500),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColorSchemes.accentBlue.withValues(alpha: 0.3),
+                    color: const Color(0xFFFEE500).withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
