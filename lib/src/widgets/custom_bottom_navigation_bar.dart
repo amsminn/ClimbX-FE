@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
+import '../utils/color_schemes.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final BottomNavTab currentTab;
@@ -18,10 +19,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFFFFFFFF),
+        color: AppColorSchemes.backgroundPrimary,
         boxShadow: [
           BoxShadow(
-            color: Color(0x08000000),
+            color: AppColorSchemes.shadowLight,
             blurRadius: 20,
             offset: Offset(0, -2),
             spreadRadius: 0,
@@ -34,7 +35,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         currentIndex: currentTab.index,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: colorScheme.primary,
-        unselectedItemColor: const Color(0xFF94A3B8),
+        unselectedItemColor: AppColorSchemes.textTertiary,
         selectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 12,

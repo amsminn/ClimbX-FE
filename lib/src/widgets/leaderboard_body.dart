@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/leaderboard_type.dart';
 import '../utils/tier_colors.dart';
+import '../utils/color_schemes.dart';
 import '../models/leaderboard_user.dart';
 
 class LeaderboardBody extends StatefulWidget {
@@ -199,7 +200,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
         Container(
           margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
+            color: AppColorSchemes.backgroundPrimary,
             borderRadius: BorderRadius.circular(16),
             boxShadow: const [
               BoxShadow(
@@ -214,11 +215,14 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             controller: _tabController,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            labelColor: const Color(0xFFFFFFFF),
-            unselectedLabelColor: const Color(0xFF64748B),
+            labelColor: AppColorSchemes.backgroundPrimary,
+            unselectedLabelColor: AppColorSchemes.textSecondary,
             indicator: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF838383), Color(0xFF191919)],
+                colors: [
+                  AppColorSchemes.textSecondary,
+                  AppColorSchemes.textSpecial,
+                ],
               ),
               borderRadius: BorderRadius.circular(20),
             ),
@@ -277,9 +281,9 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: AppColorSchemes.backgroundPrimary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
@@ -296,7 +300,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
           Text(
             '${user.rank}',
             style: const TextStyle(
-              color: Color(0xFF2B2D30),
+              color: AppColorSchemes.textSpecial,
               fontWeight: FontWeight.w700,
               fontSize: 20,
             ),
@@ -319,10 +323,10 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    color: const Color(0xFFF1F5F9),
+                    color: AppColorSchemes.backgroundTertiary,
                     child: const Icon(
                       Icons.person,
-                      color: Color(0xFF94A3B8),
+                      color: AppColorSchemes.textTertiary,
                       size: 20,
                     ),
                   );
@@ -343,7 +347,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
-                    color: Color(0xFF1E293B),
+                    color: AppColorSchemes.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -359,7 +363,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
                   child: Text(
                     user.tier,
                     style: const TextStyle(
-                      color: Color(0xFFFFFFFF),
+                      color: AppColorSchemes.backgroundPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 11,
                     ),
@@ -369,15 +373,22 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             ),
           ),
 
-          // 값
-          Text(
-            user.value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-              color: Color(0xFF1E293B),
+          // 값 (티어 그라디언트 적용)
+          ShaderMask(
+            shaderCallback: (bounds) => tierColorScheme.gradient.createShader(
+              Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+            ),
+            child: Text(
+              user.value,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+                color: Colors.white, // ShaderMask를 위해 흰색으로 설정
+              ),
             ),
           ),
+
+          const SizedBox(width: 4),
         ],
       ),
     );

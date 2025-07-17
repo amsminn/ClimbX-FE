@@ -1,5 +1,3 @@
-import 'api_client.dart';
-
 /// 사용자 프로필 정보를 담는 모델
 class UserProfile {
   final String nickname;
@@ -60,27 +58,4 @@ class UserProfile {
   String toString() {
     return 'UserProfile(nickname: $nickname, ranking: $ranking, rating: $rating, streak: $currentStreak)';
   }
-}
-
-/// 사용자 관련 API 서비스
-class UserService {
-  static final _apiClient = ApiClient.instance;
-
-  /// 현재 사용자 프로필 조회 (기존 alice 엔드포인트)
-  static Future<ApiResponse<UserProfile>> getCurrentUserProfile() async {
-    return await _apiClient.get<UserProfile>(
-      '/api/users/alice',
-      needsAuth: false, // 기존 인터페이스 유지
-      fromJson: UserProfile.fromJson,
-    );
-  }
-
-  /// 특정 사용자 프로필 조회 (확장 가능)
-  static Future<ApiResponse<UserProfile>> getUserProfile(String username) async {
-    return await _apiClient.get<UserProfile>(
-      '/api/users/$username',
-      needsAuth: false,
-      fromJson: UserProfile.fromJson,
-    );
-  }
-}
+} 

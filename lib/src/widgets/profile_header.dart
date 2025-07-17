@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
-import '../services/user_service.dart';
+import '../utils/color_schemes.dart';
+import '../models/user_profile.dart';
 
 class ProfileHeader extends StatelessWidget {
   final UserProfile? userProfile;
@@ -23,11 +24,7 @@ class ProfileHeader extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
-        ),
+        gradient: AppColorSchemes.defaultGradient,
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
@@ -92,7 +89,7 @@ class ProfileHeader extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF1E293B),
+                          color: AppColorSchemes.textPrimary,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -101,7 +98,7 @@ class ProfileHeader extends StatelessWidget {
                         userProfile!.statusMessage,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF64748B),
+                          color: AppColorSchemes.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -113,16 +110,16 @@ class ProfileHeader extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: AppColorSchemes.backgroundSecondary,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFFE2E8F0),
+                      color: AppColorSchemes.borderPrimary,
                       width: 1,
                     ),
                   ),
                   child: const Icon(
                     Icons.settings_outlined,
-                    color: Color(0xFF64748B),
+                    color: AppColorSchemes.textSecondary,
                     size: 20,
                   ),
                 ),
@@ -170,7 +167,7 @@ class ProfileHeader extends StatelessWidget {
                           'USER RATING',
                           style: TextStyle(
                             fontSize: 10,
-                            color: Color(0xFFFFFFFF),
+                            color: AppColorSchemes.backgroundPrimary,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                           ),
@@ -185,7 +182,7 @@ class ProfileHeader extends StatelessWidget {
                         'Master까지 86점',
                         style: TextStyle(
                           fontSize: 10,
-                          color: Color(0xFFFFFFFF),
+                          color: AppColorSchemes.backgroundPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -197,7 +194,7 @@ class ProfileHeader extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFFFFFFF),
+                      color: AppColorSchemes.backgroundPrimary,
                       letterSpacing: -0.3,
                     ),
                   ),
@@ -207,7 +204,7 @@ class ProfileHeader extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFFFFFFFF),
+                      color: AppColorSchemes.backgroundPrimary,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -259,7 +256,7 @@ class ProfileHeader extends StatelessWidget {
               children: [
                 Icon(
                   Icons.location_on_outlined,
-                  color: Color(0xFF94A3B8),
+                  color: AppColorSchemes.textTertiary,
                   size: 16,
                 ),
                 SizedBox(width: 6),
@@ -267,7 +264,7 @@ class ProfileHeader extends StatelessWidget {
                   '서울 은평구',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF64748B),
+                    color: AppColorSchemes.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -323,9 +320,9 @@ class ProfileHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AppColorSchemes.backgroundSecondary,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+        border: Border.all(color: AppColorSchemes.borderPrimary, width: 1),
       ),
       child: Column(
         children: [
@@ -336,14 +333,14 @@ class ProfileHeader extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1E293B),
+              color: AppColorSchemes.textPrimary,
             ),
           ),
           Text(
             label,
             style: const TextStyle(
               fontSize: 10,
-              color: Color(0xFF64748B),
+              color: AppColorSchemes.textSecondary,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,

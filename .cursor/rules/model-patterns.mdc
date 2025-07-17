@@ -1,0 +1,219 @@
+---
+description: "데이터 모델 구조, JSON 직렬화/역직렬화, Null Safety, 복합 데이터 타입"
+---
+
+# 모델 클래스 패턴
+
+## 기본 모델 구조
+
+### 표준 모델 클래스
+```dart
+/// 사용자 프로필 정보를 담는 모델
+class UserProfile {
+  final String nickname;
+  final String statusMessage;
+  final String? profileImageUrl;  // nullable 필드
+  final int ranking;
+  final int rating;
+  final Map<String, int> categoryRatings;
+
+  UserProfile({
+    required this.nickname,
+    required this.statusMessage,
+    this.profileImageUrl,
+    required this.ranking,
+    required this.rating,
+    required this.categoryRatings,
+  });
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    // JSON 역직렬화
+  }
+
+  Map<String, dynamic> toJson() {
+    // JSON 직렬화
+  }
+
+  @override
+  String toString() {
+    // 디버깅용 문자열
+  }
+}
+```
+
+## JSON 직렬화 패턴
+
+### fromJson factory 생성자
+```dart
+factory UserProfile.fromJson(Map<String, dynamic> json) {
+  return UserProfile(
+    nickname: json['nickname'] ?? '',              // 기본값 제공
+    statusMessage: json['statusMessage'] ?? '',
+    profileImageUrl: json['profileImageUrl'],      // nullable은 그대로
+    ranking: json['ranking'] ?? 0,
+    rating: json['rating'] ?? 0,
+    categoryRatings: Map<String, int>.from(        // Map 변환
+      json['categoryRatings'] ?? {}
+    ),
+  );
+}
+```
+
+### toJson 메서드
+```dart
+Map<String, dynamic> toJson() {
+  return {
+    'nickname': nickname,
+    'statusMessage': statusMessage,
+    'profileImageUrl': profileImageUrl,
+    'ranking': ranking,
+    'rating': rating,
+    'categoryRatings': categoryRatings,
+  };
+}
+```
+
+## Null Safety 처리
+
+### Nullable 필드 처리
+```dart
+final String? profileImageUrl;  // nullable
+final String nickname;          // non-null
+
+// fromJson에서
+profileImageUrl: json['profileImageUrl'],  // null 허용
+nickname: json['nickname'] ?? '',          // 기본값 제공
+```
+
+### 기본값 정의
+- String: `''` (빈 문자열)
+- int: `0`
+- List: `[]`
+- Map: `{}`
+
+## 복합 데이터 타입
+
+### Map 처리
+```dart
+final Map<String, int> categoryRatings;
+
+// fromJson에서
+categoryRatings: Map<String, int>.from(json['categoryRatings'] ?? {}),
+```
+
+### List 처리
+```dart
+final List<String> tags;
+
+// fromJson에서
+tags: List<String>.from(json['tags'] ?? []),
+```
+
+### 중첩 객체 처리
+```dart
+final Address address;
+
+// fromJson에서
+address: Address.fromJson(json['address'] ?? {}),
+```
+
+## toString 메서드
+
+### 디버깅 친화적 문자열
+```dart
+@override
+String toString() {
+  return 'UserProfile(nickname: $nickname, ranking: $ranking, rating: $rating, streak: $currentStreak)';
+}
+```
+
+### 중요한 필드만 포함
+- 모든 필드를 포함하지 말고 식별에 중요한 필드만
+- 한 줄로 간결하게 표현
+
+## 비교 메서드 (필요시)
+
+### copyWith 메서드
+```dart
+UserProfile copyWith({
+  String? nickname,
+  String? statusMessage,
+  String? profileImageUrl,
+  int? ranking,
+  int? rating,
+}) {
+  return UserProfile(
+    nickname: nickname ?? this.nickname,
+    statusMessage: statusMessage ?? this.statusMessage,
+    profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+    ranking: ranking ?? this.ranking,
+    rating: rating ?? this.rating,
+    categoryRatings: categoryRatings,
+  );
+}
+```
+
+### 등등 연산자 (필요시)
+```dart
+@override
+bool operator ==(Object other) {
+  if (identical(this, other)) return true;
+  return other is UserProfile &&
+      other.nickname == nickname &&
+      other.ranking == ranking;
+}
+
+@override
+int get hashCode => nickname.hashCode ^ ranking.hashCode;
+```
+
+## 모델 네이밍
+
+### 클래스명
+- 명사 사용
+- 목적이 명확한 이름
+- 예: `UserProfile`, `HistoryData`, `LeaderboardUser`
+
+### 필드명
+- camelCase 사용
+- 의미가 명확한 이름
+- Boolean 필드는 `is`, `has`, `can` 접두사 사용
+
+## 문서화
+
+### 클래스 문서화
+```dart
+/// 사용자 프로필 정보를 담는 모델
+/// 
+/// 서버에서 받은 사용자 데이터를 담는 불변 객체입니다.
+/// JSON 직렬화/역직렬화를 지원합니다.
+class UserProfile {
+  // ...
+}
+```
+
+### 복잡한 필드 설명
+```dart
+/// 카테고리별 레이팅 정보
+/// 
+/// Key: 카테고리명 (예: "bouldering", "lead_climbing")
+/// Value: 해당 카테고리의 레이팅 점수
+final Map<String, int> categoryRatings;
+```
+
+## 유효성 검증 (필요시)
+
+### 기본 검증
+```dart
+factory UserProfile.fromJson(Map<String, dynamic> json) {
+  final nickname = json['nickname']?.toString() ?? '';
+  if (nickname.isEmpty) {
+    throw ArgumentError('nickname은 필수 항목입니다');
+  }
+
+  return UserProfile(
+    nickname: nickname,
+    // 다른 필드들...
+  );
+}
+```

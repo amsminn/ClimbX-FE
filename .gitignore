@@ -1,3 +1,13 @@
+# 모든 build 디렉터리를 무시
+build/
+
+# Android 모듈의 빌드 아티팩트
+android/build/
+
+# iOS Xcode 빌드/캐시
+ios/build/
+**/XCBuildData/
+
 # Miscellaneous
 *.class
 *.log
@@ -35,6 +45,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/flutter/
 
 # Symbolication related
 app.*.symbols

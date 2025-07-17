@@ -1,0 +1,186 @@
+---
+description: "위젯 설계 원칙, 프로퍼티 패턴, 컨테이너 스타일링, 반응형 디자인, 성능 최적화"
+---
+
+# 위젯 컨벤션
+
+## 컴포넌트 설계 원칙
+
+### 단일 책임 원칙
+- 각 위젯은 하나의 명확한 책임을 가져야 함
+- 예: `CustomAppBar`는 앱바 관련 기능만, `ProfileHeader`는 프로필 헤더만
+
+### 재사용성
+```dart
+class CustomButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
+  final Color? textColor;
+
+  const CustomButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.backgroundColor,
+    this.textColor,
+  });
+}
+```
+
+## 프로퍼티 패턴
+
+### Required vs Optional 구분
+```dart
+class MyWidget extends StatelessWidget {
+  final String title;              // required
+  final String? subtitle;          // optional (nullable)
+  final VoidCallback? onTap;       // optional callback
+  final Color backgroundColor;     // required with default
+
+  const MyWidget({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.onTap,
+    this.backgroundColor = const Color(0xFFFFFFFF),
+  });
+}
+```
+
+### 콜백 함수 네이밍
+- `onPressed`, `onTap`, `onChanged` 등 표준 이벤트명 사용
+- 커스텀 콜백은 구체적인 이름 사용: `onTierChanged`, `onValueSelected`
+
+## Body 위젯 패턴
+
+### 화면별 Body 위젯
+```dart
+// 메인 화면의 내용만 담당
+class ProfileBody extends StatelessWidget {
+  final UserProfile userProfile;
+  final String currentTier;
+
+  const ProfileBody({
+    super.key,
+    required this.userProfile,
+    required this.currentTier,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ProfileHeader(userProfile: userProfile, currentTier: currentTier),
+        // 다른 컴포넌트들...
+      ],
+    );
+  }
+}
+```
+
+## 컨테이너 스타일링
+
+### 일관된 컨테이너 디자인
+```dart
+Container(
+  margin: const EdgeInsets.only(right: 8),
+  decoration: BoxDecoration(
+    color: const Color(0xFFF8FAFC),
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: // 내용
+)
+```
+
+### 그림자 및 elevation 사용 자제
+- elevation: 0 선호
+- surfaceTintColor: Colors.transparent 사용
+
+## 차트 위젯
+
+### 차트 데이터 처리
+```dart
+class HistoryChart extends StatelessWidget {
+  final List<HistoryData> historyData;
+  final String selectedPeriod;
+
+  const HistoryChart({
+    super.key,
+    required this.historyData,
+    required this.selectedPeriod,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // fl_chart 사용한 차트 구현
+  }
+}
+```
+
+## 반응형 디자인
+
+### MediaQuery 활용
+```dart
+@override
+Widget build(BuildContext context) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final isTablet = screenWidth > 600;
+
+  return Container(
+    width: isTablet ? screenWidth * 0.8 : screenWidth,
+    // ...
+  );
+}
+```
+
+## 애니메이션
+
+### 기본 전환 애니메이션
+- Flutter의 기본 페이지 전환 사용
+- 커스텀 애니메이션은 최소화
+
+## 접근성
+
+### 의미있는 semanticLabel 제공
+```dart
+IconButton(
+  icon: const Icon(Icons.notifications_outlined),
+  tooltip: '알림',
+  onPressed: () {},
+)
+```
+
+## 성능 최적화
+
+### const 생성자 사용
+```dart
+const Text(
+  'ClimbX',
+  style: TextStyle(
+    color: Color(0xFF1E293B),
+    fontSize: 24,
+    fontWeight: FontWeight.w800,
+  ),
+),
+```
+
+### 불필요한 rebuild 방지
+- StatefulWidget에서 상태가 실제로 변경될 때만 setState 호출
+- 콜백 함수는 가능하면 static 또는 클래스 멤버로 정의
+
+## 위젯 계층 구조
+
+### 논리적 계층 분리
+```
+Screen (main_page.dart)
+├── Body (profile_body.dart)
+│   ├── Header (profile_header.dart)
+│   ├── Stats (history_stats_summary.dart)
+│   └── Chart (history_chart.dart)
+└── AppBar (custom_app_bar.dart)
+```
+
+### 위젯 크기 제한
+- 한 위젯당 100-200줄 이내 권장
+- 복잡한 위젯은 더 작은 위젯들로 분해

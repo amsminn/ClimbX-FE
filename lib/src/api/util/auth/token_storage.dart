@@ -3,23 +3,23 @@ import 'dart:developer' as developer;
 
 /// JWT 토큰 저장소 - 토큰 관리만 담당
 class TokenStorage {
-  static const FlutterSecureStorage _storage = FlutterSecureStorage();
+  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
   static const String _tokenKey = 'jwt_token';
 
   /// 토큰 저장
   static Future<void> saveToken(String token) async {
-    await _storage.write(key: _tokenKey, value: token);
+    await _secureStorage.write(key: _tokenKey, value: token);
     developer.log('토큰이 안전하게 저장되었습니다', name: 'TokenStorage');
   }
 
   /// 저장된 토큰 가져오기
   static Future<String?> getToken() async {
-    return await _storage.read(key: _tokenKey);
+    return await _secureStorage.read(key: _tokenKey);
   }
 
   /// 토큰 삭제
   static Future<void> clearToken() async {
-    await _storage.delete(key: _tokenKey);
+    await _secureStorage.delete(key: _tokenKey);
     developer.log('토큰이 삭제되었습니다', name: 'TokenStorage');
   }
 
