@@ -101,7 +101,7 @@ class AuthInterceptor {
   /// 401 에러 처리 - 토큰 삭제 및 콜백 호출
   static Future<void> _handle401Error() async {
     try {
-      // await TokenStorage.clearToken();
+      await TokenStorage.clearToken();
       developer.log('만료된 토큰 삭제 완료', name: 'AuthInterceptor');
 
       // 콜백 호출 (예: 로그인 페이지로 이동)

@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
 import '../api/auth.dart';
 import '../utils/navigation_helper.dart';
-import '../utils/color_schemes.dart';
 
 class LoginPage extends HookWidget {
   const LoginPage({super.key});
@@ -12,7 +11,7 @@ class LoginPage extends HookWidget {
   Widget build(BuildContext context) {
     // fquery mutation 사용
     final signInMutation = useMutation(
-      (void _) => AuthApi.signInWithKakao(),
+      (_) => AuthApi.signInWithKakao(),
       onSuccess: (token, _, __) {
         // 토큰 발급 성공 - MainPage로 이동
         NavigationHelper.navigateToMainAfterLogin(context);
@@ -78,7 +77,9 @@ class LoginPage extends HookWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                  onTap: signInMutation.isPending ? null : () => signInMutation.mutate(null),
+                  onTap: signInMutation.isPending
+                      ? null
+                      : () => signInMutation.mutate(null),
                   child: Center(
                     child: signInMutation.isPending
                         ? const SizedBox(

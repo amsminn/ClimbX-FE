@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 import 'dart:math';
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'util/core/api_client.dart';
@@ -26,9 +26,11 @@ class AuthApi {
   /// 카카오 로그인
   static Future<String> signInWithKakao() async {
     try {
-      // nonce 생성
-      final nonce = _generateNonce();
+          // nonce 생성
+    final nonce = _generateNonce();
+    if (kDebugMode) {
       developer.log('생성된 nonce: $nonce', name: 'AuthApi');
+    }
 
       // 카카오톡 설치 확인
       if (await isKakaoTalkInstalled()) {
@@ -73,43 +75,14 @@ class AuthApi {
         throw Exception('카카오 토큰을 가져올 수 없습니다.');
       }
 
-      // 카카오 토큰 정보 전체 출력
-      developer.log('카카오 토큰 정보: ${token!.toJson()}', name: 'AuthApi');
+      // id_token 추출 (null safety 적용)
+      final idToken = token!.idToken;
 
-      // id_token 추출
-      final idToken = token.idToken;
-
-      developer.log('id_token: $idToken', name: 'AuthApi');
-      developer.log('전송할 nonce: $nonce', name: 'AuthApi');
-
-      // ID 토큰 디코딩하여 audience 확인
-      if (idToken != null) {
-        try {
-          final parts = idToken.split('.');
-          if (parts.length == 3) {
-            // Base64 디코딩 (패딩 추가)
-            String payload = parts[1];
-            while (payload.length % 4 != 0) {
-              payload += '=';
-            }
-
-            // URL 안전한 Base64를 일반 Base64로 변환
-            payload = payload.replaceAll('-', '+').replaceAll('_', '/');
-
-            final decodedBytes = base64Decode(payload);
-            final decodedString = utf8.decode(decodedBytes);
-
-            developer.log('ID 토큰 페이로드: $decodedString', name: 'AuthApi');
-
-            // JSON 파싱하여 audience 확인
-            final payloadMap =
-                jsonDecode(decodedString) as Map<String, dynamic>;
-            final audience = payloadMap['aud'];
-            developer.log('ID 토큰 audience: $audience', name: 'AuthApi');
-          }
-        } catch (e) {
-          developer.log('ID 토큰 디코딩 실패: $e', name: 'AuthApi');
-        }
+      if (kDebugMode) {
+        // 카카오 토큰 정보 전체 출력 (디버그 모드만)
+        developer.log('카카오 토큰 정보: ${token.toJson()}', name: 'AuthApi');
+        developer.log('id_token: $idToken', name: 'AuthApi');
+        developer.log('전송할 nonce: $nonce', name: 'AuthApi');
       }
 
       // 백엔드로 id_token과 nonce 전송하여 JWT 토큰 받기
