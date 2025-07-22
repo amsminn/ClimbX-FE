@@ -10,4 +10,5 @@ export 'util/core/http_method.dart';
 // API 엔드포인트 모듈들
 export 'auth.dart';
 export 'user.dart';
-export 'gym.dart'; 
+export 'gym.dart';
+export 'leaderboard.dart'; 

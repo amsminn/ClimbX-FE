@@ -1,0 +1,83 @@
+import 'dart:developer' as developer;
+import 'util/core/api_client.dart';
+import '../models/leaderboard_user.dart';
+import '../utils/leaderboard_type.dart';
+import '../utils/tier_colors.dart';
+
+/// 리더보드 관련 API 호출 함수들
+class LeaderboardApi {
+  static final _apiClient = ApiClient.instance;
+
+  /// 리더보드 조회
+  static Future<List<LeaderboardUser>> getRanking({
+    required LeaderboardType type,
+    String order = 'desc',
+    int page = 0,
+    int perPage = 100, // 전체 데이터를 가져오기 위해 충분히 큰 값 설정
+  }) async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '/api/ranking/users',
+        queryParameters: {
+          'criteria': type.criteria,
+          'order': order,
+          'page': page,
+          'per_page': perPage,
+        },
+        logContext: 'LeaderboardApi',
+      );
+
+      final rankingListData = response['rankingList'] as List<dynamic>? ?? [];
+      
+      // LeaderboardUser 리스트로 변환
+      final users = rankingListData
+          .asMap()
+          .entries
+          .map((entry) {
+            final index = entry.key;
+            final userData = entry.value as Map<String, dynamic>;
+            
+            // 프론트엔드에서 계산되는 값들
+            final rank = index + 1;
+            final tier = TierColors.getTierStringFromRating(userData['rating'] ?? 0);
+            final value = _getValueByCriteria(userData, type.criteria);
+            
+            return LeaderboardUser.fromJson(
+              userData,
+              rank: rank,
+              tier: tier,
+              value: value,
+            );
+          })
+          .toList();
+
+      developer.log(
+        '리더보드 조회 성공 - ${users.length}명 조회',
+        name: 'LeaderboardApi',
+      );
+
+      return users;
+    } catch (e) {
+      // 디버깅용 상세 로그 남기기
+      developer.log('리더보드 조회 실패: $e', name: 'LeaderboardApi', error: e);
+      throw Exception('리더보드 정보를 불러올 수 없습니다');
+    }
+  }
+
+  /// criteria에 따라 적절한 value를 선택하는 헬퍼 메서드
+  static String _getValueByCriteria(Map<String, dynamic> userData, String criteria) {
+    switch (criteria) {
+      case 'rating':
+        return (userData['rating'] ?? 0).toString();
+      case 'streak':
+        return (userData['currentStreak'] ?? 0).toString();
+      case 'longestStreak':
+        return (userData['longestStreak'] ?? 0).toString();
+      case 'solvedProblemsCount':
+        final count = userData['solvedCount'] ?? 0;
+        return count.toString();
+      default:
+        return (userData['rating'] ?? 0).toString();
+    }
+  }
+} 
