@@ -75,8 +75,14 @@ class AuthApi {
         throw Exception('카카오 토큰을 가져올 수 없습니다.');
       }
 
-      // id_token 추출 (null safety 적용)
+      // id_token 추출 및 null 체크
       final idToken = token!.idToken;
+
+      // idToken null 체크 - Kakao OAuth에서 선택적 필드이므로 필수 검증
+      if (idToken == null || idToken.isEmpty) {
+        developer.log('idToken이 null이거나 비어있음', name: 'AuthApi');
+        throw Exception('카카오 ID 토큰을 받을 수 없습니다. 다시 시도해주세요.');
+      }
 
       if (kDebugMode) {
         // 카카오 토큰 정보 전체 출력 (디버그 모드만)
@@ -85,7 +91,7 @@ class AuthApi {
         developer.log('전송할 nonce: $nonce', name: 'AuthApi');
       }
 
-      // 백엔드로 id_token과 nonce 전송하여 JWT 토큰 받기
+      // 백엔드로 id_token과 nonce 전송하여 JWT 토큰 받기 (idToken 검증 후)
       final response = await _apiClient.post<Map<String, dynamic>>(
         '/api/auth/oauth2/kakao/callback',
         data: {'idToken': idToken, 'nonce': nonce},
