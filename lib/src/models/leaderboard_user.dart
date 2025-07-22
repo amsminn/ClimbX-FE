@@ -1,15 +1,70 @@
+/// 리더보드 사용자 정보를 담는 모델
 class LeaderboardUser {
-  final int rank;
-  final String profileImageUrl;
   final String nickname;
-  final String value;
+  final String statusMessage;
+  final String? profileImageUrl;
+  final int rating;
+  final int currentStreak;
+  final int longestStreak;
+  final int solvedCount;
+  
+  // 프론트엔드에서 계산되는 필드들
+  final int rank;
   final String tier;
+  final String value;
 
   const LeaderboardUser({
-    required this.rank,
-    required this.profileImageUrl,
     required this.nickname,
-    required this.value,
+    required this.statusMessage,
+    this.profileImageUrl,
+    required this.rating,
+    required this.currentStreak,
+    required this.longestStreak,
+    required this.solvedCount,
+    required this.rank,
     required this.tier,
+    required this.value,
   });
+
+  /// 백엔드 응답에서 LeaderboardUser 객체 생성
+  factory LeaderboardUser.fromJson(
+    Map<String, dynamic> json, {
+    required int rank,
+    required String tier,
+    required String value,
+  }) {
+    return LeaderboardUser(
+      nickname: json['nickname'] ?? '',
+      statusMessage: json['statusMessage'] ?? '',
+      profileImageUrl: json['profileImageUrl'],
+      rating: json['rating'] ?? 0,
+      currentStreak: json['currentStreak'] ?? 0,
+      longestStreak: json['longestStreak'] ?? 0,
+      solvedCount: json['solvedCount'] ?? 0,
+      rank: rank,
+      tier: tier,
+      value: value,
+    );
+  }
+
+  /// JSON으로 직렬화
+  Map<String, dynamic> toJson() {
+    return {
+      'nickname': nickname,
+      'statusMessage': statusMessage,
+      'profileImageUrl': profileImageUrl,
+      'rating': rating,
+      'currentStreak': currentStreak,
+      'longestStreak': longestStreak,
+      'solvedCount': solvedCount,
+      'rank': rank,
+      'tier': tier,
+      'value': value,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'LeaderboardUser(rank: $rank, nickname: $nickname, rating: $rating, value: $value)';
+  }
 } 
