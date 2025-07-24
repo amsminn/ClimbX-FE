@@ -2,130 +2,142 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'dart:developer' as developer;
-import 'dart:typed_data';
 import '../models/video.dart';
+import '../api/video.dart';
 import '../utils/color_schemes.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
+import '../utils/tier_colors.dart';
 
 class VideoAnalysisWidget extends HookWidget {
   final bool isActive;
+  final String? tierName; // 티어 정보를 받기 위해 추가
 
-  const VideoAnalysisWidget({super.key, this.isActive = true});
+  const VideoAnalysisWidget({
+    super.key, 
+    this.isActive = true,
+    this.tierName,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final videos = useState<List<AssetEntity>>([]);
     final isLoading = useState(false);
     final picker = useMemoized(() => ImagePicker(), []);
-    final uploadedVideos = useState<List<Video>>(
-      [],
-    ); // 업로드된 영상을 임시로 구현해둠 (API개발 이후에는 캐싱으로 사용 또는 제거할듯)
+    
+    // 서버에서 가져온 영상 목록
+    final serverVideos = useState<List<Video>>([]);
+    
+    // 로컬에서 업로드 중인 영상 목록
+    final localVideos = useState<List<Video>>([]);
 
-    // 갤러리에서 비디오 로드
-    Future<void> loadGalleryVideos() async {
+    // 티어 색상 정보 가져오기
+    final TierType currentTier = TierColors.getTierFromString(tierName ?? 'Bronze III');
+    final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
+
+    // 통합 영상 목록 (서버 + 로컬) - getter 함수로 정의
+    List<Video> getAllVideos() => [...serverVideos.value, ...localVideos.value];
+
+    // 서버에서 영상 목록 로드
+    Future<void> loadServerVideos() async {
       if (!isActive) return;
 
-      isLoading.value = true;
-
       try {
-        // 권한 요청
-        final PermissionState ps = await PhotoManager.requestPermissionExtend();
-        developer.log('권한 상태: $ps', name: 'VideoAnalysisWidget');
-
-        if (!ps.hasAccess) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('갤러리 접근 권한이 필요합니다.'),
-                action: SnackBarAction(
-                  label: '설정',
-                  onPressed: () async {
-                    final result = await openAppSettings();
-                    developer.log('설정 페이지 열기: $result', name: 'VideoAnalysisWidget');
-                  },
-                ),
-                duration: const Duration(seconds: 5),
-              ),
-            );
-            isLoading.value = false;
-          }
-          return;
-        }
-
-        // 비디오만 필터링하여 최신순으로 가져오기
-        final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
-          type: RequestType.video,
-          filterOption: FilterOptionGroup(
-            imageOption: const FilterOption(
-              needTitle: true,
-              sizeConstraint: SizeConstraint(ignoreSize: true),
-            ),
-            videoOption: const FilterOption(
-              needTitle: true,
-              sizeConstraint: SizeConstraint(ignoreSize: true),
-            ),
-            createTimeCond: DateTimeCond(
-              min: DateTime(1970),
-              max: DateTime.now(),
-            ),
-            orders: [
-              const OrderOption(type: OrderOptionType.createDate, asc: false),
-            ],
-          ),
-        );
-
-        developer.log('앨범 개수: ${paths.length}', name: 'VideoAnalysisWidget');
-
-        if (paths.isNotEmpty) {
-          final recentPath = paths.first;
-          final assetCount = await recentPath.assetCountAsync;
-          developer.log(
-            '첫 번째 앨범: ${recentPath.name}, 비디오 개수: $assetCount',
-            name: 'VideoAnalysisWidget',
-          );
-
-          final assets = await recentPath.getAssetListRange(start: 0, end: 100);
-
-          if (context.mounted) {
-            videos.value = assets;
-            developer.log(
-              '갤러리에서 ${assets.length}개의 비디오 로드됨',
-              name: 'VideoAnalysisWidget',
-            );
-          }
-        } else {
-          developer.log('사용 가능한 앨범이 없음', name: 'VideoAnalysisWidget');
+        developer.log('서버 영상 목록 로드 시작', name: 'VideoAnalysisWidget');
+        final videos = await VideoApi.getCurrentUserVideos();
+        
+        if (context.mounted) {
+          serverVideos.value = videos;
+          developer.log('서버 영상 목록 로드 완료: ${videos.length}개', name: 'VideoAnalysisWidget');
         }
       } catch (e) {
-        developer.log('갤러리 비디오 로드 실패: $e', name: 'VideoAnalysisWidget', error: e);
-      } finally {
+        developer.log('서버 영상 목록 로드 실패: $e', name: 'VideoAnalysisWidget', error: e);
         if (context.mounted) {
-          isLoading.value = false;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('영상 목록을 불러올 수 없습니다: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       }
     }
 
-    // XFile을 받아서 업로드 처리 (썸네일 생성, Video 객체 생성, 리스트 추가, 스낵바 안내)
-    Future<void> handleVideoUpload(XFile picked, String successMsg) async {
-      final Uint8List? thumb = await VideoThumbnail.thumbnailData(
-        video: picked.path,
-        imageFormat: ImageFormat.PNG,
-        maxWidth: 200,
-        quality: 75,
-      );
-      final video = Video(
-        videoId: DateTime.now().millisecondsSinceEpoch,
-        userId: 0,
-        videoUrl: picked.path,
-        videoMetadata: thumb != null ? {'thumbnail': thumb} : null,
-      );
-      if (context.mounted) {
-        uploadedVideos.value = [...uploadedVideos.value, video];
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(successMsg)));
+    // 영상 업로드 처리
+    Future<void> handleVideoUpload(XFile pickedFile, String successMsg) async {
+      final contextMounted = context.mounted;
+      if (!contextMounted) return;
+
+      try {
+        // 로컬 Video 객체 생성 (업로드 전)
+        final localVideo = Video.fromLocalFile(pickedFile.path);
+        localVideos.value = [...localVideos.value, localVideo];
+
+        // 성공 메시지 표시
+        if (contextMounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(successMsg)),
+          );
+        }
+
+        developer.log('영상 업로드 시작: ${pickedFile.path}', name: 'VideoAnalysisWidget');
+
+        // 업로드 시작 - 진행률 표시를 위해 상태 업데이트
+        final uploadingVideo = localVideo.copyWith(isUploading: true);
+        final index = localVideos.value.length - 1;
+        localVideos.value = [
+          ...localVideos.value.take(index),
+          uploadingVideo,
+          ...localVideos.value.skip(index + 1),
+        ];
+
+        // 실제 업로드 수행
+        final videoId = await VideoApi.uploadVideo(
+          filePath: pickedFile.path,
+          onProgress: (progress) {
+            final currentIndex = localVideos.value.indexWhere((v) => v.localPath == pickedFile.path);
+            if (currentIndex != -1) {
+              final updatedVideo = uploadingVideo.copyWith(
+                uploadProgress: progress,
+              );
+              localVideos.value = [
+                ...localVideos.value.take(currentIndex),
+                updatedVideo,
+                ...localVideos.value.skip(currentIndex + 1),
+              ];
+            }
+          },
+        );
+
+        developer.log('영상 업로드 완료: $videoId', name: 'VideoAnalysisWidget');
+
+        // 업로드 완료 후 로컬 목록에서 제거하고 서버 목록 갱신
+        localVideos.value = localVideos.value.where((v) => v.localPath != pickedFile.path).toList();
+        
+        // 서버 목록 새로고침
+        await loadServerVideos();
+
+        if (contextMounted && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('영상 업로드가 완료되었습니다!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        developer.log('영상 업로드 실패: $e', name: 'VideoAnalysisWidget', error: e);
+        
+        // 실패한 영상을 로컬 목록에서 제거
+        localVideos.value = localVideos.value.where((v) => v.localPath != pickedFile.path).toList();
+        
+        if (contextMounted && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('영상 업로드 실패: $e'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
       }
     }
 
@@ -161,28 +173,61 @@ class VideoAnalysisWidget extends HookWidget {
         );
 
         if (video != null) {
-          await handleVideoUpload(video, '촬영 영상 임시 업로드 완료');
+          await handleVideoUpload(video, '촬영된 영상을 업로드 중입니다...');
         }
       } catch (e) {
         developer.log('비디오 촬영 실패: $e', name: 'VideoAnalysisWidget', error: e);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('비디오 촬영 실패: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
 
-    // 갤러리에서 영상 선택 후 업로드 (임시 메모리에 올라감. 실제로는 서버로 보내야함)
+    // 갤러리에서 영상 선택
     Future<void> selectFromGallery() async {
-      final XFile? picked = await picker.pickVideo(
-        source: ImageSource.gallery,
-        maxDuration: const Duration(minutes: 5),
-      );
-      if (picked != null) {
-        await handleVideoUpload(picked, '갤러리 영상 임시 업로드 완료');
+      try {
+        final XFile? picked = await picker.pickVideo(
+          source: ImageSource.gallery,
+          maxDuration: const Duration(minutes: 5),
+        );
+        
+        if (picked != null) {
+          await handleVideoUpload(picked, '선택된 영상을 업로드 중입니다...');
+        }
+      } catch (e) {
+        developer.log('갤러리 영상 선택 실패: $e', name: 'VideoAnalysisWidget', error: e);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('갤러리 영상 선택 실패: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
 
-    // 탭이 활성화될 때마다 갤러리 비디오 로드
+    // 영상 목록 새로고침
+    Future<void> refreshVideos() async {
+      isLoading.value = true;
+      try {
+        await loadServerVideos();
+      } finally {
+        if (context.mounted) {
+          isLoading.value = false;
+        }
+      }
+    }
+
+    // 탭이 활성화될 때마다 서버 영상 목록 로드
     useEffect(() {
       if (isActive) {
-        loadGalleryVideos();
+        refreshVideos();
       }
       return null;
     }, [isActive]);
@@ -210,45 +255,93 @@ class VideoAnalysisWidget extends HookWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 상단 헤더
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: colorScheme.gradient,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'VIDEOS',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColorSchemes.backgroundPrimary,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                // 새로고침 버튼
+                IconButton(
+                  onPressed: isLoading.value ? null : refreshVideos,
+                  icon: isLoading.value 
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.refresh, size: 20),
+                  tooltip: '목록 새로고침',
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // 비디오 그리드
+            isLoading.value
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
-                itemCount: 2 + uploadedVideos.value.length,
-                // 촬영 버튼 + 갤러리에서 선택 버튼 + 서버의 영상
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    // 촬영 버튼
-                    return _buildGridTile(
-                      icon: Icons.videocam_outlined,
-                      label: '촬영하기',
-                      onTap: recordVideo,
-                    );
-                  } else if (index == 1) {
-                    // 갤러리에서 선택 버튼
-                    return _buildGridTile(
-                      icon: Icons.photo_library_outlined,
-                      label: '갤러리에서 선택',
-                      onTap: selectFromGallery,
-                    );
-                  } else {
-                    final uploadedVideo = uploadedVideos.value[index - 2];
-                    return _buildUploadedVideoTile(uploadedVideo);
-                  }
-                },
-              ),
+                    itemCount: 2 + getAllVideos().length, // 촬영 버튼 + 갤러리 버튼 + 영상들
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        // 촬영 버튼
+                        return _buildActionTile(
+                          icon: Icons.videocam_outlined,
+                          label: '촬영하기',
+                          onTap: recordVideo,
+                        );
+                      } else if (index == 1) {
+                        // 갤러리에서 선택 버튼
+                        return _buildActionTile(
+                          icon: Icons.photo_library_outlined,
+                          label: '갤러리에서 선택',
+                          onTap: selectFromGallery,
+                        );
+                      } else {
+                        // 실제 영상들
+                        final video = getAllVideos()[index - 2];
+                        return _buildVideoTile(video);
+                      }
+                    },
+                  ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildGridTile({
+  /// 액션 버튼 타일 (촬영, 갤러리 선택)
+  Widget _buildActionTile({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -259,6 +352,10 @@ class VideoAnalysisWidget extends HookWidget {
         decoration: BoxDecoration(
           color: AppColorSchemes.backgroundSecondary,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColorSchemes.textTertiary.withValues(alpha: 0.2),
+            width: 1,
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -272,6 +369,7 @@ class VideoAnalysisWidget extends HookWidget {
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -279,35 +377,151 @@ class VideoAnalysisWidget extends HookWidget {
     );
   }
 
-  Widget _buildUploadedVideoTile(Video video) {
-    final thumb = video.videoMetadata?['thumbnail'];
+  /// 영상 타일
+  Widget _buildVideoTile(Video video) {
     return Container(
       decoration: BoxDecoration(
         color: AppColorSchemes.backgroundSecondary,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: video.isUploading 
+              ? Colors.blue.withValues(alpha: 0.5) 
+              : AppColorSchemes.textTertiary.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
         children: [
-          if (thumb != null && thumb is Uint8List)
-            Image.memory(thumb, width: 80, height: 80, fit: BoxFit.cover)
-          else
-            const Icon(
-              Icons.video_file_outlined,
-              size: 32,
-              color: AppColorSchemes.textSecondary,
-            ),
-          const SizedBox(height: 8),
-          Text(
-            video.videoUrl.split('/').last,
-            style: const TextStyle(
-              color: AppColorSchemes.textSecondary,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-            overflow: TextOverflow.ellipsis,
+          // 메인 콘텐츠
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 썸네일 또는 아이콘
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: video.getThumbnailWidget(),
+                ),
+              ),
+              
+              // 파일명/상태
+              Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(
+                  video.displayName,
+                  style: TextStyle(
+                    color: video.isUploading 
+                        ? Colors.blue 
+                        : AppColorSchemes.textSecondary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              
+              // 상태 표시
+              if (video.isUploading || !video.isCompleted)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: _buildStatusIndicator(video),
+                ),
+            ],
           ),
+          
+          // 업로드 진행률 오버레이
+          if (video.isUploading && video.uploadProgress != null)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        value: video.uploadProgress,
+                        color: Colors.white,
+                        strokeWidth: 3,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${(video.uploadProgress! * 100).toInt()}%',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+
+  /// 상태 표시기
+  Widget _buildStatusIndicator(Video video) {
+    if (video.isUploading) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: Colors.blue.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Text(
+          '업로드 중',
+          style: TextStyle(
+            color: Colors.blue,
+            fontSize: 8,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
+    Color statusColor;
+    String statusText;
+    
+    switch (video.status) {
+      case VideoStatus.pending:
+        statusColor = Colors.orange;
+        statusText = '대기 중';
+        break;
+      case VideoStatus.processing:
+        statusColor = Colors.blue;
+        statusText = '처리 중';
+        break;
+      case VideoStatus.completed:
+        statusColor = Colors.green;
+        statusText = '완료';
+        break;
+      case VideoStatus.failed:
+        statusColor = Colors.red;
+        statusText = '실패';
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          color: statusColor,
+          fontSize: 8,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

@@ -9,18 +9,6 @@ PODS:
     - Flutter
   - kakao_flutter_sdk_common (1.9.7-3):
     - Flutter
-  - libwebp (1.5.0):
-    - libwebp/demux (= 1.5.0)
-    - libwebp/mux (= 1.5.0)
-    - libwebp/sharpyuv (= 1.5.0)
-    - libwebp/webp (= 1.5.0)
-  - libwebp/demux (1.5.0):
-    - libwebp/webp
-  - libwebp/mux (1.5.0):
-    - libwebp/demux
-  - libwebp/sharpyuv (1.5.0)
-  - libwebp/webp (1.5.0):
-    - libwebp/sharpyuv
   - NMapsGeometry (1.0.2)
   - NMapsMap (3.21.0):
     - NMapsGeometry
@@ -35,9 +23,6 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - video_thumbnail (0.0.1):
-    - Flutter
-    - libwebp
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -52,12 +37,10 @@ DEPENDENCIES:
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
 
 SPEC REPOS:
   trunk:
-    - libwebp
     - NMapsGeometry
     - NMapsMap
 
@@ -80,8 +63,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/photo_manager/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
-  video_thumbnail:
-    :path: ".symlinks/plugins/video_thumbnail/ios"
   webview_flutter_wkwebview:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
@@ -91,14 +72,12 @@ SPEC CHECKSUMS:
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   kakao_flutter_sdk_common: 600d55b532da0bd37268a529e1add49302477710
-  libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   NMapsGeometry: 4e02554fa9880ef02ed96b075dc84355d6352479
   NMapsMap: 8e7e35c2446e7c4a88d6dd0d64aa0d1de903e4f0
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   photo_manager: 1d80ae07a89a67dfbcae95953a1e5a24af7c3e62
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
-  video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
   webview_flutter_wkwebview: 1821ceac936eba6f7984d89a9f3bcb4dea99ebb2
 
 PODFILE CHECKSUM: 3c00331815b9cd92035eb4f2a76a90645118f61f

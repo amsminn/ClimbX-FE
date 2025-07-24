@@ -119,7 +119,7 @@ class ProfileBody extends HookWidget {
               child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
             ),
             _buildTabContent(
-              child: const VideoAnalysisWidget(),
+              child: VideoAnalysisWidget(tierName: currentTier),
             ),
           ],
         ),
