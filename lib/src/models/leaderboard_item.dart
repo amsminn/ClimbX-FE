@@ -1,5 +1,5 @@
-/// 리더보드 사용자 정보를 담는 모델
-class LeaderboardUser {
+/// 리더보드 아이템 정보를 담는 모델
+class LeaderboardItem {
   final String nickname;
   final String statusMessage;
   final String? profileImageUrl;
@@ -13,7 +13,7 @@ class LeaderboardUser {
   final String tier;
   final String value;
 
-  const LeaderboardUser({
+  const LeaderboardItem({
     required this.nickname,
     required this.statusMessage,
     this.profileImageUrl,
@@ -26,14 +26,14 @@ class LeaderboardUser {
     required this.value,
   });
 
-  /// 백엔드 응답에서 LeaderboardUser 객체 생성
-  factory LeaderboardUser.fromJson(
+  /// 백엔드 응답에서 LeaderboardItem 객체 생성
+  factory LeaderboardItem.fromJson(
     Map<String, dynamic> json, {
     required int rank,
     required String tier,
     required String value,
   }) {
-    return LeaderboardUser(
+    return LeaderboardItem(
       nickname: json['nickname'] ?? '',
       statusMessage: json['statusMessage'] ?? '',
       profileImageUrl: json['profileImageUrl'],
@@ -65,6 +65,6 @@ class LeaderboardUser {
 
   @override
   String toString() {
-    return 'LeaderboardUser(rank: $rank, nickname: $nickname, rating: $rating, value: $value)';
+    return 'LeaderboardItem(rank: $rank, nickname: $nickname, rating: $rating, value: $value)';
   }
 } 

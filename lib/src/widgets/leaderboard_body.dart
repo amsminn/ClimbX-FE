@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../api/leaderboard.dart';
+import '../api/util/core/api_client.dart';
+import '../models/leaderboard_item.dart';
+import '../utils/color_schemes.dart';
 import '../utils/leaderboard_type.dart';
 import '../utils/tier_colors.dart';
-import '../utils/color_schemes.dart';
-import '../models/leaderboard_user.dart';
-import '../api/api.dart';
 
+/// 리더보드 메인 위젯
 class LeaderboardBody extends StatefulWidget {
   const LeaderboardBody({super.key});
 
@@ -18,7 +20,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
   LeaderboardType _selectedType = LeaderboardType.rating;
   
   // API 호출 상태 관리
-  Future<List<LeaderboardUser>>? _leaderboardFuture;
+  Future<List<LeaderboardItem>>? _leaderboardFuture;
 
   @override
   void initState() {
@@ -109,7 +111,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
         Expanded(
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: FutureBuilder<List<LeaderboardUser>>(
+            child: FutureBuilder<List<LeaderboardItem>>(
               future: _leaderboardFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -185,7 +187,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     );
   }
 
-  Widget _buildLeaderboardItem(LeaderboardUser user) {
+  Widget _buildLeaderboardItem(LeaderboardItem user) {
     final TierType tierType = TierColors.getTierFromString(user.tier);
     final TierColorScheme tierColorScheme = TierColors.getColorScheme(tierType);
 
