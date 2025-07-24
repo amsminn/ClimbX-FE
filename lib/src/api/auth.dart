@@ -178,7 +178,7 @@ class AuthApi {
       }
 
       developer.log('로그인 성공 - 토큰 저장 완료', name: 'AuthApi');
-      return accessToken as String;
+      return accessToken;
     } catch (e) {
       throw Exception('카카오 로그인에 실패했습니다: $e');
     }
@@ -267,7 +267,7 @@ class AuthApi {
       );
 
       developer.log('토큰 갱신 성공', name: 'AuthApi');
-      return newAccessToken as String;
+      return newAccessToken;
     } catch (e) {
       throw Exception('토큰 갱신에 실패했습니다: $e');
     }

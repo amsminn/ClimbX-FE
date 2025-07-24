@@ -11,4 +11,5 @@ export 'util/core/http_method.dart';
 export 'auth.dart';
 export 'user.dart';
 export 'gym.dart';
-export 'leaderboard.dart'; 
+export 'leaderboard.dart';
+export 'video.dart'; 
