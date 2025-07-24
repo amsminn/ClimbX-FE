@@ -8,7 +8,6 @@ import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/color_schemes.dart';
 
-
 class MainPage extends StatefulWidget {
   final BottomNavTab? initialTab;
 

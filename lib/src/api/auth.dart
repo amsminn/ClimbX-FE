@@ -10,18 +10,20 @@ import 'util/auth/token_storage.dart';
 /// 인증 관련 API 호출 함수들
 class AuthApi {
   static final _apiClient = ApiClient.instance;
-  
+
   // 헤더 접근용 순수 Dio 인스턴스 (인터셉터 없음)
-  static final _pureDio = Dio(BaseOptions(
-    baseUrl: ApiClient.baseUrl ?? '',
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 15),
-    sendTimeout: const Duration(seconds: 10),
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-  ));
+  static final _pureDio = Dio(
+    BaseOptions(
+      baseUrl: ApiClient.baseUrl ?? '',
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(seconds: 10),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   /// nonce 생성 함수
   static String _generateNonce() {
@@ -39,11 +41,11 @@ class AuthApi {
   /// 카카오 로그인
   static Future<String> signInWithKakao() async {
     try {
-          // nonce 생성
-    final nonce = _generateNonce();
-    if (kDebugMode) {
-      developer.log('생성된 nonce: $nonce', name: 'AuthApi');
-    }
+      // nonce 생성
+      final nonce = _generateNonce();
+      if (kDebugMode) {
+        developer.log('생성된 nonce: $nonce', name: 'AuthApi');
+      }
 
       // 카카오톡 설치 확인
       if (await isKakaoTalkInstalled()) {
@@ -176,7 +178,7 @@ class AuthApi {
       }
 
       developer.log('로그인 성공 - 토큰 저장 완료', name: 'AuthApi');
-      return accessToken;
+      return accessToken as String;
     } catch (e) {
       throw Exception('카카오 로그인에 실패했습니다: $e');
     }
@@ -265,7 +267,7 @@ class AuthApi {
       );
 
       developer.log('토큰 갱신 성공', name: 'AuthApi');
-      return newAccessToken;
+      return newAccessToken as String;
     } catch (e) {
       throw Exception('토큰 갱신에 실패했습니다: $e');
     }

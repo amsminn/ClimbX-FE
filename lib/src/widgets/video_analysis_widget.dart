@@ -9,10 +9,10 @@ import '../models/video.dart';
 import '../utils/color_schemes.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-class VideoAnalysisContent extends HookWidget {
+class VideoAnalysisWidget extends HookWidget {
   final bool isActive;
 
-  const VideoAnalysisContent({super.key, this.isActive = true});
+  const VideoAnalysisWidget({super.key, this.isActive = true});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class VideoAnalysisContent extends HookWidget {
       try {
         // 권한 요청
         final PermissionState ps = await PhotoManager.requestPermissionExtend();
-        developer.log('권한 상태: $ps', name: 'AnalysisPage');
+        developer.log('권한 상태: $ps', name: 'VideoAnalysisWidget');
 
         if (!ps.hasAccess) {
           if (context.mounted) {
@@ -43,7 +43,7 @@ class VideoAnalysisContent extends HookWidget {
                   label: '설정',
                   onPressed: () async {
                     final result = await openAppSettings();
-                    developer.log('설정 페이지 열기: $result', name: 'AnalysisPage');
+                    developer.log('설정 페이지 열기: $result', name: 'VideoAnalysisWidget');
                   },
                 ),
                 duration: const Duration(seconds: 5),
@@ -76,14 +76,14 @@ class VideoAnalysisContent extends HookWidget {
           ),
         );
 
-        developer.log('앨범 개수: ${paths.length}', name: 'AnalysisPage');
+        developer.log('앨범 개수: ${paths.length}', name: 'VideoAnalysisWidget');
 
         if (paths.isNotEmpty) {
           final recentPath = paths.first;
           final assetCount = await recentPath.assetCountAsync;
           developer.log(
             '첫 번째 앨범: ${recentPath.name}, 비디오 개수: $assetCount',
-            name: 'AnalysisPage',
+            name: 'VideoAnalysisWidget',
           );
 
           final assets = await recentPath.getAssetListRange(start: 0, end: 100);
@@ -92,14 +92,14 @@ class VideoAnalysisContent extends HookWidget {
             videos.value = assets;
             developer.log(
               '갤러리에서 ${assets.length}개의 비디오 로드됨',
-              name: 'AnalysisPage',
+              name: 'VideoAnalysisWidget',
             );
           }
         } else {
-          developer.log('사용 가능한 앨범이 없음', name: 'AnalysisPage');
+          developer.log('사용 가능한 앨범이 없음', name: 'VideoAnalysisWidget');
         }
       } catch (e) {
-        developer.log('갤러리 비디오 로드 실패: $e', name: 'AnalysisPage', error: e);
+        developer.log('갤러리 비디오 로드 실패: $e', name: 'VideoAnalysisWidget', error: e);
       } finally {
         if (context.mounted) {
           isLoading.value = false;
@@ -134,7 +134,7 @@ class VideoAnalysisContent extends HookWidget {
       try {
         // 카메라 권한 요청
         final cameraStatus = await Permission.camera.request();
-        developer.log('카메라 권한 상태: $cameraStatus', name: 'AnalysisPage');
+        developer.log('카메라 권한 상태: $cameraStatus', name: 'VideoAnalysisWidget');
 
         if (!cameraStatus.isGranted) {
           if (context.mounted) {
@@ -145,7 +145,7 @@ class VideoAnalysisContent extends HookWidget {
                   label: '설정',
                   onPressed: () async {
                     final result = await openAppSettings();
-                    developer.log('설정 페이지 열기: $result', name: 'AnalysisPage');
+                    developer.log('설정 페이지 열기: $result', name: 'VideoAnalysisWidget');
                   },
                 ),
                 duration: const Duration(seconds: 5),
@@ -164,7 +164,7 @@ class VideoAnalysisContent extends HookWidget {
           await handleVideoUpload(video, '촬영 영상 임시 업로드 완료');
         }
       } catch (e) {
-        developer.log('비디오 촬영 실패: $e', name: 'AnalysisPage', error: e);
+        developer.log('비디오 촬영 실패: $e', name: 'VideoAnalysisWidget', error: e);
       }
     }
 
@@ -187,45 +187,65 @@ class VideoAnalysisContent extends HookWidget {
       return null;
     }, [isActive]);
 
-    return isLoading.value
-        ? const Center(child: CircularProgressIndicator())
-        : Column(
-            children: [
-              Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
-                  itemCount: 2 + uploadedVideos.value.length,
-                  // 촬영 버튼 + 갤러리에서 선택 버튼 + 서버의 영상
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      // 촬영 버튼
-                      return _buildGridTile(
-                        icon: Icons.videocam_outlined,
-                        label: '촬영하기',
-                        onTap: recordVideo,
-                      );
-                    } else if (index == 1) {
-                      // 갤러리에서 선택 버튼
-                      return _buildGridTile(
-                        icon: Icons.photo_library_outlined,
-                        label: '갤러리에서 선택',
-                        onTap: selectFromGallery,
-                      );
-                    } else {
-                      final uploadedVideo = uploadedVideos.value[index - 2];
-                      return _buildUploadedVideoTile(uploadedVideo);
-                    }
-                  },
-                ),
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: AppColorSchemes.defaultGradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 20,
+            offset: Offset(0, 4),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+            spreadRadius: -2,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                itemCount: 2 + uploadedVideos.value.length,
+                // 촬영 버튼 + 갤러리에서 선택 버튼 + 서버의 영상
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    // 촬영 버튼
+                    return _buildGridTile(
+                      icon: Icons.videocam_outlined,
+                      label: '촬영하기',
+                      onTap: recordVideo,
+                    );
+                  } else if (index == 1) {
+                    // 갤러리에서 선택 버튼
+                    return _buildGridTile(
+                      icon: Icons.photo_library_outlined,
+                      label: '갤러리에서 선택',
+                      onTap: selectFromGallery,
+                    );
+                  } else {
+                    final uploadedVideo = uploadedVideos.value[index - 2];
+                    return _buildUploadedVideoTile(uploadedVideo);
+                  }
+                },
               ),
-            ],
-          );
+      ),
+    );
   }
 
   Widget _buildGridTile({
@@ -288,22 +308,6 @@ class VideoAnalysisContent extends HookWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class AnalysisPage extends StatelessWidget {
-  final bool isActive;
-
-  const AnalysisPage({super.key, required this.isActive});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColorSchemes.backgroundPrimary,
-      body: SafeArea(
-        child: VideoAnalysisContent(isActive: isActive),
       ),
     );
   }
