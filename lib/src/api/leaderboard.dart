@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
-import '../models/leaderboard_user.dart';
+import '../models/leaderboard_item.dart';
 import '../utils/leaderboard_type.dart';
 import '../utils/tier_colors.dart';
 
@@ -22,7 +22,7 @@ class LeaderboardApi {
   static const String _criteriaSolvedProblems = 'solvedProblemsCount';
 
   /// 리더보드 조회
-  static Future<List<LeaderboardUser>> getRanking({
+  static Future<List<LeaderboardItem>> getRanking({
     required LeaderboardType type,
     String order = 'desc',
     int page = 0,
@@ -42,7 +42,7 @@ class LeaderboardApi {
 
       final rankingListData = response[_keyRankingList] as List<dynamic>? ?? [];
       
-      // LeaderboardUser 리스트로 변환
+      // LeaderboardItem 리스트로 변환
       final users = rankingListData
           .asMap()
           .entries
@@ -55,7 +55,7 @@ class LeaderboardApi {
             final tier = TierColors.getTierStringFromRating(userData[_keyRating] ?? 0);
             final value = _getValueByCriteria(userData, type.criteria);
             
-            return LeaderboardUser.fromJson(
+            return LeaderboardItem.fromJson(
               userData,
               rank: rank,
               tier: tier,
