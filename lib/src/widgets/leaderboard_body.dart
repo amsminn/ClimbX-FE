@@ -3,7 +3,7 @@ import '../utils/leaderboard_type.dart';
 import '../utils/tier_colors.dart';
 import '../utils/color_schemes.dart';
 import '../models/leaderboard_user.dart';
-import '../api/api.dart'; // 중앙 export: LeaderboardApi + ApiClient 모두 포함
+import '../api/api.dart';
 
 class LeaderboardBody extends StatefulWidget {
   const LeaderboardBody({super.key});
@@ -293,15 +293,18 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
   /// 프로필 이미지 빌드 (네트워크 이미지 또는 기본 아바타)
   Widget _buildProfileImage(String? profileImageUrl) {
+    // 기본 아바타 위젯 
+    final Widget defaultAvatar = Container(
+      color: AppColorSchemes.backgroundTertiary,
+      child: const Icon(
+        Icons.person,
+        color: AppColorSchemes.textTertiary,
+        size: 20,
+      ),
+    );
+
     if (profileImageUrl == null || profileImageUrl.isEmpty) {
-      return Container(
-        color: AppColorSchemes.backgroundTertiary,
-        child: const Icon(
-          Icons.person,
-          color: AppColorSchemes.textTertiary,
-          size: 20,
-        ),
-      );
+      return defaultAvatar;
     }
 
     // 네트워크 이미지인지 로컬 이미지인지 판단
@@ -311,16 +314,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
       return Image.network(
         fullUrl,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: AppColorSchemes.backgroundTertiary,
-            child: const Icon(
-              Icons.person,
-              color: AppColorSchemes.textTertiary,
-              size: 20,
-            ),
-          );
-        },
+        errorBuilder: (context, error, stackTrace) => defaultAvatar,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Container(
@@ -343,16 +337,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     return Image.asset(
       profileImageUrl,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          color: AppColorSchemes.backgroundTertiary,
-          child: const Icon(
-            Icons.person,
-            color: AppColorSchemes.textTertiary,
-            size: 20,
-          ),
-        );
-      },
+      errorBuilder: (context, error, stackTrace) => defaultAvatar,
     );
   }
 }

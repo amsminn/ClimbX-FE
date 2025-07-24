@@ -8,12 +8,19 @@ import '../utils/tier_colors.dart';
 class LeaderboardApi {
   static final _apiClient = ApiClient.instance;
 
+  // API 응답 데이터 키값 상수 정의
+  static const String _keyRating = 'rating';
+  static const String _keyCurrentStreak = 'currentStreak';
+  static const String _keyLongestStreak = 'longestStreak';
+  static const String _keySolvedCount = 'solvedCount';
+  static const String _keyRankingList = 'rankingList';
+
   /// 리더보드 조회
   static Future<List<LeaderboardUser>> getRanking({
     required LeaderboardType type,
     String order = 'desc',
     int page = 0,
-    int perPage = 100, // 전체 데이터를 가져오기 위해 충분히 큰 값 설정
+    int perPage = 10000, // 모든 데이터를 가져오기 위해 충분히 큰 값 설정 (추후 변경예정)
   }) async {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
@@ -27,7 +34,7 @@ class LeaderboardApi {
         logContext: 'LeaderboardApi',
       );
 
-      final rankingListData = response['rankingList'] as List<dynamic>? ?? [];
+      final rankingListData = response[_keyRankingList] as List<dynamic>? ?? [];
       
       // LeaderboardUser 리스트로 변환
       final users = rankingListData
@@ -39,7 +46,7 @@ class LeaderboardApi {
             
             // 프론트엔드에서 계산되는 값들
             final rank = index + 1;
-            final tier = TierColors.getTierStringFromRating(userData['rating'] ?? 0);
+            final tier = TierColors.getTierStringFromRating(userData[_keyRating] ?? 0);
             final value = _getValueByCriteria(userData, type.criteria);
             
             return LeaderboardUser.fromJson(
@@ -67,17 +74,17 @@ class LeaderboardApi {
   /// criteria에 따라 적절한 value를 선택하는 헬퍼 메서드
   static String _getValueByCriteria(Map<String, dynamic> userData, String criteria) {
     switch (criteria) {
-      case 'rating':
-        return (userData['rating'] ?? 0).toString();
-      case 'streak':
-        return (userData['currentStreak'] ?? 0).toString();
-      case 'longestStreak':
-        return (userData['longestStreak'] ?? 0).toString();
-      case 'solvedProblemsCount':
-        final count = userData['solvedCount'] ?? 0;
+      case LeaderboardType.rating.criteria:
+        return (userData[_keyRating] ?? 0).toString();
+      case LeaderboardType.streak.criteria:
+        return (userData[_keyCurrentStreak] ?? 0).toString();
+      case LeaderboardType.longestStreak.criteria:
+        return (userData[_keyLongestStreak] ?? 0).toString();
+      case LeaderboardType.solvedProblems.criteria:
+        final count = userData[_keySolvedCount] ?? 0;
         return count.toString();
       default:
-        return (userData['rating'] ?? 0).toString();
+        return (userData[_keyRating] ?? 0).toString();
     }
   }
 } 
