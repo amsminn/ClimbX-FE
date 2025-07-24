@@ -15,6 +15,12 @@ class LeaderboardApi {
   static const String _keySolvedCount = 'solvedCount';
   static const String _keyRankingList = 'rankingList';
 
+  // Criteria 값 상수 정의 (switch문에서 사용하기 위해)
+  static const String _criteriaRating = 'rating';
+  static const String _criteriaStreak = 'streak';
+  static const String _criteriaLongestStreak = 'longestStreak';
+  static const String _criteriaSolvedProblems = 'solvedProblemsCount';
+
   /// 리더보드 조회
   static Future<List<LeaderboardUser>> getRanking({
     required LeaderboardType type,
@@ -74,13 +80,13 @@ class LeaderboardApi {
   /// criteria에 따라 적절한 value를 선택하는 헬퍼 메서드
   static String _getValueByCriteria(Map<String, dynamic> userData, String criteria) {
     switch (criteria) {
-      case LeaderboardType.rating.criteria:
+      case _criteriaRating:
         return (userData[_keyRating] ?? 0).toString();
-      case LeaderboardType.streak.criteria:
+      case _criteriaStreak:
         return (userData[_keyCurrentStreak] ?? 0).toString();
-      case LeaderboardType.longestStreak.criteria:
+      case _criteriaLongestStreak:
         return (userData[_keyLongestStreak] ?? 0).toString();
-      case LeaderboardType.solvedProblems.criteria:
+      case _criteriaSolvedProblems:
         final count = userData[_keySolvedCount] ?? 0;
         return count.toString();
       default:
