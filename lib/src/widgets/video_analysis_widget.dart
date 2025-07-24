@@ -9,10 +9,10 @@ import '../models/video.dart';
 import '../utils/color_schemes.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-class AnalysisPage extends HookWidget {
+class VideoAnalysisContent extends HookWidget {
   final bool isActive;
 
-  const AnalysisPage({super.key, required this.isActive});
+  const VideoAnalysisContent({super.key, this.isActive = true});
 
   @override
   Widget build(BuildContext context) {
@@ -187,50 +187,45 @@ class AnalysisPage extends HookWidget {
       return null;
     }, [isActive]);
 
-    return Scaffold(
-      backgroundColor: AppColorSchemes.backgroundPrimary,
-      body: SafeArea(
-        child: isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  Expanded(
-                    child: GridView.builder(
-                      padding: const EdgeInsets.all(16),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
-                      itemCount: 2 + uploadedVideos.value.length,
-                      // 촬영 버튼 + 갤러리에서 선택 버튼 + 서버의 영상
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          // 촬영 버튼
-                          return _buildGridTile(
-                            icon: Icons.videocam_outlined,
-                            label: '촬영하기',
-                            onTap: recordVideo,
-                          );
-                        } else if (index == 1) {
-                          // 갤러리에서 선택 버튼
-                          return _buildGridTile(
-                            icon: Icons.photo_library_outlined,
-                            label: '갤러리에서 선택',
-                            onTap: selectFromGallery,
-                          );
-                        } else {
-                          final uploadedVideo = uploadedVideos.value[index - 2];
-                          return _buildUploadedVideoTile(uploadedVideo);
-                        }
-                      },
-                    ),
-                  ),
-                ],
+    return isLoading.value
+        ? const Center(child: CircularProgressIndicator())
+        : Column(
+            children: [
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                  itemCount: 2 + uploadedVideos.value.length,
+                  // 촬영 버튼 + 갤러리에서 선택 버튼 + 서버의 영상
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      // 촬영 버튼
+                      return _buildGridTile(
+                        icon: Icons.videocam_outlined,
+                        label: '촬영하기',
+                        onTap: recordVideo,
+                      );
+                    } else if (index == 1) {
+                      // 갤러리에서 선택 버튼
+                      return _buildGridTile(
+                        icon: Icons.photo_library_outlined,
+                        label: '갤러리에서 선택',
+                        onTap: selectFromGallery,
+                      );
+                    } else {
+                      final uploadedVideo = uploadedVideos.value[index - 2];
+                      return _buildUploadedVideoTile(uploadedVideo);
+                    }
+                  },
+                ),
               ),
-      ),
-    );
+            ],
+          );
   }
 
   Widget _buildGridTile({
@@ -297,3 +292,19 @@ class AnalysisPage extends HookWidget {
     );
   }
 }
+
+class AnalysisPage extends StatelessWidget {
+  final bool isActive;
+
+  const AnalysisPage({super.key, required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColorSchemes.backgroundPrimary,
+      body: SafeArea(
+        child: VideoAnalysisContent(isActive: isActive),
+      ),
+    );
+  }
+} 
