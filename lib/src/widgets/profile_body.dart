@@ -9,6 +9,7 @@ import '../utils/tier_colors.dart';
 import '../utils/color_schemes.dart';
 import '../models/user_profile.dart';
 import '../api/user.dart';
+import 'video_analysis_widget.dart';
 
 class ProfileBody extends HookWidget {
   final String currentTier;
@@ -118,7 +119,7 @@ class ProfileBody extends HookWidget {
               child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
             ),
             _buildTabContent(
-              child: _buildComingSoon('내 영상', Icons.video_library, colorScheme),
+              child: const VideoAnalysisContent(),
             ),
           ],
         ),
