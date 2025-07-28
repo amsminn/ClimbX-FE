@@ -10,20 +10,18 @@ import 'util/auth/token_storage.dart';
 /// 인증 관련 API 호출 함수들
 class AuthApi {
   static final _apiClient = ApiClient.instance;
-
+  
   // 헤더 접근용 순수 Dio 인스턴스 (인터셉터 없음)
-  static final _pureDio = Dio(
-    BaseOptions(
-      baseUrl: ApiClient.baseUrl ?? '',
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
-      sendTimeout: const Duration(seconds: 10),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ),
-  );
+  static final _pureDio = Dio(BaseOptions(
+    baseUrl: ApiClient.baseUrl ?? '',
+    connectTimeout: const Duration(seconds: 10),
+    receiveTimeout: const Duration(seconds: 15),
+    sendTimeout: const Duration(seconds: 10),
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  ));
 
   /// nonce 생성 함수
   static String _generateNonce() {
@@ -41,11 +39,11 @@ class AuthApi {
   /// 카카오 로그인
   static Future<String> signInWithKakao() async {
     try {
-      // nonce 생성
-      final nonce = _generateNonce();
-      if (kDebugMode) {
-        developer.log('생성된 nonce: $nonce', name: 'AuthApi');
-      }
+          // nonce 생성
+    final nonce = _generateNonce();
+    if (kDebugMode) {
+      developer.log('생성된 nonce: $nonce', name: 'AuthApi');
+    }
 
       // 카카오톡 설치 확인
       if (await isKakaoTalkInstalled()) {
@@ -115,37 +113,29 @@ class AuthApi {
 
       if (kDebugMode) {
         developer.log('=== 로그인 응답 헤더 확인 ===', name: 'AuthApi Debug');
-        developer.log(
-          '응답 헤더들: ${dioResponse.headers.map}',
-          name: 'AuthApi Debug',
-        );
-        developer.log(
-          'Refresh-Token 헤더: ${dioResponse.headers.value('Refresh-Token')}',
-          name: 'AuthApi Debug',
-        );
+        developer.log('응답 헤더들: ${dioResponse.headers.map}', name: 'AuthApi Debug');
+        developer.log('Refresh-Token 헤더: ${dioResponse.headers.value('Refresh-Token')}', name: 'AuthApi Debug');
         developer.log('응답 데이터: ${dioResponse.data}', name: 'AuthApi Debug');
         developer.log('============================', name: 'AuthApi Debug');
       }
 
       // 순수 응답 데이터에서 access token 추출
       final responseData = dioResponse.data;
-
+      
       if (responseData is! Map<String, dynamic>) {
         throw Exception('응답 형식이 올바르지 않습니다: ${responseData.runtimeType}');
       }
 
       // 백엔드 응답 구조에 맞게 데이터 추출
       Map<String, dynamic> bodyData;
-      if (responseData.containsKey('body') &&
-          responseData['body'] is Map<String, dynamic>) {
+      if (responseData.containsKey('body') && responseData['body'] is Map<String, dynamic>) {
         final body = responseData['body'] as Map<String, dynamic>;
         if (body.containsKey('data') && body['data'] is Map<String, dynamic>) {
           bodyData = body['data'] as Map<String, dynamic>;
         } else {
           bodyData = body;
         }
-      } else if (responseData.containsKey('data') &&
-          responseData['data'] is Map<String, dynamic>) {
+      } else if (responseData.containsKey('data') && responseData['data'] is Map<String, dynamic>) {
         bodyData = responseData['data'] as Map<String, dynamic>;
       } else {
         bodyData = responseData;
@@ -172,7 +162,7 @@ class AuthApi {
       try {
         final authMeResponse = await _pureDio.get('/api/auth/me');
         final authData = authMeResponse.data;
-
+        
         if (authData is Map<String, dynamic>) {
           final nickname = authData['nickname'] as String?;
           if (nickname != null && nickname.isNotEmpty) {
@@ -210,50 +200,46 @@ class AuthApi {
   static Future<String> refreshToken() async {
     try {
       final refreshToken = await TokenStorage.getRefreshToken();
-
+      
       if (refreshToken == null || refreshToken.isEmpty) {
         throw Exception('Refresh Token이 없습니다');
       }
 
       // 헤더에서 새로운 Refresh-Token을 받기 위해 순수 Dio 사용 (인터셉터 없음)
       final dioResponse = await _pureDio.post(
-        '/api/auth/refresh',
-        data: {'refreshToken': refreshToken},
+        '/api/auth/oauth2/refresh',
+        options: Options(
+          headers: {
+            'Refresh-Token': refreshToken,
+          },
+        ),
       );
 
       if (kDebugMode) {
         developer.log('=== 토큰 갱신 응답 헤더 확인 ===', name: 'AuthApi Debug');
-        developer.log(
-          '응답 헤더들: ${dioResponse.headers.map}',
-          name: 'AuthApi Debug',
-        );
-        developer.log(
-          'Refresh-Token 헤더: ${dioResponse.headers.value('Refresh-Token')}',
-          name: 'AuthApi Debug',
-        );
+        developer.log('응답 헤더들: ${dioResponse.headers.map}', name: 'AuthApi Debug');
+        developer.log('Refresh-Token 헤더: ${dioResponse.headers.value('Refresh-Token')}', name: 'AuthApi Debug');
         developer.log('응답 데이터: ${dioResponse.data}', name: 'AuthApi Debug');
         developer.log('===============================', name: 'AuthApi Debug');
       }
 
       // 순수 응답 데이터에서 새로운 access token 추출
       final responseData = dioResponse.data;
-
+      
       if (responseData is! Map<String, dynamic>) {
         throw Exception('토큰 갱신 응답 형식이 올바르지 않습니다: ${responseData.runtimeType}');
       }
 
       // 백엔드 응답 구조에 맞게 데이터 추출
       Map<String, dynamic> bodyData;
-      if (responseData.containsKey('body') &&
-          responseData['body'] is Map<String, dynamic>) {
+      if (responseData.containsKey('body') && responseData['body'] is Map<String, dynamic>) {
         final body = responseData['body'] as Map<String, dynamic>;
         if (body.containsKey('data') && body['data'] is Map<String, dynamic>) {
           bodyData = body['data'] as Map<String, dynamic>;
         } else {
           bodyData = body;
         }
-      } else if (responseData.containsKey('data') &&
-          responseData['data'] is Map<String, dynamic>) {
+      } else if (responseData.containsKey('data') && responseData['data'] is Map<String, dynamic>) {
         bodyData = responseData['data'] as Map<String, dynamic>;
       } else {
         bodyData = responseData;
@@ -264,14 +250,18 @@ class AuthApi {
         throw Exception('토큰 갱신 실패: accessToken을 찾을 수 없음: $bodyData');
       }
 
-      // 응답 헤더에서 새로운 Refresh-Token 추출 (있으면)
+      // 응답 헤더에서 새로운 Refresh-Token 추출
       final newRefreshToken = dioResponse.headers.value('Refresh-Token');
-
+      
+      // refresh token 없음
+      if (newRefreshToken == null || newRefreshToken.isEmpty) {
+        throw Exception('토큰 갱신 실패: 새로운 Refresh Token을 받지 못했습니다. 서버 응답을 확인하세요.');
+      }
+      
       // 새 토큰들 저장
       await TokenStorage.saveTokens(
-        accessToken: newAccessToken as String,
-        refreshToken:
-            newRefreshToken ?? refreshToken, // 새로운 refresh token이 없으면 기존 것 유지
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
       );
 
       developer.log('토큰 갱신 성공', name: 'AuthApi');
