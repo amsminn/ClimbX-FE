@@ -41,7 +41,7 @@ class AuthInterceptor {
   ) async {
     try {
       // 무한 루프 방지: refresh API 호출은 토큰 추가 스킵
-      if (options.path.contains('/api/auth/refresh')) {
+      if (options.path.contains('/api/auth/oauth2/refresh')) {
         if (kDebugMode) {
           developer.log('Refresh API 호출 - 토큰 추가 스킵', name: 'AuthInterceptor');
         }
@@ -105,7 +105,7 @@ class AuthInterceptor {
       developer.log('401 에러 감지 - 토큰 갱신 시도', name: 'AuthInterceptor');
       
       // refresh API 호출에서 401이 나면 refresh token도 만료된 것
-      if (error.requestOptions.path.contains('/api/auth/refresh')) {
+      if (error.requestOptions.path.contains('/api/auth/oauth2/refresh')) {
         developer.log('Refresh Token 만료 - 완전 로그아웃 처리', name: 'AuthInterceptor');
         await _handleCompleteLogout();
         handler.next(error);
