@@ -109,11 +109,19 @@ class VideoAnalysisWidget extends HookWidget {
 
         developer.log('영상 업로드 완료: $videoId', name: 'VideoAnalysisWidget');
 
-        // 업로드 완료 후 로컬 목록에서 제거하고 서버 목록 갱신
-        localVideos.value = localVideos.value.where((v) => v.localPath != pickedFile.path).toList();
-        
-        // 서버 목록 새로고침
-        await loadServerVideos();
+        // 업로드 완료 - 업로드 상태만 해제하고 로컬에서 삭제하지 않음
+        final currentIndex = localVideos.value.indexWhere((v) => v.localPath == pickedFile.path);
+        if (currentIndex != -1) {
+          final completedVideo = localVideos.value[currentIndex].copyWith(
+            isUploading: false,
+            uploadProgress: 1.0,
+          );
+          localVideos.value = [
+            ...localVideos.value.take(currentIndex),
+            completedVideo,
+            ...localVideos.value.skip(currentIndex + 1),
+          ];
+        }
 
         if (contextMounted && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -216,6 +224,8 @@ class VideoAnalysisWidget extends HookWidget {
     Future<void> refreshVideos() async {
       isLoading.value = true;
       try {
+        // 새로고침 시 로컬 영상 목록 초기화 (업로드 중인 것들 제거)
+        localVideos.value = [];
         await loadServerVideos();
       } finally {
         if (context.mounted) {
