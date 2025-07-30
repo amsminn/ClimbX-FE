@@ -113,6 +113,11 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
       TierColors.getTierFromString(widget.tierName ?? 'Bronze III'),
     );
 
+    if (_isInitialized) {
+      developer.log(
+        'Video Controller Aspect Ratio: ${_controller.value.aspectRatio}',
+      );
+    }
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(20),
@@ -140,7 +145,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
                             child: VideoPlayer(_controller),
                           ),
 
-                          // 3. 컨트롤 오버레이
+                          // 3. 컨트롤 오버레이: _showControls 값에 따라 나타나거나 사라짐
                           Positioned.fill(
                             child: AnimatedOpacity(
                               opacity: _showControls ? 1.0 : 0.0,
@@ -149,7 +154,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
                               child: IgnorePointer(
                                 ignoring: !_showControls,
                                 child: Container(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   child: Stack(
                                     children: [
                                       // 중앙 재생/일시정지 버튼
@@ -159,8 +164,8 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
                                           child: Container(
                                             padding: const EdgeInsets.all(20),
                                             decoration: BoxDecoration(
-                                              color: Colors.black.withOpacity(
-                                                0.6,
+                                              color: Colors.black.withValues(
+                                                alpha: 0.6,
                                               ),
                                               shape: BoxShape.circle,
                                             ),
@@ -183,8 +188,8 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
                                           child: Container(
                                             padding: const EdgeInsets.all(8),
                                             decoration: BoxDecoration(
-                                              color: Colors.black.withOpacity(
-                                                0.6,
+                                              color: Colors.black.withValues(
+                                                alpha: 0.6,
                                               ),
                                               shape: BoxShape.circle,
                                             ),
@@ -216,7 +221,6 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: ElevatedButton(
               onPressed: () {
-                // TODO 영상 체출 흐름으로 이동
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('영상 제출 기능은 준비 중입니다')),
                 );
