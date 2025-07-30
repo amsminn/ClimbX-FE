@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// 영상 처리 상태
 enum VideoStatus {
   pending('PENDING'),
-  processing('PROCESSING'), 
+  processing('PROCESSING'),
   completed('COMPLETED'),
   failed('FAILED');
 
@@ -34,7 +34,7 @@ class Video {
   final VideoStatus status;        // 영상 처리 상태
   final int? durationSeconds;      // 영상 길이 (초)
   final DateTime createdAt;        // 생성 시간
-  
+
   // 클라이언트 전용 필드들 (서버에 저장되지 않음)
   final String? localPath;         // 업로드 전 로컬 파일 경로
   final double? uploadProgress;    // 업로드 진행률 (0.0 ~ 1.0)
@@ -149,7 +149,7 @@ class Video {
   /// 재생 시간을 MM:SS 형식으로 변환
   String get formattedDuration {
     if (durationSeconds == null) return '';
-    
+
     final minutes = durationSeconds! ~/ 60;
     final seconds = durationSeconds! % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
