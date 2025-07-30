@@ -115,8 +115,8 @@ class Video {
 
   /// 썸네일 위젯 생성
   Widget getThumbnailWidget({
-    double width = 80,
-    double height = 80,
+    double? width,
+    double? height,
     BoxFit fit = BoxFit.cover,
   }) {
     if (hasThumbnail) {
@@ -137,8 +137,22 @@ class Video {
         },
       );
     } else {
-      return _getDefaultIcon();
+      return Container(
+        width: width,
+        height: height,
+        alignment: Alignment.center,
+        child: _getDefaultIcon(),
+      );
     }
+  }
+
+  /// 재생 시간을 MM:SS 형식으로 변환
+  String get formattedDuration {
+    if (durationSeconds == null) return '';
+    
+    final minutes = durationSeconds! ~/ 60;
+    final seconds = durationSeconds! % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   /// 기본 아이콘 위젯
