@@ -102,8 +102,7 @@ class AuthInterceptor {
     final statusCode = error.response?.statusCode ?? 0;
 
     // 401 Unauthorized 처리
-    if (statusCode == 401 || statusCode == 403) {
-      // TODO 임시로 403 추가 (나중에 삭제 필요)
+    if (statusCode == 401) {
       developer.log('401 에러 감지 - 토큰 갱신 시도', name: 'AuthInterceptor');
 
       // refresh API 호출에서 401이 나면 refresh token도 만료된 것
