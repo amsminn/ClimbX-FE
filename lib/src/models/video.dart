@@ -55,6 +55,8 @@ class Video {
   /// 백엔드 응답에서 Video 객체 생성
   factory Video.fromJson(Map<String, dynamic> json) {
     return Video(
+      // TODO: 백엔드에서 videoId 필드 추가 예정
+      videoId: json['videoId'] as String?,
       thumbnailCdnUrl: json['thumbnailCdnUrl'] as String?,
       hlsCdnUrl: json['hlsCdnUrl'] as String?,
       status: VideoStatus.fromString(json['status'] as String),

@@ -91,7 +91,7 @@ class VideoAnalysisWidget extends HookWidget {
 
         // 업로드 시작 - 진행률 표시를 위해 상태 업데이트
         final uploadingVideo = localVideo.copyWith(isUploading: true);
-        final index = localVideos.value.length - 1;
+        final index = localVideos.value.indexWhere((v) => v.localPath == pickedFile.path);
         localVideos.value = [
           ...localVideos.value.take(index),
           uploadingVideo,
@@ -537,65 +537,6 @@ class VideoAnalysisWidget extends HookWidget {
                 ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  /// 상태 표시기
-  Widget _buildStatusIndicator(Video video) {
-    if (video.isUploading) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: Colors.blue.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: const Text(
-          '업로드 중',
-          style: TextStyle(
-            color: Colors.blue,
-            fontSize: 8,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      );
-    }
-
-    Color statusColor;
-    String statusText;
-
-    switch (video.status) {
-      case VideoStatus.pending:
-        statusColor = Colors.orange;
-        statusText = '대기 중';
-        break;
-      case VideoStatus.processing:
-        statusColor = Colors.blue;
-        statusText = '처리 중';
-        break;
-      case VideoStatus.completed:
-        statusColor = Colors.green;
-        statusText = '완료';
-        break;
-      case VideoStatus.failed:
-        statusColor = Colors.red;
-        statusText = '실패';
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: statusColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        statusText,
-        style: TextStyle(
-          color: statusColor,
-          fontSize: 8,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );

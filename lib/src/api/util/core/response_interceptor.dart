@@ -10,7 +10,7 @@ class ResponseInterceptor {
     return InterceptorsWrapper(
       onResponse: (response, handler) {
         // fromJson 함수는 requestOptions.extra에서 가져옴
-        final fromJson = response.requestOptions.extra?['fromJson'] as Function(Map<String, dynamic>)?;
+        final fromJson = response.requestOptions.extra['fromJson'] as Function(Map<String, dynamic>)?;
         
         try {
           final convertedResponse = _convertResponse(response, fromJson);

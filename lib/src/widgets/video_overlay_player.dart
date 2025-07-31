@@ -156,7 +156,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
 
   Widget _buildControls() {
     return Container(
-      color: Colors.black.withOpacity(0.2),
+      color: Colors.black.withValues(alpha: 0.2),
       child: Stack(
         children: [
           Center(
@@ -168,7 +168,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
+                      color: Colors.black.withValues(alpha: 0.6),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -189,7 +189,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
+                  color: Colors.black.withValues(alpha: 0.6),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.close, color: Colors.white, size: 20),

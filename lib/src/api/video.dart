@@ -1,6 +1,5 @@
 import 'dart:developer' as developer;
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:video_compress/video_compress.dart';
 import 'util/core/api_client.dart';
@@ -25,13 +24,17 @@ class VideoUploadResponse {
 /// 영상 관련 API 호출 함수들
 class VideoApi {
   static final _apiClient = ApiClient.instance;
+  
+  /// 업로드 가능한 최대 파일 크기 (100MB)
+  static const _maxUploadSize = 100 * 1024 * 1024;
 
   /// 현재 사용자의 영상 목록 조회
   static Future<List<Video>> getCurrentUserVideos() async {
     try {
       // 사용자 닉네임 가져오기 (기존 TokenStorage 활용)
-      final nickname = await TokenStorage.getUserNickname();
-      if (nickname == null || nickname.isEmpty) {
+      String? finalNickname = await TokenStorage.getUserNickname();
+      
+      if (finalNickname == null || finalNickname.isEmpty) {
         developer.log('저장된 닉네임이 없음 - /api/auth/me 호출', name: 'VideoApi');
 
         final authResponse = await _apiClient.get<Map<String, dynamic>>(
@@ -44,12 +47,11 @@ class VideoApi {
           throw Exception('현재 사용자의 nickname을 찾을 수 없습니다');
         }
 
-        // 닉네임 저장
+        // 닉네임 저장 및 사용할 변수 업데이트
         await TokenStorage.saveUserNickname(fetchedNickname);
+        finalNickname = fetchedNickname;
         developer.log('닉네임 저장 완료: $fetchedNickname', name: 'VideoApi');
       }
-
-      final finalNickname = nickname ?? await TokenStorage.getUserNickname();
       developer.log(
         '사용자 영상 목록 조회 - nickname: $finalNickname',
         name: 'VideoApi',
@@ -120,13 +122,7 @@ class VideoApi {
       );
 
       final file = File(filePath);
-      late final Uint8List fileBytes;
-
-      try {
-        fileBytes = await file.readAsBytes();
-      } catch (e) {
-        throw Exception('파일을 읽을 수 없습니다: $filePath ($e)');
-      }
+      final fileSize = await file.length();
       final fileExtension = filePath.split('.').last.toLowerCase();
 
       // 파일 형식에 따른 Content-Type 설정
@@ -150,8 +146,11 @@ class VideoApi {
 
       await s3Dio.put(
         presignedUrl,
-        data: fileBytes,
-        options: Options(headers: {'Content-Type': contentType}),
+        data: file.openRead(),
+        options: Options(headers: {
+          'Content-Type': contentType,
+          'Content-Length': fileSize.toString(),
+        }),
         onSendProgress: onProgress != null
             ? (sent, total) {
                 final progress = sent / total;
@@ -223,11 +222,10 @@ class VideoApi {
         name: 'VideoApi',
       );
 
-      // 4. 압축된 파일 크기 제한 검증 (100MB)
-      const maxSize = 100 * 1024 * 1024;
-      if (compressedFileSize > maxSize) {
+      // 4. 압축된 파일 크기 제한 검증
+      if (compressedFileSize > _maxUploadSize) {
         throw Exception(
-          '압축된 파일 크기가 여전히 큽니다. (최대: ${maxSize ~/ (1024 * 1024)}MB)',
+          '압축된 파일 크기가 여전히 큽니다. (최대: ${_maxUploadSize ~/ (1024 * 1024)}MB)',
         );
       }
 
