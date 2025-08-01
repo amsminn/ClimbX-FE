@@ -241,7 +241,6 @@ class VideoApi {
       // 5. presigned URL 요청 (압축된 파일 정보로)
       // 압축된 파일의 확장자를 사용해 presigned URL을 요청합니다.
       final compressedFileExtension = compressedFilePath.split('.').last.toLowerCase();
-      print(compressedFileExtension);
       final uploadResponse = await requestUploadUrl(
         fileExtension: compressedFileExtension,
         fileSize: compressedFileSize,
