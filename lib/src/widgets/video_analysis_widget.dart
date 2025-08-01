@@ -67,6 +67,20 @@ class VideoAnalysisWidget extends HookWidget {
       }
     }
 
+    // 영상 목록 새로고침
+    Future<void> refreshVideos() async {
+      isLoading.value = true;
+      try {
+        // 새로고침 시 로컬 영상 목록 초기화 (업로드 중인 것들 제거)
+        localVideos.value = [];
+        await loadServerVideos();
+      } finally {
+        if (context.mounted) {
+          isLoading.value = false;
+        }
+      }
+    }
+
     // 영상 업로드 처리
     Future<void> handleVideoUpload(XFile pickedFile, String successMsg) async {
       final contextMounted = context.mounted;
@@ -144,6 +158,8 @@ class VideoAnalysisWidget extends HookWidget {
             ),
           );
         }
+
+        refreshVideos();
       } catch (e) {
         developer.log('영상 업로드 실패: $e', name: 'VideoAnalysisWidget', error: e);
 
@@ -238,20 +254,6 @@ class VideoAnalysisWidget extends HookWidget {
               backgroundColor: Colors.red,
             ),
           );
-        }
-      }
-    }
-
-    // 영상 목록 새로고침
-    Future<void> refreshVideos() async {
-      isLoading.value = true;
-      try {
-        // 새로고침 시 로컬 영상 목록 초기화 (업로드 중인 것들 제거)
-        localVideos.value = [];
-        await loadServerVideos();
-      } finally {
-        if (context.mounted) {
-          isLoading.value = false;
         }
       }
     }

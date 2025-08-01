@@ -200,27 +200,36 @@ class VideoApi {
         );
       }
 
-      // 3. 비디오 압축
-      developer.log('비디오 압축 시작', name: 'VideoApi');
-      final compressedMediaInfo = await VideoCompress.compressVideo(
-        filePath,
-        quality: VideoQuality.Res1920x1080Quality,
-        deleteOrigin: false,
-        includeAudio: true,
-      );
+      /// TODO: 파일 형식에 따라 처리로직 변경 필요
+      // 3. 비디오 압축 (AVI는 지원되지 않아 원본 그대로 업로드)
+      String compressedFilePath;
+      int compressedFileSize;
 
-      if (compressedMediaInfo?.path == null) {
-        throw Exception('비디오 압축 실패');
+      if (fileExtension == 'avi') {
+        developer.log('AVI 형식은 압축을 건너뜁니다', name: 'VideoApi');
+        compressedFilePath = filePath;
+        compressedFileSize = originalFileSize;
+      } else {
+        developer.log('비디오 압축 시작', name: 'VideoApi');
+        final compressedMediaInfo = await VideoCompress.compressVideo(
+          filePath,
+          quality: VideoQuality.Res1920x1080Quality,
+          deleteOrigin: false,
+          includeAudio: true,
+        );
+
+        if (compressedMediaInfo?.path == null) {
+          throw Exception('비디오 압축 실패');
+        }
+
+        compressedFilePath = compressedMediaInfo!.path!;
+        compressedFileSize = await File(compressedFilePath).length();
+
+        developer.log(
+          '비디오 압축 완료 - 압축된 파일: $compressedFilePath, 크기: ${compressedFileSize}bytes (원본: ${originalFileSize}bytes)',
+          name: 'VideoApi',
+        );
       }
-
-      final compressedFilePath = compressedMediaInfo!.path!;
-      final compressedFile = File(compressedFilePath);
-      final compressedFileSize = await compressedFile.length();
-
-      developer.log(
-        '비디오 압축 완료 - 압축된 파일: $compressedFilePath, 크기: ${compressedFileSize}bytes (원본: ${originalFileSize}bytes)',
-        name: 'VideoApi',
-      );
 
       // 4. 압축된 파일 크기 제한 검증
       if (compressedFileSize > _maxUploadSize) {
@@ -230,8 +239,11 @@ class VideoApi {
       }
 
       // 5. presigned URL 요청 (압축된 파일 정보로)
+      // 압축된 파일의 확장자를 사용해 presigned URL을 요청합니다.
+      final compressedFileExtension = compressedFilePath.split('.').last.toLowerCase();
+      print(compressedFileExtension);
       final uploadResponse = await requestUploadUrl(
-        fileExtension: fileExtension,
+        fileExtension: compressedFileExtension,
         fileSize: compressedFileSize,
       );
 
