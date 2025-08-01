@@ -56,6 +56,9 @@ class AppColorSchemes {
   
   /// 초록색 액센트 - 성공 상태 등
   static const Color accentGreen = Color(0xFF059669);
+  
+  /// 빨간색 액센트 - 오류, 경고 등
+  static const Color accentRed = Color(0xFFEF4444);
 
   // ===== 그라디언트 색상 (Gradient Colors) =====
   

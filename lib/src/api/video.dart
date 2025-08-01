@@ -126,20 +126,12 @@ class VideoApi {
       final fileExtension = filePath.split('.').last.toLowerCase();
 
       // 파일 형식에 따른 Content-Type 설정
-      String contentType;
-      switch (fileExtension) {
-        case 'mp4':
-          contentType = 'video/mp4';
-          break;
-        case 'mov':
-          contentType = 'video/quicktime';
-          break;
-        case 'avi':
-          contentType = 'video/x-msvideo';
-          break;
-        default:
-          contentType = 'video/mp4';
-      }
+      const contentTypes = {
+        'mp4': 'video/mp4',
+        'mov': 'video/quicktime',
+        'avi': 'video/x-msvideo',
+      };
+      final contentType = contentTypes[fileExtension] ?? 'video/mp4';
 
       // 진행률 로깅 최적화를 위한 변수
       double lastLoggedProgress = 0.0;
