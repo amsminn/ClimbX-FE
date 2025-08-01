@@ -7,7 +7,6 @@ import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/color_schemes.dart';
-import '../screens/analysis_page.dart';
 
 class MainPage extends StatefulWidget {
   final BottomNavTab? initialTab;
@@ -64,8 +63,8 @@ class _MainPageState extends State<MainPage> {
           _buildComingSoon('홈', Icons.home, colorScheme),
           // 1: 리더보드
           const LeaderboardBody(),
-          // 2: 분석
-          AnalysisPage(isActive: _currentTab == BottomNavTab.analysis),
+          // 2: 검색
+          _buildComingSoon('검색', Icons.search, colorScheme),
           // 3: 지도
           const MapBody(),
           // 4: 프로필

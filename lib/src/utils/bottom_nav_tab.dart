@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 enum BottomNavTab {
   home('홈', Icons.home_outlined, Icons.home),
   leaderboard('리더보드', Icons.leaderboard_outlined, Icons.leaderboard),
-  analysis('분석', Icons.camera_alt_outlined, Icons.camera_alt),
+  search('검색', Icons.search_outlined, Icons.search),
   map('지도', Icons.map_outlined, Icons.map),
   profile('프로필', Icons.person_outline, Icons.person);
 

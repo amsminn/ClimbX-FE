@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'dart:async';
 import 'token_storage.dart';
 import '../../auth.dart';
+import '../core/response_interceptor.dart';
 
 /// JWT 인증 토큰 인터셉터
 class AuthInterceptor {
@@ -103,7 +104,7 @@ class AuthInterceptor {
     // 401 Unauthorized 처리
     if (statusCode == 401) {
       developer.log('401 에러 감지 - 토큰 갱신 시도', name: 'AuthInterceptor');
-      
+
       // refresh API 호출에서 401이 나면 refresh token도 만료된 것
       if (error.requestOptions.path.contains('/api/auth/oauth2/refresh')) {
         developer.log('Refresh Token 만료 - 완전 로그아웃 처리', name: 'AuthInterceptor');
@@ -114,21 +115,28 @@ class AuthInterceptor {
 
       // 토큰 갱신 시도
       final success = await _attemptTokenRefreshWithQueue();
-      
+
       if (success) {
         // 갱신 성공 시 원래 요청 재시도
         try {
           final newAccessToken = await TokenStorage.getAccessToken();
           if (newAccessToken != null && newAccessToken.isNotEmpty) {
-            error.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-            
+            error.requestOptions.headers['Authorization'] =
+                'Bearer $newAccessToken';
+
             // 새로운 Dio 인스턴스로 재시도 (순환 참조 방지)
-            final retryDio = Dio(BaseOptions(
-              baseUrl: error.requestOptions.baseUrl,
-              connectTimeout: const Duration(seconds: 10),
-              receiveTimeout: const Duration(seconds: 15),
-            ));
-            
+            // ResponseInterceptor도 포함해야 함
+            final retryDio = Dio(
+              BaseOptions(
+                baseUrl: error.requestOptions.baseUrl,
+                connectTimeout: const Duration(seconds: 10),
+                receiveTimeout: const Duration(seconds: 15),
+              ),
+            );
+
+            // ResponseInterceptor 추가
+            retryDio.interceptors.add(_createResponseInterceptor());
+
             final response = await retryDio.fetch(error.requestOptions);
             developer.log('토큰 갱신 후 요청 재시도 성공', name: 'AuthInterceptor');
             return handler.resolve(response);
@@ -137,7 +145,7 @@ class AuthInterceptor {
           developer.log('재시도 실패: $retryError', name: 'AuthInterceptor');
         }
       }
-      
+
       // 갱신 실패 시 로그아웃 처리
       await _handleCompleteLogout();
     }
@@ -156,7 +164,7 @@ class AuthInterceptor {
       developer.log('이미 토큰 갱신 중 - 대기 큐에 추가', name: 'AuthInterceptor');
       final completer = Completer<void>();
       _refreshQueue.add(completer);
-      
+
       try {
         await completer.future;
         // 갱신 완료 후 새 토큰 확인
@@ -169,11 +177,11 @@ class AuthInterceptor {
     }
 
     _isRefreshing = true;
-    
+
     try {
       // AuthApi.refreshToken() 호출
       await AuthApi.refreshToken();
-      
+
       // 대기 중인 요청들 깨우기
       for (final completer in _refreshQueue) {
         if (!completer.isCompleted) {
@@ -181,12 +189,12 @@ class AuthInterceptor {
         }
       }
       _refreshQueue.clear();
-      
+
       developer.log('토큰 갱신 성공', name: 'AuthInterceptor');
       return true;
     } catch (e) {
       developer.log('토큰 갱신 실패: $e', name: 'AuthInterceptor');
-      
+
       // 대기 중인 요청들 에러 처리
       for (final completer in _refreshQueue) {
         if (!completer.isCompleted) {
@@ -194,7 +202,7 @@ class AuthInterceptor {
         }
       }
       _refreshQueue.clear();
-      
+
       return false;
     } finally {
       _isRefreshing = false;
@@ -244,5 +252,10 @@ class AuthInterceptor {
       developer.log('토큰 갱신 확인 실패: $e', name: 'AuthInterceptor');
       return false;
     }
+  }
+
+  /// ResponseInterceptor 생성 (재시도용)
+  static InterceptorsWrapper _createResponseInterceptor() {
+    return ResponseInterceptor.createInterceptor();
   }
 }

@@ -10,18 +10,20 @@ import 'util/auth/token_storage.dart';
 /// 인증 관련 API 호출 함수들
 class AuthApi {
   static final _apiClient = ApiClient.instance;
-  
+
   // 헤더 접근용 순수 Dio 인스턴스 (인터셉터 없음)
-  static final _pureDio = Dio(BaseOptions(
-    baseUrl: ApiClient.baseUrl ?? '',
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 15),
-    sendTimeout: const Duration(seconds: 10),
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-  ));
+  static final _pureDio = Dio(
+    BaseOptions(
+      baseUrl: ApiClient.baseUrl ?? '',
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(seconds: 10),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   /// nonce 생성 함수
   static String _generateNonce() {
@@ -39,11 +41,11 @@ class AuthApi {
   /// 카카오 로그인
   static Future<String> signInWithKakao() async {
     try {
-          // nonce 생성
-    final nonce = _generateNonce();
-    if (kDebugMode) {
-      developer.log('생성된 nonce: $nonce', name: 'AuthApi');
-    }
+      // nonce 생성
+      final nonce = _generateNonce();
+      if (kDebugMode) {
+        developer.log('생성된 nonce: $nonce', name: 'AuthApi');
+      }
 
       // 카카오톡 설치 확인
       if (await isKakaoTalkInstalled()) {
@@ -257,7 +259,7 @@ class AuthApi {
       if (newRefreshToken == null || newRefreshToken.isEmpty) {
         throw Exception('토큰 갱신 실패: 새로운 Refresh Token을 받지 못했습니다. 서버 응답을 확인하세요.');
       }
-      
+
       // 새 토큰들 저장
       await TokenStorage.saveTokens(
         accessToken: newAccessToken,
