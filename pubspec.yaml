@@ -56,6 +56,8 @@ dependencies:
   video_player: ^2.10.0
   # Apple Sign In
   sign_in_with_apple: ^7.0.1
+  # 구글 로그인
+  google_sign_in: ^7.1.1
   crypto: ^3.0.2
 
 dev_dependencies:
