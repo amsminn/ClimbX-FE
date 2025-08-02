@@ -163,33 +163,12 @@ class AuthApi {
         throw Exception('카카오 ID 토큰을 받을 수 없습니다. 다시 시도해주세요.');
       }
 
-      if (kDebugMode) {
-        // 카카오 토큰 정보 전체 출력 (디버그 모드만)
-        developer.log('카카오 토큰 정보: ${token.toJson()}', name: 'AuthApi');
-        developer.log('id_token: $idToken', name: 'AuthApi');
-        developer.log('전송할 nonce: $nonce', name: 'AuthApi');
-      }
-
       // 백엔드로 id_token과 nonce 전송하여 JWT 토큰 받기 (idToken 검증 후)
       // 헤더에서 Refresh-Token을 받기 위해 순수 Dio 사용 (인터셉터 없음)
       final dioResponse = await _pureDio.post(
         '/api/auth/oauth2/kakao/callback',
         data: {'idToken': idToken, 'nonce': nonce},
       );
-
-      if (kDebugMode) {
-        developer.log('=== 로그인 응답 헤더 확인 ===', name: 'AuthApi Debug');
-        developer.log(
-          '응답 헤더들: ${dioResponse.headers.map}',
-          name: 'AuthApi Debug',
-        );
-        developer.log(
-          'Refresh-Token 헤더: ${dioResponse.headers.value('Refresh-Token')}',
-          name: 'AuthApi Debug',
-        );
-        developer.log('응답 데이터: ${dioResponse.data}', name: 'AuthApi Debug');
-        developer.log('============================', name: 'AuthApi Debug');
-      }
 
       final accessToken = await _processAuthResponse(dioResponse);
       developer.log('로그인 성공 - 토큰 저장 완료', name: 'AuthApi');
@@ -218,17 +197,6 @@ class AuthApi {
         nonce: nonce,
       );
 
-      if (kDebugMode) {
-        developer.log(
-          'Apple credential raw: ${credential.toString()}',
-          name: 'AuthApi',
-        );
-        developer.log(
-          'identityToken: ${credential.identityToken}...',
-          name: 'AuthApi',
-        );
-      }
-
       // identityToken 확인
       final identityToken = credential.identityToken;
       if (identityToken == null || identityToken.isEmpty) {
@@ -240,20 +208,6 @@ class AuthApi {
         '/api/auth/oauth2/apple/callback',
         data: {'idToken': identityToken, 'nonce': nonce},
       );
-
-      if (kDebugMode) {
-        developer.log('=== Apple 로그인 응답 헤더 확인 ===', name: 'AuthApi Debug');
-        developer.log(
-          '응답 헤더들: ${dioResponse.headers.map}',
-          name: 'AuthApi Debug',
-        );
-        developer.log(
-          'Refresh-Token 헤더: ${dioResponse.headers.value('Refresh-Token')}',
-          name: 'AuthApi Debug',
-        );
-        developer.log('응답 데이터: ${dioResponse.data}', name: 'AuthApi Debug');
-        developer.log('============================', name: 'AuthApi Debug');
-      }
 
       final accessToken = await _processAuthResponse(dioResponse);
       return accessToken;
@@ -290,20 +244,6 @@ class AuthApi {
         '/api/auth/oauth2/refresh',
         options: Options(headers: {'Refresh-Token': refreshToken}),
       );
-
-      if (kDebugMode) {
-        developer.log('=== 토큰 갱신 응답 헤더 확인 ===', name: 'AuthApi Debug');
-        developer.log(
-          '응답 헤더들: ${dioResponse.headers.map}',
-          name: 'AuthApi Debug',
-        );
-        developer.log(
-          'Refresh-Token 헤더: ${dioResponse.headers.value('Refresh-Token')}',
-          name: 'AuthApi Debug',
-        );
-        developer.log('응답 데이터: ${dioResponse.data}', name: 'AuthApi Debug');
-        developer.log('===============================', name: 'AuthApi Debug');
-      }
 
       final newAccessToken = await _processAuthResponse(dioResponse);
       developer.log('토큰 갱신 성공', name: 'AuthApi');
