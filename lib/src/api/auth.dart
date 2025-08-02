@@ -243,30 +243,11 @@ class AuthApi {
         throw Exception('Google 로그인 실패: idToken이 없습니다');
       }
 
-      if (kDebugMode) {
-        developer.log('Google account 이메일: ${account.email}', name: 'AuthApi');
-        developer.log('idToken (prefix): ${idToken}', name: 'AuthApi');
-      }
-
       // 백엔드로 토큰 전송
       final dioResponse = await _pureDio.post(
         '/api/auth/oauth2/google/callback',
         data: {'idToken': idToken}, // 구글은 nonce를 직접 내부에 생성하므로 nonce를 전달X
       );
-
-      if (kDebugMode) {
-        developer.log('=== Google 로그인 응답 헤더 확인 ===', name: 'AuthApi Debug');
-        developer.log(
-          '응답 헤더들: ${dioResponse.headers.map}',
-          name: 'AuthApi Debug',
-        );
-        developer.log(
-          'Refresh-Token 헤더: ${dioResponse.headers.value('Refresh-Token')}',
-          name: 'AuthApi Debug',
-        );
-        developer.log('응답 데이터: ${dioResponse.data}', name: 'AuthApi Debug');
-        developer.log('============================', name: 'AuthApi Debug');
-      }
 
       final accessToken = await _processAuthResponse(dioResponse);
       return accessToken;
