@@ -14,8 +14,15 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
+  
+  // 네이버 맵 클라이언트 ID 검증
+  final naverMapClientId = dotenv.env['NAVER_MAP_CLIENT_ID'];
+  if (naverMapClientId == null || naverMapClientId.isEmpty) {
+    throw Exception('.env 파일에 NAVER_MAP_CLIENT_ID가 설정되지 않았습니다.');
+  }
+  
   await FlutterNaverMap().init(
-    clientId: dotenv.env['NAVER_MAP_CLIENT_ID']!,
+    clientId: naverMapClientId,
     onAuthFailed: (ex) {
       switch (ex) {
         case NQuotaExceededException(:final message):
@@ -31,7 +38,11 @@ void main() async {
   );
 
   // 카카오 SDK 초기화
-  KakaoSdk.init(nativeAppKey: dotenv.env['KAKAO_NATIVE_APP_KEY']);
+  final kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'];
+  if (kakaoNativeAppKey == null || kakaoNativeAppKey.isEmpty) {
+    throw Exception('.env 파일에 KAKAO_NATIVE_APP_KEY가 설정되지 않았습니다.');
+  }
+  KakaoSdk.init(nativeAppKey: kakaoNativeAppKey);
 
   // API 클라이언트 초기화
   ApiClient.instance;
