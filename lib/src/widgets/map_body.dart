@@ -334,6 +334,8 @@ class MapBody extends HookWidget {
         final status = await Permission.location.status;
         if (status.isDenied) {
           await Permission.location.request();
+        } else if (status.isPermanentlyDenied) {
+          await openAppSettings();
         }
       } catch (e) {
         developer.log('위치 권한 요청 중 오류: $e', name: 'MapBody');
