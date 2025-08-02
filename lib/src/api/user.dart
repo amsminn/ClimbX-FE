@@ -4,6 +4,8 @@ import '../models/user_profile.dart';
 import '../models/history_data.dart';
 import '../models/streak_data.dart';
 import 'util/auth/token_storage.dart'; // TokenStorage import 수정
+import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// 사용자 관련 API 호출 함수들
 class UserApi {
@@ -14,11 +16,11 @@ class UserApi {
     try {
       // 저장된 닉네임 확인
       String? nickname = await TokenStorage.getUserNickname();
-      
+
       // 저장된 닉네임이 없으면 /api/auth/me로 조회 후 저장
       if (nickname == null || nickname.isEmpty) {
         developer.log('저장된 닉네임이 없음 - /api/auth/me 호출', name: 'UserApi');
-        
+
         final authResponse = await _apiClient.get<Map<String, dynamic>>(
           '/api/auth/me',
           logContext: 'UserApi',
@@ -78,11 +80,11 @@ class UserApi {
     try {
       // 저장된 닉네임 확인
       String? nickname = await TokenStorage.getUserNickname();
-      
+
       // 저장된 닉네임이 없으면 /api/auth/me로 조회 후 저장
       if (nickname == null || nickname.isEmpty) {
         developer.log('저장된 닉네임이 없음 - /api/auth/me 호출', name: 'UserApi');
-        
+
         final authResponse = await _apiClient.get<Map<String, dynamic>>(
           '/api/auth/me',
           logContext: 'UserApi',
@@ -152,11 +154,11 @@ class UserApi {
     try {
       // 저장된 닉네임 확인
       String? nickname = await TokenStorage.getUserNickname();
-      
+
       // 저장된 닉네임이 없으면 /api/auth/me로 조회 후 저장
       if (nickname == null || nickname.isEmpty) {
         developer.log('저장된 닉네임이 없음 - /api/auth/me 호출', name: 'UserApi');
-        
+
         final authResponse = await _apiClient.get<Map<String, dynamic>>(
           '/api/auth/me',
           logContext: 'UserApi',
@@ -216,4 +218,42 @@ class UserApi {
       throw Exception('스트릭 데이터를 불러올 수 없습니다');
     }
   }
-} 
+
+  /// 프로필 업데이트 (닉네임, 상태 메세지)
+  static Future<void> updateProfile({
+    required String currentNickname,
+    String? newNickname,
+    String? newStatusMessage,
+  }) async {
+    await _apiClient.put<void>(
+      '/api/users/$currentNickname',
+      data: {'newNickname': newNickname, 'newStatusMessage': newStatusMessage},
+      logContext: 'UserApi',
+    );
+
+    // 닉네임이 변경되면 로컬 저장 닉네임 갱신
+    if (newNickname != null && newNickname.isNotEmpty) {
+      await TokenStorage.saveUserNickname(newNickname);
+    }
+  }
+
+  /// 프로필 이미지 업데이트 (file == null 이면 기본 이미지로 변경)
+  static Future<void> updateProfileImage({
+    required String nickname,
+    required XFile? file,
+  }) async {
+    final formData = FormData.fromMap({
+      if (file != null)
+        'profileImage': await MultipartFile.fromFile(
+          file.path,
+          filename: file.name,
+        ),
+    });
+
+    await _apiClient.dio.put(
+      '/api/users/$nickname/profile-image',
+      data: formData,
+      options: Options(contentType: Headers.multipartFormDataContentType),
+    );
+  }
+}
