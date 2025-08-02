@@ -60,3 +60,7 @@ app.*.map.json
 
 # Environment variables
 .env
+
+# Firebase config (should not be committed)
+GoogleService-Info.plist
+**/GoogleService-Info.plist

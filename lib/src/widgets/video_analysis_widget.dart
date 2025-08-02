@@ -60,7 +60,7 @@ class VideoAnalysisWidget extends HookWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('영상 목록을 불러올 수 없습니다: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColorSchemes.accentRed,
             ),
           );
         }
@@ -92,7 +92,7 @@ class VideoAnalysisWidget extends HookWidget {
         localVideos.value = [localVideo, ...localVideos.value];
 
         // 성공 메시지 표시
-        if (contextMounted) {
+        if (context.mounted) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(successMsg)));
@@ -150,11 +150,11 @@ class VideoAnalysisWidget extends HookWidget {
           ];
         }
 
-        if (contextMounted && context.mounted) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('영상 업로드가 완료되었습니다!'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColorSchemes.accentGreen,
             ),
           );
         }
@@ -168,11 +168,11 @@ class VideoAnalysisWidget extends HookWidget {
             .where((v) => v.localPath != pickedFile.path)
             .toList();
 
-        if (contextMounted && context.mounted) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('영상 업로드 실패: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColorSchemes.accentRed,
               duration: const Duration(seconds: 5),
             ),
           );
@@ -223,7 +223,7 @@ class VideoAnalysisWidget extends HookWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('비디오 촬영 실패: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColorSchemes.accentRed,
             ),
           );
         }
@@ -251,7 +251,7 @@ class VideoAnalysisWidget extends HookWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('갤러리 영상 선택 실패: $e'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColorSchemes.accentRed,
             ),
           );
         }
@@ -425,7 +425,7 @@ class VideoAnalysisWidget extends HookWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: video.isUploading
-                ? Colors.blue.withValues(alpha: 0.5)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
                 : AppColorSchemes.textTertiary.withValues(alpha: 0.2),
             width: 1,
           ),
@@ -438,7 +438,7 @@ class VideoAnalysisWidget extends HookWidget {
               Positioned.fill(
                 child: video.isPending
                     ? Container(
-                        color: Colors.grey[100],
+                        color: AppColorSchemes.backgroundSecondary,
                         child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -456,12 +456,12 @@ class VideoAnalysisWidget extends HookWidget {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Text(
+                              const Text(
                                 '처리중',
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.grey[600],
+                                  color: AppColorSchemes.textSecondary,
                                 ),
                               ),
                             ],
@@ -562,14 +562,14 @@ class VideoAnalysisWidget extends HookWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('영상 처리가 완료되면 재생할 수 있습니다'),
-          backgroundColor: Colors.orange,
+          backgroundColor: AppColorSchemes.accentOrange,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('영상을 재생할 수 없습니다'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColorSchemes.accentRed,
         ),
       );
     }

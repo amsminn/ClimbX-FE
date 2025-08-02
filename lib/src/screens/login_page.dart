@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
 import '../api/auth.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'dart:io';
 import '../utils/navigation_helper.dart';
 
 class LoginPage extends HookWidget {
@@ -27,6 +29,26 @@ class LoginPage extends HookWidget {
       },
     );
 
+    // Apple 로그인 mutation
+    final signInAppleMutation = useMutation(
+      (_) => AuthApi.signInWithApple(),
+      onSuccess: (token, _, __) {
+        NavigationHelper.navigateToMainAfterLogin(context);
+      },
+      onError: (error, _, __) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error.toString()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      },
+    );
+
+    // Apple 로그인 사용 가능 여부 확인 (iOS 13+, Android 웹)
+    final appleAvailableSnapshot = useFuture(useMemoized(() => SignInWithApple.isAvailable()));
+    final showAppleButton = Platform.isIOS && appleAvailableSnapshot.data == true;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: Center(
@@ -48,7 +70,7 @@ class LoginPage extends HookWidget {
 
             // 서브 타이틀
             const Text(
-              '카카오로 로그인',
+              '소셜 계정으로 로그인',
               style: TextStyle(
                 color: Color(0xFF64748B),
                 fontSize: 18,
@@ -105,13 +127,28 @@ class LoginPage extends HookWidget {
               ),
             ),
 
+            if (showAppleButton) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: 280,
+                height: 56,
+                child: SignInWithAppleButton(
+                  borderRadius: BorderRadius.circular(16),
+                  onPressed: () {
+                  if (signInAppleMutation.isPending) return;
+                  signInAppleMutation.mutate(null);
+                },
+                ),
+              ),
+            ],
+
             const SizedBox(height: 24),
 
             // 설명 텍스트
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
-                '카카오 계정으로 간편하게 로그인',
+                '소셜 계정으로 로그인',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(0xFF94A3B8),
