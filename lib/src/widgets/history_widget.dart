@@ -58,7 +58,7 @@ class HistoryWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedPeriod = useState(HistoryPeriod.oneMonth);
+    final selectedPeriod = useState(HistoryPeriod.all);
 
     // fquery로 히스토리 데이터 get
     final historyQuery = useQuery<HistoryData, Exception>(
@@ -146,6 +146,7 @@ class HistoryWidget extends HookWidget {
             HistoryChart(
               historyData: filteredHistoryData,
               colorScheme: colorScheme,
+              period: selectedPeriod.value,
             ),
 
             const SizedBox(height: 8),
