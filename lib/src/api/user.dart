@@ -252,10 +252,15 @@ class UserApi {
         ),
     });
 
-    await _apiClient.dio.put(
-      '/api/users/$nickname/profile-image',
-      data: formData,
-      options: Options(contentType: Headers.multipartFormDataContentType),
-    );
+    try {
+      await _apiClient.dio.put(
+        '/api/users/$nickname/profile-image',
+        data: formData,
+        options: Options(contentType: Headers.multipartFormDataContentType),
+      );
+    } catch (e) {
+      developer.log('프로필 이미지 업데이트 실패: $e', name: 'UserApi', error: e);
+      throw Exception('프로필 이미지를 업데이트할 수 없습니다.');
+    }
   }
 }

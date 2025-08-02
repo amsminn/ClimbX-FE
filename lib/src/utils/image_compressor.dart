@@ -5,18 +5,25 @@ import 'package:path/path.dart' as p;
 
 /// 이미지 압축 유틸리티
 /// 5MB 이하로 압축하여 반환
+
+// 압축 설정 상수
 const _maxBytes = 5 * 1024 * 1024; // 5 MB
+const _initialQuality = 90; // 초기 압축 품질
+const _minQuality = 25; // 최소 압축 품질
+const _qualityStep = 10; // 품질 감소 단위
+const _initialMinSide = 2000; // 초기 최소 크기 (픽셀)
+const _resizeFactor = 0.9; // 크기 감소 비율
 
 /// 이미지를 5MB 이하로 압축
 Future<File> compressUnder5MB(File original) async {
   final originSize = await original.length();
   if (originSize <= _maxBytes) return original;
 
-  int quality = 90;
-  int minSide = 2000; // 고해상도로 시작하여 점진적으로 축소
+  int quality = _initialQuality;
+  int minSide = _initialMinSide; // 고해상도로 시작하여 점진적으로 축소
   List<int>? outBytes;
 
-  while (quality >= 25) {
+  while (quality >= _minQuality) {
     outBytes = await FlutterImageCompress.compressWithFile(
       original.path,
       quality: quality,
@@ -29,8 +36,8 @@ Future<File> compressUnder5MB(File original) async {
     if (outBytes.length <= _maxBytes) break;
 
     // 다음 반복을 위해 품질과 크기 감소
-    quality -= 10;
-    minSide = (minSide * 0.9).round();
+    quality -= _qualityStep;
+    minSide = (minSide * _resizeFactor).round();
   }
 
   // 압축 실패 시 에러 발생
