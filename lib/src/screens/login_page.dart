@@ -62,8 +62,11 @@ class LoginPage extends HookWidget {
     );
 
     // Apple 로그인 사용 가능 여부 확인 (iOS 13+, Android 웹)
-    final appleAvailableSnapshot = useFuture(useMemoized(() => SignInWithApple.isAvailable()));
-    final showAppleButton = Platform.isIOS && appleAvailableSnapshot.data == true;
+    final appleAvailableSnapshot = useFuture(
+      useMemoized(() => SignInWithApple.isAvailable()),
+    );
+    final showAppleButton =
+        Platform.isIOS && appleAvailableSnapshot.data == true;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -152,8 +155,8 @@ class LoginPage extends HookWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Color(0xFFE2E8F0)),
-                boxShadow: [
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 12,
@@ -201,9 +204,9 @@ class LoginPage extends HookWidget {
                 child: SignInWithAppleButton(
                   borderRadius: BorderRadius.circular(16),
                   onPressed: () {
-                  if (signInAppleMutation.isPending) return;
-                  signInAppleMutation.mutate(null);
-                },
+                    if (signInAppleMutation.isPending) return;
+                    signInAppleMutation.mutate(null);
+                  },
                 ),
               ),
             ],
