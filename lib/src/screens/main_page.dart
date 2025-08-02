@@ -33,7 +33,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    // 초기 탭 설정
+    // 초기 탭 설정 - 프로필이 첫 번째 탭이므로 기본값으로 설정
     _currentTab = widget.initialTab ?? BottomNavTab.profile;
   }
 
@@ -59,16 +59,14 @@ class _MainPageState extends State<MainPage> {
       body: IndexedStack(
         index: _currentTab.index,
         children: [
-          // 0: 홈
-          _buildComingSoon('홈', Icons.home, colorScheme),
+          // 0: 프로필
+          ProfileBody(currentTier: currentTier, colorScheme: colorScheme),
           // 1: 리더보드
           const LeaderboardBody(),
           // 2: 검색
           _buildComingSoon('검색', Icons.search, colorScheme),
           // 3: 지도
           const MapBody(),
-          // 4: 프로필
-          ProfileBody(currentTier: currentTier, colorScheme: colorScheme),
         ],
       ),
 
