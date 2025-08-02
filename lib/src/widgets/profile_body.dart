@@ -11,6 +11,9 @@ import '../models/user_profile.dart';
 import '../api/user.dart';
 import 'video_analysis_widget.dart';
 
+/// 프로필 화면의 메인 바디 위젯
+/// 로딩/에러 상태 처리 및 탭 구조 관리
+
 class ProfileBody extends HookWidget {
   final String currentTier;
   final TierColorScheme colorScheme;
@@ -23,18 +26,18 @@ class ProfileBody extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    // fquery로 데이터 get
+    // 사용자 프로필 데이터 조회
     final userQuery = useQuery<UserProfile, Exception>(
       ['user_profile'],
       UserApi.getUserProfile,
     );
 
-    // 로딩 상태
+    // 로딩 중 표시
     if (userQuery.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // 에러 상태
+    // 에러 발생 시 재시도 화면
     if (userQuery.isError) {
       return Center(
         child: Column(
@@ -53,7 +56,8 @@ class ProfileBody extends HookWidget {
       );
     }
 
-    final userProfile = userQuery.data;
+    // 데이터 로드 성공 - 프로필 정보 사용
+    final userProfile = userQuery.data!;
     return DefaultTabController(
       length: 5,
       child: NestedScrollView(
@@ -202,6 +206,7 @@ class ProfileBody extends HookWidget {
   }
 }
 
+/// 스크롤 시 고정되는 탭바 델리게이트
 class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
   const _StickyTabBarDelegate(this.tabBar);
 
