@@ -7,6 +7,8 @@ import 'package:dio/dio.dart';
 import 'util/core/api_client.dart';
 import 'util/auth/token_storage.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// 인증 관련 API 호출 함수들
 class AuthApi {
@@ -213,6 +215,45 @@ class AuthApi {
       return accessToken;
     } catch (e) {
       throw Exception('Apple 로그인에 실패했습니다: \\${e.toString()}');
+    }
+  }
+
+  /// Google 로그인
+  static Future<String> signInWithGoogle() async {
+    try {
+      // Google 로그인 인스턴스 생성
+      final googleSignIn = GoogleSignIn.instance;
+
+      // 환경 변수에서 클라이언트 ID 로드 (.env)
+      final iosClientId = dotenv.env['GOOGLE_IOS_CLIENT_ID'];
+      final webClientId = dotenv.env['GOOGLE_WEB_CLIENT_ID'];
+
+      await GoogleSignIn.instance.initialize(
+        clientId: defaultTargetPlatform == TargetPlatform.iOS ? iosClientId : null,
+        serverClientId: webClientId,
+      );
+
+      // 로그인 플로우 시작
+      final GoogleSignInAccount account = await googleSignIn.authenticate();
+
+      // 인증 정보 가져오기
+      final authentication = account.authentication;
+      final idToken = authentication.idToken;
+
+      if (idToken == null || idToken.isEmpty) {
+        throw Exception('Google 로그인 실패: idToken이 없습니다');
+      }
+
+      // 백엔드로 토큰 전송
+      final dioResponse = await _pureDio.post(
+        '/api/auth/oauth2/google/callback',
+        data: {'idToken': idToken}, // 구글은 nonce를 직접 내부에 생성하므로 nonce를 전달X
+      );
+
+      final accessToken = await _processAuthResponse(dioResponse);
+      return accessToken;
+    } catch (e) {
+      throw Exception('Google 로그인에 실패했습니다: ${e.toString()}');
     }
   }
 

@@ -45,9 +45,28 @@ class LoginPage extends HookWidget {
       },
     );
 
+    // Google 로그인 mutation
+    final signInGoogleMutation = useMutation(
+      (_) => AuthApi.signInWithGoogle(),
+      onSuccess: (token, _, __) {
+        NavigationHelper.navigateToMainAfterLogin(context);
+      },
+      onError: (error, _, __) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('로그인에 실패했습니다. 다시 시도해주세요.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      },
+    );
+
     // Apple 로그인 사용 가능 여부 확인 (iOS 13+, Android 웹)
-    final appleAvailableSnapshot = useFuture(useMemoized(() => SignInWithApple.isAvailable()));
-    final showAppleButton = Platform.isIOS && appleAvailableSnapshot.data == true;
+    final appleAvailableSnapshot = useFuture(
+      useMemoized(() => SignInWithApple.isAvailable()),
+    );
+    final showAppleButton =
+        Platform.isIOS && appleAvailableSnapshot.data == true;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -127,6 +146,56 @@ class LoginPage extends HookWidget {
               ),
             ),
 
+            const SizedBox(height: 16),
+
+            // Google 로그인 버튼
+            Container(
+              width: 280,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 12,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: signInGoogleMutation.isPending
+                      ? null
+                      : () => signInGoogleMutation.mutate(null),
+                  child: Center(
+                    child: signInGoogleMutation.isPending
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF1E293B),
+                              ),
+                            ),
+                          )
+                        : const Text(
+                            'Google 로그인',
+                            style: TextStyle(
+                              color: Color(0xFF1E293B),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+
             if (showAppleButton) ...[
               const SizedBox(height: 16),
               SizedBox(
@@ -135,9 +204,9 @@ class LoginPage extends HookWidget {
                 child: SignInWithAppleButton(
                   borderRadius: BorderRadius.circular(16),
                   onPressed: () {
-                  if (signInAppleMutation.isPending) return;
-                  signInAppleMutation.mutate(null);
-                },
+                    if (signInAppleMutation.isPending) return;
+                    signInAppleMutation.mutate(null);
+                  },
                 ),
               ),
             ],
