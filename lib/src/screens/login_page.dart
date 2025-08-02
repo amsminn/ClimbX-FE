@@ -53,8 +53,8 @@ class LoginPage extends HookWidget {
       },
       onError: (error, _, __) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.toString()),
+          const SnackBar(
+            content: Text('로그인에 실패했습니다. 다시 시도해주세요.'),
             backgroundColor: Colors.red,
           ),
         );
