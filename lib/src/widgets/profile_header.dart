@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
 import '../utils/color_schemes.dart';
 import '../models/user_profile.dart';
+import '../screens/profile_edit_page.dart';
 
 class ProfileHeader extends StatelessWidget {
   final UserProfile? userProfile;
@@ -107,20 +108,33 @@ class ProfileHeader extends StatelessWidget {
                 ),
 
                 // 설정 버튼
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColorSchemes.backgroundSecondary,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColorSchemes.borderPrimary,
-                      width: 1,
+                GestureDetector(
+                  onTap: () {
+                    if (userProfile != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ProfileEditPage(userProfile: userProfile!),
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColorSchemes.backgroundSecondary,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColorSchemes.borderPrimary,
+                        width: 1,
+                      ),
                     ),
-                  ),
-                  child: const Icon(
-                    Icons.settings_outlined,
-                    color: AppColorSchemes.textSecondary,
-                    size: 20,
+                    child: const Icon(
+                      Icons.settings_outlined,
+                      color: AppColorSchemes.textSecondary,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],
