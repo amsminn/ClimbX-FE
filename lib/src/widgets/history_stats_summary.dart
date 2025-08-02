@@ -41,6 +41,7 @@ class HistoryStatsSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
+          // 데이터가 없을 때도 통계 표시 (0값으로)
           Row(
             children: [
               Expanded(
