@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.climbx_fe"
-    compileSdk = 35  // API 35 (네이버 지도 요구사항)
+    compileSdk = 36  // API 36 (flutter_naver_map 요구사항)
     ndkVersion = "27.0.12077973"  // 네이버 지도 요구사항
 
     compileOptions {
@@ -24,7 +24,7 @@ android {
     defaultConfig {
         applicationId = "com.example.climbx_fe"
         minSdk = 23
-        targetSdk = 35
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
