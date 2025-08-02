@@ -9,12 +9,12 @@ import '../api/user.dart';
 
 class StreakWidget extends HookWidget {
   final String tierName;
-  final UserProfile? userProfile;
+  final UserProfile userProfile;
 
   const StreakWidget({
     super.key,
     this.tierName = 'Diamond I',
-    this.userProfile,
+    required this.userProfile,
   });
 
   @override
