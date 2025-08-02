@@ -5,12 +5,12 @@ import '../models/user_profile.dart';
 
 class TierWidget extends StatelessWidget {
   final String tierName;
-  final UserProfile? userProfile;
+  final UserProfile userProfile;
 
   const TierWidget({
     super.key, 
     this.tierName = 'Diamond I',
-    this.userProfile,
+    required this.userProfile,
   });
 
   @override
@@ -90,7 +90,7 @@ class TierWidget extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          userProfile != null ? '#${userProfile!.ranking}' : '#---',
+                          '#${userProfile.ranking}',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -146,7 +146,7 @@ class TierWidget extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          userProfile != null ? '${userProfile!.rating}' : '---',
+                          '${userProfile.rating}',
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 28 : 32,
                             fontWeight: FontWeight.w900,

@@ -6,6 +6,7 @@ import '../models/streak_data.dart';
 import 'util/auth/token_storage.dart'; // TokenStorage import 수정
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 
 /// 사용자 관련 API 호출 함수들
 class UserApi {
@@ -247,6 +248,7 @@ class UserApi {
         'profileImage': await MultipartFile.fromFile(
           file.path,
           filename: file.name,
+          contentType: MediaType('image', 'jpeg'), // 모든 사진은 jpeg로 통일
         ),
     });
 
