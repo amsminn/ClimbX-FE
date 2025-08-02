@@ -3,6 +3,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'dart:developer' as developer;
 import 'dart:async';
+import 'package:permission_handler/permission_handler.dart';
 import '../api/gym.dart';
 import '../models/gym.dart';
 import '../utils/color_schemes.dart';
@@ -37,7 +38,7 @@ class MapBody extends HookWidget {
       return await NOverlayImage.fromWidget(
         widget: SizedBox(
           width: 80,
-          height: 60,
+          height: 70,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -75,15 +76,15 @@ class MapBody extends HookWidget {
                     fontWeight: FontWeight.w600,
                     color: AppColorSchemes.textPrimary,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  overflow: TextOverflow.visible,
                   textAlign: TextAlign.center,
                 ),
               ),
             ],
           ),
         ),
-        size: const Size(80, 60),
+        size: const Size(80, 70),
         context: context,
       );
     }, []);
@@ -327,6 +328,18 @@ class MapBody extends HookWidget {
       }
     }, [createCustomMarkerIcon, showGymDetailBottomSheet]);
 
+    // 위치 권한 요청 함수
+    Future<void> requestLocationPermission() async {
+      try {
+        final status = await Permission.location.status;
+        if (status.isDenied) {
+          await Permission.location.request();
+        }
+      } catch (e) {
+        developer.log('위치 권한 요청 중 오류: $e', name: 'MapBody');
+      }
+    }
+
     // 마커 추가 useEffect
     useEffect(() {
       if (controller.value != null && gyms.isNotEmpty) {
@@ -353,20 +366,27 @@ class MapBody extends HookWidget {
         // 네이버 지도 (배경)
         NaverMap(
           options: const NaverMapViewOptions(
-            // 서울 중심으로 설정
+            // 서울 중심으로 설정 - 서울이 한 화면에 들어오도록 줌 조정
             initialCameraPosition: NCameraPosition(
               target: NLatLng(37.5665, 126.9780),
-              zoom: 14,
+              zoom: 10, // 서울 전체가 보이도록 줌 레벨 낮춤
             ),
             mapType: NMapType.basic,
             activeLayerGroups: [NLayerGroup.building, NLayerGroup.transit],
             // 줌 레벨 제한 설정
             minZoom: 8,
             // 최소 줌 (더 멀리)
-            maxZoom: 20, // 최대 줌 (더 가까이)
+            maxZoom: 20,
+            // 최대 줌 (더 가까이)
+            // 위치 권한 활성화
+            locationButtonEnable: true,
+            // 1.4.1+1 버전에서 추가된 contentPadding 설정
+            contentPadding: EdgeInsets.zero,
           ),
           onMapReady: (NaverMapController mapController) {
             controller.value = mapController;
+            // 지도가 준비되면 위치 권한 요청
+            requestLocationPermission();
           },
         ),
 

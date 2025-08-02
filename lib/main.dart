@@ -6,6 +6,7 @@ import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'src/widgets/auth_wrapper.dart';
 import 'src/api/util/core/api_client.dart';
 import 'src/api/util/auth/auth_interceptor.dart';
+import 'dart:developer' as developer;
 
 // 전역 네비게이터 키 (팝업용)
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -13,7 +14,21 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
-  await FlutterNaverMap().init(clientId: dotenv.env['NAVER_MAP_CLIENT_ID']);
+  await FlutterNaverMap().init(
+    clientId: dotenv.env['NAVER_MAP_CLIENT_ID']!,
+    onAuthFailed: (ex) {
+      switch (ex) {
+        case NQuotaExceededException(:final message):
+          developer.log('사용량 초과 (message: $message)', name: 'FlutterNaverMap');
+          break;
+        case NUnauthorizedClientException() ||
+            NClientUnspecifiedException() ||
+            NAnotherAuthFailedException():
+          developer.log('인증 실패: $ex', name: 'FlutterNaverMap');
+          break;
+      }
+    },
+  );
 
   // 카카오 SDK 초기화
   KakaoSdk.init(nativeAppKey: dotenv.env['KAKAO_NATIVE_APP_KEY']);
@@ -38,7 +53,9 @@ void main() async {
             onPressed: () {
               Navigator.of(context).pop();
               // AuthWrapper가 자동으로 로그인 상태를 확인하고 LoginPage로 이동
-              Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/', (route) => false);
             },
             child: const Text('확인'),
           ),

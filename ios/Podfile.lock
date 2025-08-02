@@ -15,9 +15,9 @@ PODS:
     - Mantle
     - SDWebImage
     - SDWebImageWebPCoder
-  - flutter_naver_map (1.3.1):
+  - flutter_naver_map (1.4.0):
     - Flutter
-    - NMapsMap (= 3.21.0)
+    - NMapsMap (= 3.22.1)
   - flutter_secure_storage (6.0.0):
     - Flutter
   - google_sign_in_ios (0.0.1):
@@ -67,7 +67,7 @@ PODS:
     - Mantle/extobjc (= 2.2.0)
   - Mantle/extobjc (2.2.0)
   - NMapsGeometry (1.0.2)
-  - NMapsMap (3.21.0):
+  - NMapsMap (3.22.1):
     - NMapsGeometry
   - path_provider_foundation (0.0.1):
     - Flutter
@@ -168,7 +168,7 @@ SPEC CHECKSUMS:
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_image_compress_common: 1697a328fd72bfb335507c6bca1a65fa5ad87df1
-  flutter_naver_map: dafe40026d3b4739fdff4ae32953021b1b52b0c2
+  flutter_naver_map: 651a0c5af560ee180f6ee57c11e4ec62aa82abc8
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   google_sign_in_ios: 205742c688aea0e64db9da03c33121694a365109
   GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
@@ -180,7 +180,7 @@ SPEC CHECKSUMS:
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   NMapsGeometry: 4e02554fa9880ef02ed96b075dc84355d6352479
-  NMapsMap: 8e7e35c2446e7c4a88d6dd0d64aa0d1de903e4f0
+  NMapsMap: 09552eb050059e13b4c8fc294055760713cfdad8
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   photo_manager: 1d80ae07a89a67dfbcae95953a1e5a24af7c3e62
