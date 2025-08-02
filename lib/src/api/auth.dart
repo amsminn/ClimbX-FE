@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'util/core/api_client.dart';
 import 'util/auth/token_storage.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 /// 인증 관련 API 호출 함수들
 class AuthApi {
@@ -213,6 +214,64 @@ class AuthApi {
       return accessToken;
     } catch (e) {
       throw Exception('Apple 로그인에 실패했습니다: \\${e.toString()}');
+    }
+  }
+
+  /// Google 로그인
+  static Future<String> signInWithGoogle() async {
+    try {
+      // Google 로그인 인스턴스 생성
+      final googleSignIn = GoogleSignIn.instance;
+
+      // 플랫폼 분기: Android는 serverClientId만, iOS는 clientId 필요
+      await GoogleSignIn.instance.initialize(
+        clientId: defaultTargetPlatform == TargetPlatform.iOS
+            ? '798391464641-pa8167jo8eusga2qlc3snjcabmu2fs3v.apps.googleusercontent.com'
+            : null,
+        serverClientId:
+            '798391464641-osbfon603i2bc1jfgeen24f4354tjc4c.apps.googleusercontent.com',
+      );
+
+      // 로그인 플로우 시작
+      final GoogleSignInAccount account = await googleSignIn.authenticate();
+
+      // 인증 정보 가져오기
+      final authentication = await account.authentication;
+      final idToken = authentication.idToken;
+
+      if (idToken == null || idToken.isEmpty) {
+        throw Exception('Google 로그인 실패: idToken이 없습니다');
+      }
+
+      if (kDebugMode) {
+        developer.log('Google account 이메일: ${account.email}', name: 'AuthApi');
+        developer.log('idToken (prefix): ${idToken}', name: 'AuthApi');
+      }
+
+      // 백엔드로 토큰 전송
+      final dioResponse = await _pureDio.post(
+        '/api/auth/oauth2/google/callback',
+        data: {'idToken': idToken}, // 구글은 nonce를 직접 내부에 생성하므로 nonce를 전달X
+      );
+
+      if (kDebugMode) {
+        developer.log('=== Google 로그인 응답 헤더 확인 ===', name: 'AuthApi Debug');
+        developer.log(
+          '응답 헤더들: ${dioResponse.headers.map}',
+          name: 'AuthApi Debug',
+        );
+        developer.log(
+          'Refresh-Token 헤더: ${dioResponse.headers.value('Refresh-Token')}',
+          name: 'AuthApi Debug',
+        );
+        developer.log('응답 데이터: ${dioResponse.data}', name: 'AuthApi Debug');
+        developer.log('============================', name: 'AuthApi Debug');
+      }
+
+      final accessToken = await _processAuthResponse(dioResponse);
+      return accessToken;
+    } catch (e) {
+      throw Exception('Google 로그인에 실패했습니다: ${e.toString()}');
     }
   }
 
