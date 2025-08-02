@@ -233,7 +233,12 @@ class AuthApi {
       );
 
       // 로그인 플로우 시작
-      final GoogleSignInAccount account = await googleSignIn.authenticate();
+      final GoogleSignInAccount? account = await googleSignIn.authenticate();
+
+      if (account == null) {
+        // 사용자가 로그인을 취소한 경우
+        throw Exception('Google 로그인이 취소되었습니다.');
+      }
 
       // 인증 정보 가져오기
       final authentication = account.authentication;
