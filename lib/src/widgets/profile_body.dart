@@ -95,8 +95,8 @@ class ProfileBody extends HookWidget {
                     _buildTab('개요'),
                     _buildTab('히스토리'),
                     _buildTab('스트릭'),
-                    _buildTab('분야별 티어'),
                     _buildTab('내 영상'),
+                    _buildTab('분야별 티어'),
                   ],
                 ),
               ),
@@ -120,10 +120,10 @@ class ProfileBody extends HookWidget {
               ),
             ),
             _buildTabContent(
-              child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
+              child: VideoAnalysisWidget(tierName: currentTier),
             ),
             _buildTabContent(
-              child: VideoAnalysisWidget(tierName: currentTier),
+              child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
             ),
           ],
         ),
