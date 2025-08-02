@@ -335,7 +335,31 @@ class MapBody extends HookWidget {
         if (status.isDenied) {
           await Permission.location.request();
         } else if (status.isPermanentlyDenied) {
-          await openAppSettings();
+          // 사용자에게 권한이 영구적으로 거부되었음을 알리고 설정으로 이동하도록 안내
+          await showDialog(
+            context: context,
+            builder: (BuildContext dialogContext) {
+              return AlertDialog(
+                title: const Text('위치 권한 필요'),
+                content: const Text('지도 기능을 사용하려면 위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.'),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('설정으로 이동'),
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                      openAppSettings();
+                    },
+                  ),
+                  TextButton(
+                    child: const Text('취소'),
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
         }
       } catch (e) {
         developer.log('위치 권한 요청 중 오류: $e', name: 'MapBody');
