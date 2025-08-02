@@ -236,7 +236,7 @@ class AuthApi {
       final GoogleSignInAccount account = await googleSignIn.authenticate();
 
       // 인증 정보 가져오기
-      final authentication = await account.authentication;
+      final authentication = account.authentication;
       final idToken = authentication.idToken;
 
       if (idToken == null || idToken.isEmpty) {
