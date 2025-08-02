@@ -297,9 +297,29 @@ class AuthApi {
 
 /// 인증 상태 관리 헬퍼 함수들 (로컬 저장소 기반)
 class AuthHelpers {
-  /// 로그인 상태 확인
+  /// 로그인 상태 확인 및 토큰 유효성 검증 + 닉네임 최신화
   static Future<bool> isLoggedIn() async {
-    return await TokenStorage.hasToken();
+    // 1. 토큰 존재 확인
+    if (!await TokenStorage.hasToken()) return false;
+    
+    // 2. 토큰 유효성 검증 + 닉네임 최신화
+    try {
+      final authData = await ApiClient.instance.get<Map<String, dynamic>>('/api/auth/me');
+      final nickname = authData['nickname'] as String?;
+      if (nickname != null && nickname.isNotEmpty) {
+        await TokenStorage.saveUserNickname(nickname);
+        if (kDebugMode) {
+          developer.log('자동 로그인 시 닉네임 최신화: $nickname', name: 'AuthHelpers');
+        }
+      }
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        developer.log('토큰 유효성 검증 실패: $e', name: 'AuthHelpers');
+      }
+      await TokenStorage.clearTokens();
+      return false;
+    }
   }
 
   /// 로그아웃 (카카오 로그아웃 + 로컬 토큰 삭제)
