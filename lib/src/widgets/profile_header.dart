@@ -50,6 +50,7 @@ class ProfileHeader extends HookWidget {
       final nickChanged = newNick != u.nickname;
       final statusChanged = newStatus != u.statusMessage;
       final imageChanged = newImage.value != null;
+      bool imageUploadSuccess = false; // 이미지 업로드 성공 여부 추적
 
       if (!nickChanged && !statusChanged && !imageChanged) {
         isEditing.value = false;
@@ -82,21 +83,28 @@ class ProfileHeader extends HookWidget {
               nickname: imageNickname,
               file: XFile(compressed.path),
             );
+            imageUploadSuccess = true; // 이미지 업로드 성공
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(e.toString())),
+                SnackBar(content: Text('이미지 업로드 실패: $e')),
               );
             }
-            return; // 에러 발생 시 저장 중단
+            // 이미지 업로드 실패해도 텍스트 변경사항은 반영
           }
         }
-        // 캐시 무효화로 화면 갱신
+        
+        // 캐시 무효화로 화면 갱신 (텍스트 변경사항 반영)
         queryClient.invalidateQueries(['user_profile'], exact: true);
         isEditing.value = false;
+        
+        // 성공 메시지 (부분 성공도 포함)
         if (context.mounted) {
+          final successMessage = imageChanged && !imageUploadSuccess 
+              ? '텍스트 정보가 업데이트되었습니다. (이미지 업로드 실패)'
+              : '프로필이 업데이트되었습니다.';
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('프로필이 업데이트되었습니다.')),
+            SnackBar(content: Text(successMessage)),
           );
         }
       } catch (e) {
