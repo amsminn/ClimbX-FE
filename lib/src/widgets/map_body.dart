@@ -330,14 +330,18 @@ class MapBody extends HookWidget {
 
     // 위치 권한 요청 함수
     Future<void> requestLocationPermission() async {
+      final currentContext = context;
+      
       try {
         final status = await Permission.location.status;
         if (status.isDenied) {
           await Permission.location.request();
         } else if (status.isPermanentlyDenied) {
+          if (!currentContext.mounted) return;
+          
           // 사용자에게 권한이 영구적으로 거부되었음을 알리고 설정으로 이동하도록 안내
           await showDialog(
-            context: context,
+            context: currentContext,
             builder: (BuildContext dialogContext) {
               return AlertDialog(
                 title: const Text('위치 권한 필요'),
