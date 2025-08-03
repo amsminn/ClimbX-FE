@@ -183,8 +183,8 @@ class ProfileHeader extends HookWidget {
                             radius: screenW * 0.09 - 3,
                             backgroundImage: newImage.value != null
                                 ? FileImage(newImage.value!)
-                                : (u.profileImageUrl?.isNotEmpty ?? false)
-                                ? NetworkImage(u.profileImageUrl!)
+                                : (u.profileImageCdnUrl?.isNotEmpty ?? false)
+                                ? NetworkImage(u.profileImageCdnUrl!)
                                 : const AssetImage('assets/images/avatar.png')
                                       as ImageProvider,
                           ),
