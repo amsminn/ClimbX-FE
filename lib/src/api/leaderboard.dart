@@ -13,13 +13,13 @@ class LeaderboardApi {
   static const String _keyCurrentStreak = 'currentStreak';
   static const String _keyLongestStreak = 'longestStreak';
   static const String _keySolvedCount = 'solvedCount';
-  static const String _keyRankingList = 'rankingList';
+  static const String _keyRankingList = 'rankings';
 
   // Criteria 값 상수 정의 (switch문에서 사용하기 위해)
   static const String _criteriaRating = 'rating';
-  static const String _criteriaStreak = 'streak';
-  static const String _criteriaLongestStreak = 'longestStreak';
-  static const String _criteriaSolvedProblems = 'solvedProblemsCount';
+  static const String _criteriaStreak = 'current_streak';
+  static const String _criteriaLongestStreak = 'longest_streak';
+  static const String _criteriaSolvedProblems = 'solved_count';
 
   /// 리더보드 조회
   static Future<List<LeaderboardItem>> getRanking({
@@ -41,33 +41,28 @@ class LeaderboardApi {
       );
 
       final rankingListData = response[_keyRankingList] as List<dynamic>? ?? [];
-      
-      // LeaderboardItem 리스트로 변환
-      final users = rankingListData
-          .asMap()
-          .entries
-          .map((entry) {
-            final index = entry.key;
-            final userData = entry.value as Map<String, dynamic>;
-            
-            // 프론트엔드에서 계산되는 값들
-            final rank = index + 1;
-            final tier = TierColors.getTierStringFromRating(userData[_keyRating] ?? 0);
-            final value = _getValueByCriteria(userData, type.criteria);
-            
-            return LeaderboardItem.fromJson(
-              userData,
-              rank: rank,
-              tier: tier,
-              value: value,
-            );
-          })
-          .toList();
 
-      developer.log(
-        '리더보드 조회 성공 - ${users.length}명 조회',
-        name: 'LeaderboardApi',
-      );
+      // LeaderboardItem 리스트로 변환
+      final users = rankingListData.asMap().entries.map((entry) {
+        final index = entry.key;
+        final userData = entry.value as Map<String, dynamic>;
+
+        // 프론트엔드에서 계산되는 값들
+        final rank = index + 1;
+        final tier = TierColors.getTierStringFromRating(
+          userData[_keyRating] ?? 0,
+        );
+        final value = _getValueByCriteria(userData, type.criteria);
+
+        return LeaderboardItem.fromJson(
+          userData,
+          rank: rank,
+          tier: tier,
+          value: value,
+        );
+      }).toList();
+
+      developer.log('리더보드 조회 성공 - ${users.length}명 조회', name: 'LeaderboardApi');
 
       return users;
     } catch (e) {
@@ -78,7 +73,10 @@ class LeaderboardApi {
   }
 
   /// criteria에 따라 적절한 value를 선택하는 헬퍼 메서드
-  static String _getValueByCriteria(Map<String, dynamic> userData, String criteria) {
+  static String _getValueByCriteria(
+    Map<String, dynamic> userData,
+    String criteria,
+  ) {
     switch (criteria) {
       case _criteriaRating:
         return (userData[_keyRating] ?? 0).toString();
@@ -93,4 +91,4 @@ class LeaderboardApi {
         return (userData[_keyRating] ?? 0).toString();
     }
   }
-} 
+}
