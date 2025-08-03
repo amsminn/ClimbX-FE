@@ -230,7 +230,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(22.5),
-              child: _buildProfileImage(user.profileImageUrl),
+                              child: _buildProfileImage(user.profileImageCdnUrl),
             ),
           ),
 
