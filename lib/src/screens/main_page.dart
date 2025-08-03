@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/map_body.dart';
 import '../widgets/profile_body.dart';
 import '../widgets/leaderboard_body.dart';
+import '../widgets/search_body.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_colors.dart';
@@ -64,7 +65,7 @@ class _MainPageState extends State<MainPage> {
           // 1: 리더보드
           const LeaderboardBody(),
           // 2: 검색
-          _buildComingSoon('검색', Icons.search, colorScheme),
+          const SearchBody(),
           // 3: 지도
           const MapBody(),
           // 4: 프로필
