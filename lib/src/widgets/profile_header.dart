@@ -122,6 +122,17 @@ class ProfileHeader extends HookWidget {
     final tier = TierColors.getTierFromString(tierName);
     final colorScheme = TierColors.getColorScheme(tier);
 
+    // 프로필 이미지 결정 로직
+    final imageUrl = u.profileImageCdnUrl;
+    final ImageProvider backgroundImage;
+    if (newImage.value != null) {
+      backgroundImage = FileImage(newImage.value!);
+    } else if (imageUrl != null && imageUrl.isNotEmpty) {
+      backgroundImage = NetworkImage(imageUrl);
+    } else {
+      backgroundImage = const AssetImage('assets/images/avatar.png');
+    }
+
     /* ----------------- UI 구성 ----------------- */
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -181,12 +192,7 @@ class ProfileHeader extends HookWidget {
                         children: [
                           CircleAvatar(
                             radius: screenW * 0.09 - 3,
-                            backgroundImage: newImage.value != null
-                                ? FileImage(newImage.value!)
-                                : (u.profileImageCdnUrl?.isNotEmpty ?? false)
-                                ? NetworkImage(u.profileImageCdnUrl!)
-                                : const AssetImage('assets/images/avatar.png')
-                                      as ImageProvider,
+                            backgroundImage: backgroundImage,
                           ),
                           // 편집 모드 시 카메라 아이콘 오버레이
                           if (isEditing.value)
