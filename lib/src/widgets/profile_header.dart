@@ -107,9 +107,19 @@ class ProfileHeader extends HookWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('업데이트 실패: $e')),
-          );
+          // 409 에러(닉네임 중복) 처리
+          if (e.toString().contains('409')) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('이미 사용 중인 닉네임입니다.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('업데이트 실패: $e')),
+            );
+          }
         }
       } finally {
         submitting.value = false;
@@ -358,7 +368,7 @@ class ProfileHeader extends HookWidget {
                           icon: Icon(
                             isEditing.value
                                 ? Icons.check
-                                : Icons.settings_outlined,
+                                : Icons.edit_outlined,
                             color: AppColorSchemes.textSecondary,
                             size: 20,
                           ),
