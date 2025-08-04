@@ -53,9 +53,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
   /// 탭 변경 처리
   void _onTabChanged() {
     if (_tabController.indexIsChanging) {
-      setState(() {
-        _selectedType = LeaderboardType.values[_tabController.index];
-      });
+      _selectedType = LeaderboardType.values[_tabController.index];
       
       // 새로운 탭의 데이터가 없으면 로드
       if (_leaderboardFutures[_selectedType] == null) {
@@ -130,11 +128,6 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
   /// 각 탭별 리더보드 페이지 빌드
   Widget _buildLeaderboardPage(LeaderboardType type) {
-    // 해당 탭의 데이터가 없으면 로드
-    if (_leaderboardFutures[type] == null) {
-      _loadLeaderboard(type);
-    }
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: FutureBuilder<List<LeaderboardItem>>(
