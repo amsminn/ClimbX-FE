@@ -18,6 +18,7 @@ class VideoAnalysisWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final isLoading = useState(false);
+    final isPickerActive = useState(false);
     final picker = useMemoized(() => ImagePicker(), []);
 
     // 서버에서 가져온 영상 목록
@@ -182,7 +183,14 @@ class VideoAnalysisWidget extends HookWidget {
 
     // 비디오 촬영
     Future<void> recordVideo() async {
+      if (isPickerActive.value) {
+        developer.log('이미 picker가 활성화되어 있습니다', name: 'VideoAnalysisWidget');
+        return;
+      }
+
       try {
+        isPickerActive.value = true;
+        
         // 카메라 권한 요청
         final cameraStatus = await Permission.camera.request();
         developer.log('카메라 권한 상태: $cameraStatus', name: 'VideoAnalysisWidget');
@@ -227,12 +235,21 @@ class VideoAnalysisWidget extends HookWidget {
             ),
           );
         }
+      } finally {
+        isPickerActive.value = false;
       }
     }
 
     // 갤러리에서 영상 선택
     Future<void> selectFromGallery() async {
+      if (isPickerActive.value) {
+        developer.log('이미 picker가 활성화되어 있습니다', name: 'VideoAnalysisWidget');
+        return;
+      }
+
       try {
+        isPickerActive.value = true;
+        
         final XFile? picked = await picker.pickVideo(
           source: ImageSource.gallery,
           maxDuration: const Duration(minutes: 5),
@@ -255,6 +272,8 @@ class VideoAnalysisWidget extends HookWidget {
             ),
           );
         }
+      } finally {
+        isPickerActive.value = false;
       }
     }
 
@@ -357,14 +376,16 @@ class VideoAnalysisWidget extends HookWidget {
                         return _buildActionTile(
                           icon: Icons.videocam_outlined,
                           label: '촬영하기',
-                          onTap: recordVideo,
+                          onTap: isPickerActive.value ? null : recordVideo,
+                          isDisabled: isPickerActive.value,
                         );
                       } else if (index == 1) {
                         // 갤러리에서 선택 버튼
                         return _buildActionTile(
                           icon: Icons.photo_library_outlined,
                           label: '갤러리에서 선택',
-                          onTap: selectFromGallery,
+                          onTap: isPickerActive.value ? null : selectFromGallery,
+                          isDisabled: isPickerActive.value,
                         );
                       } else {
                         // 실제 영상들
@@ -383,28 +404,41 @@ class VideoAnalysisWidget extends HookWidget {
   Widget _buildActionTile({
     required IconData icon,
     required String label,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
+    bool isDisabled = false,
   }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isDisabled ? null : onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColorSchemes.backgroundSecondary,
+          color: isDisabled 
+              ? AppColorSchemes.backgroundSecondary.withValues(alpha: 0.5)
+              : AppColorSchemes.backgroundSecondary,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColorSchemes.textTertiary.withValues(alpha: 0.2),
+            color: isDisabled
+                ? AppColorSchemes.textTertiary.withValues(alpha: 0.1)
+                : AppColorSchemes.textTertiary.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 32, color: AppColorSchemes.textSecondary),
+            Icon(
+              icon, 
+              size: 32, 
+              color: isDisabled 
+                  ? AppColorSchemes.textSecondary.withValues(alpha: 0.5)
+                  : AppColorSchemes.textSecondary,
+            ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(
-                color: AppColorSchemes.textSecondary,
+              style: TextStyle(
+                color: isDisabled 
+                    ? AppColorSchemes.textSecondary.withValues(alpha: 0.5)
+                    : AppColorSchemes.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
