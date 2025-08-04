@@ -60,7 +60,7 @@ class _MainPageState extends State<MainPage> {
         index: _currentTab.index,
         children: [
           // 0: 프로필
-          ProfileBody(currentTier: currentTier, colorScheme: colorScheme),
+          const ProfileBody(),
           // 1: 리더보드
           const LeaderboardBody(),
           // 2: 검색

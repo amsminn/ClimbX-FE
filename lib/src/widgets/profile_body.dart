@@ -15,13 +15,8 @@ import 'video_analysis_widget.dart';
 /// 로딩/에러 상태 처리 및 탭 구조 관리
 
 class ProfileBody extends HookWidget {
-  final String currentTier;
-  final TierColorScheme colorScheme;
-
   const ProfileBody({
     super.key,
-    required this.currentTier,
-    required this.colorScheme,
   });
 
   @override
@@ -58,6 +53,8 @@ class ProfileBody extends HookWidget {
 
     // 데이터 로드 성공 - 프로필 정보 사용
     final userProfile = userQuery.data!;
+    final currentTier = userProfile.tier;
+    final colorScheme = TierColors.getColorScheme(TierColors.getTierFromString(currentTier));
     return DefaultTabController(
       length: 5,
       child: NestedScrollView(
@@ -66,7 +63,6 @@ class ProfileBody extends HookWidget {
             SliverToBoxAdapter(
               child: ProfileHeader(
                 userProfile: userProfile,
-                tierName: currentTier,
               ),
             ),
             SliverPersistentHeader(
@@ -108,7 +104,6 @@ class ProfileBody extends HookWidget {
           children: [
             _buildTabContent(
               child: TierWidget(
-                tierName: currentTier,
                 userProfile: userProfile,
               ),
             ),
