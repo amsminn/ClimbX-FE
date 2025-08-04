@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/color_schemes.dart';
+import '../utils/tier_provider.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final BottomNavTab currentTab;
   final Function(BottomNavTab) onTap;
-  final TierColorScheme colorScheme;
 
   const CustomBottomNavigationBar({
     super.key,
     required this.currentTab,
     required this.onTap,
-    required this.colorScheme,
   });
 
   @override
@@ -34,7 +32,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         elevation: 0,
         currentIndex: currentTab.index,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: colorScheme.primary,
+        selectedItemColor: TierProvider.of(context).primary,
         unselectedItemColor: AppColorSchemes.textTertiary,
         selectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
