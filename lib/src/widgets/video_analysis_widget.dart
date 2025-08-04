@@ -6,14 +6,14 @@ import 'dart:developer' as developer;
 import '../models/video.dart';
 import '../api/video.dart';
 import '../utils/color_schemes.dart';
+import '../utils/tier_provider.dart';
 import '../utils/tier_colors.dart';
 import 'video_overlay_player.dart';
 
 class VideoAnalysisWidget extends HookWidget {
   final bool isActive;
-  final String? tierName; // 티어 정보를 받기 위해 추가
 
-  const VideoAnalysisWidget({super.key, this.isActive = true, this.tierName});
+  const VideoAnalysisWidget({super.key, this.isActive = true});
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +28,7 @@ class VideoAnalysisWidget extends HookWidget {
     final localVideos = useState<List<Video>>([]);
 
     // 티어 색상 정보 가져오기
-    final TierType currentTier = TierColors.getTierFromString(
-      tierName ?? 'Bronze III',
-    );
-    final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
+    final TierColorScheme colorScheme = TierProvider.of(context);
 
     // 통합 영상 목록 (로컬, 서버) - getter 함수로 정의
     List<Video> getAllVideos() => [...localVideos.value, ...serverVideos.value];
@@ -483,9 +480,7 @@ class VideoAnalysisWidget extends HookWidget {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.5,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    TierColors.getColorScheme(
-                                      TierColors.getTierFromString(tierName ?? 'Bronze III'),
-                                    ).primary,
+                                    TierProvider.of(context).primary,
                                   ),
                                 ),
                               ),
@@ -588,7 +583,6 @@ class VideoAnalysisWidget extends HookWidget {
         builder: (BuildContext context) {
           return VideoOverlayPlayer(
             video: video,
-            tierName: tierName,
           );
         },
       );

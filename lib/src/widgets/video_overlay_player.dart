@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../models/video.dart';
 import 'dart:developer' as developer;
+import '../utils/tier_provider.dart';
 import '../utils/tier_colors.dart';
 
 class VideoOverlayPlayer extends StatefulWidget {
   final Video video;
-  final String? tierName;
 
-  const VideoOverlayPlayer({super.key, required this.video, this.tierName});
+  const VideoOverlayPlayer({super.key, required this.video});
 
   @override
   State<VideoOverlayPlayer> createState() => _VideoOverlayPlayerState();
@@ -89,9 +89,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final tierColors = TierColors.getColorScheme(
-      TierColors.getTierFromString(widget.tierName ?? 'Bronze III'),
-    );
+    final tierColors = TierProvider.of(context);
 
     return Dialog(
       backgroundColor: Colors.transparent,
