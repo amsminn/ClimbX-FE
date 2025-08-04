@@ -16,11 +16,9 @@ class ProfileHeader extends HookWidget {
   const ProfileHeader({
     super.key,
     required this.userProfile,
-    required this.tierName,
   });
 
   final UserProfile userProfile;
-  final String tierName;
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +117,7 @@ class ProfileHeader extends HookWidget {
     }
 
     final screenW = MediaQuery.of(context).size.width;
-    final tier = TierColors.getTierFromString(tierName);
+    final tier = TierColors.getTierFromString(userProfile.tier);
     final colorScheme = TierColors.getColorScheme(tier);
 
     // 프로필 이미지 결정 로직
@@ -384,11 +382,14 @@ class ProfileHeader extends HookWidget {
             const SizedBox(height: 12),
             _TierCard(
               colorScheme: colorScheme,
-              tierName: tierName,
+              tierName: userProfile.tier,
               rating: u.rating,
             ),
             const SizedBox(height: 12),
-            _StatsRow(colorScheme: colorScheme),
+            _StatsRow(
+              colorScheme: colorScheme,
+              userProfile: userProfile,
+            ),
           ],
         ),
       ),
@@ -521,9 +522,10 @@ class _ProgressBar extends StatelessWidget {
 
 /// 통계 정보 행
 class _StatsRow extends StatelessWidget {
-  const _StatsRow({required this.colorScheme});
+  const _StatsRow({required this.colorScheme, required this.userProfile});
 
   final TierColorScheme colorScheme;
+  final UserProfile userProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -566,11 +568,11 @@ class _StatsRow extends StatelessWidget {
 
     return Row(
       children: [
-        card('1520', '문제 해결', Icons.check_circle_outline),
+        card(userProfile.solvedCount.toString(), '문제 해결', Icons.check_circle_outline),
         const SizedBox(width: 12),
-        card('274', '문제 기여', Icons.add_circle_outline),
+        card(userProfile.contributionCount.toString(), '문제 기여', Icons.add_circle_outline),
         const SizedBox(width: 12),
-        card('331', '명의 라이벌', Icons.people_outline),
+        card(userProfile.rivalCount.toString(), '명의 라이벌', Icons.people_outline),
       ],
     );
   }

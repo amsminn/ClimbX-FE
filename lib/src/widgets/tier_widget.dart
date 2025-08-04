@@ -4,12 +4,10 @@ import '../utils/color_schemes.dart';
 import '../models/user_profile.dart';
 
 class TierWidget extends StatelessWidget {
-  final String tierName;
   final UserProfile userProfile;
 
   const TierWidget({
     super.key, 
-    this.tierName = 'Diamond I',
     required this.userProfile,
   });
 
@@ -17,7 +15,7 @@ class TierWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final TierType currentTier = TierColors.getTierFromString(tierName);
+    final TierType currentTier = TierColors.getTierFromString(userProfile.tier);
     final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
 
     return Container(
@@ -132,7 +130,7 @@ class TierWidget extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          tierName,
+                          userProfile.tier,
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 20 : 24,
                             fontWeight: FontWeight.w800,
