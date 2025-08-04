@@ -230,7 +230,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(22.5),
-              child: _buildProfileImage(user.profileImageUrl),
+              child: _buildProfileImage(user.profileImageCdnUrl),
             ),
           ),
 
@@ -294,7 +294,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
   }
 
   /// 프로필 이미지 빌드 (네트워크 이미지 또는 기본 아바타)
-  Widget _buildProfileImage(String? profileImageUrl) {
+  Widget _buildProfileImage(String? profileImageCdnUrl) {
     // 기본 아바타 위젯 
     final Widget defaultAvatar = Container(
       color: AppColorSchemes.backgroundTertiary,
@@ -305,14 +305,14 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
       ),
     );
 
-    if (profileImageUrl == null || profileImageUrl.isEmpty) {
+    if (profileImageCdnUrl == null || profileImageCdnUrl.isEmpty) {
       return defaultAvatar;
     }
 
     // 네트워크 이미지인지 로컬 이미지인지 판단
-    if (profileImageUrl.startsWith('/images/')) {
+    if (profileImageCdnUrl.startsWith('/images/')) {
       // 백엔드 이미지 경로에 base URL 추가
-      final fullUrl = '${ApiClient.baseUrl}$profileImageUrl';
+      final fullUrl = '${ApiClient.baseUrl}$profileImageCdnUrl';
       return Image.network(
         fullUrl,
         fit: BoxFit.cover,
@@ -337,7 +337,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
     // 로컬 asset 이미지
     return Image.asset(
-      profileImageUrl,
+      profileImageCdnUrl,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => defaultAvatar,
     );

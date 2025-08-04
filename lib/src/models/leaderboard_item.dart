@@ -2,7 +2,7 @@
 class LeaderboardItem {
   final String nickname;
   final String statusMessage;
-  final String? profileImageUrl;
+  final String? profileImageCdnUrl;
   final int rating;
   final int currentStreak;
   final int longestStreak;
@@ -16,7 +16,7 @@ class LeaderboardItem {
   const LeaderboardItem({
     required this.nickname,
     required this.statusMessage,
-    this.profileImageUrl,
+    this.profileImageCdnUrl,
     required this.rating,
     required this.currentStreak,
     required this.longestStreak,
@@ -36,7 +36,7 @@ class LeaderboardItem {
     return LeaderboardItem(
       nickname: json['nickname'] ?? '',
       statusMessage: json['statusMessage'] ?? '',
-      profileImageUrl: json['profileImageUrl'],
+      profileImageCdnUrl: json['profileImageCdnUrl'],
       rating: json['rating'] ?? 0,
       currentStreak: json['currentStreak'] ?? 0,
       longestStreak: json['longestStreak'] ?? 0,
@@ -52,7 +52,7 @@ class LeaderboardItem {
     return {
       'nickname': nickname,
       'statusMessage': statusMessage,
-      'profileImageUrl': profileImageUrl,
+      'profileImageCdnUrl': profileImageCdnUrl,
       'rating': rating,
       'currentStreak': currentStreak,
       'longestStreak': longestStreak,

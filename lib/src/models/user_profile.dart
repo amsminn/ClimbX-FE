@@ -2,7 +2,7 @@
 class UserProfile {
   final String nickname;
   final String statusMessage;
-  final String? profileImageUrl;
+  final String? profileImageCdnUrl;
   final int ranking;
   final int rating;
   final Map<String, int> categoryRatings;
@@ -14,7 +14,7 @@ class UserProfile {
   UserProfile({
     required this.nickname,
     required this.statusMessage,
-    this.profileImageUrl,
+    this.profileImageCdnUrl,
     required this.ranking,
     required this.rating,
     required this.categoryRatings,
@@ -28,7 +28,7 @@ class UserProfile {
     return UserProfile(
       nickname: json['nickname'] ?? '',
       statusMessage: json['statusMessage'] ?? '',
-      profileImageUrl: json['profileImageUrl'],
+      profileImageCdnUrl: json['profileImageCdnUrl'],
       ranking: json['ranking'] ?? 0,
       rating: json['rating'] ?? 0,
       categoryRatings: Map<String, int>.from(json['categoryRatings'] ?? {}),
@@ -43,7 +43,7 @@ class UserProfile {
     return {
       'nickname': nickname,
       'statusMessage': statusMessage,
-      'profileImageUrl': profileImageUrl,
+      'profileImageCdnUrl': profileImageCdnUrl,
       'ranking': ranking,
       'rating': rating,
       'categoryRatings': categoryRatings,
