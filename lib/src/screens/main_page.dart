@@ -54,7 +54,7 @@ class _MainPageState extends State<MainPage> {
               ] else ...[
                 const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
-                Text('프로필을 불러올 수 없습니다: $_error'),
+                Text(_error ?? '프로필을 불러올 수 없습니다.'),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _loadUserProfile,
@@ -185,7 +185,7 @@ class _MainPageState extends State<MainPage> {
       developer.log('유저 프로필 로드 실패: $e', name: 'MainPage', error: e);
       if (mounted) {
         setState(() {
-          _error = e.toString();
+          _error = '프로필 정보를 불러오는 데 실패했습니다.';
           _isLoading = false;
         });
       }

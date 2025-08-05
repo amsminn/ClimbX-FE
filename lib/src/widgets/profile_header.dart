@@ -8,15 +8,13 @@ import '../models/user_profile.dart';
 import '../utils/color_schemes.dart';
 import '../utils/image_compressor.dart';
 import '../utils/tier_colors.dart';
+import '../utils/tier_provider.dart';
 
 /// 프로필 헤더 위젯 - 사용자 정보 표시 및 편집 기능
 /// 인라인 편집 모드 지원
 
 class ProfileHeader extends HookWidget {
-  const ProfileHeader({
-    super.key,
-    required this.userProfile,
-  });
+  const ProfileHeader({super.key, required this.userProfile});
 
   final UserProfile userProfile;
 
@@ -84,26 +82,26 @@ class ProfileHeader extends HookWidget {
             imageUploadSuccess = true; // 이미지 업로드 성공
           } catch (e) {
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('이미지 업로드 실패: $e')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('이미지 업로드 실패: $e')));
             }
             // 이미지 업로드 실패해도 텍스트 변경사항은 반영
           }
         }
-        
+
         // 캐시 무효화로 화면 갱신 (텍스트 변경사항 반영)
         queryClient.invalidateQueries(['user_profile'], exact: true);
         isEditing.value = false;
-        
+
         // 성공 메시지 (부분 성공도 포함)
         if (context.mounted) {
-          final successMessage = imageChanged && !imageUploadSuccess 
+          final successMessage = imageChanged && !imageUploadSuccess
               ? '텍스트 정보가 업데이트되었습니다. (이미지 업로드 실패)'
               : '프로필이 업데이트되었습니다.';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(successMessage)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(successMessage)));
         }
       } catch (e) {
         if (context.mounted) {
@@ -116,9 +114,9 @@ class ProfileHeader extends HookWidget {
               ),
             );
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('업데이트 실패: $e')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('업데이트 실패: $e')));
           }
         }
       } finally {
@@ -127,8 +125,7 @@ class ProfileHeader extends HookWidget {
     }
 
     final screenW = MediaQuery.of(context).size.width;
-    final tier = TierColors.getTierFromString(userProfile.tier);
-    final colorScheme = TierColors.getColorScheme(tier);
+    final colorScheme = TierProvider.of(context);
 
     // 프로필 이미지 결정 로직
     final imageUrl = u.profileImageCdnUrl;
@@ -366,14 +363,12 @@ class ProfileHeader extends HookWidget {
                         )
                       : IconButton(
                           icon: Icon(
-                            isEditing.value
-                                ? Icons.check
-                                : Icons.edit_outlined,
+                            isEditing.value ? Icons.check : Icons.edit_outlined,
                             color: AppColorSchemes.textSecondary,
                             size: 20,
                           ),
                           onPressed: isEditing.value
-                               ? saveChanges
+                              ? saveChanges
                               : () {
                                   // 편집 모드 진입 시 초기값 설정
                                   nickCtrl.text = u.nickname;
@@ -396,10 +391,7 @@ class ProfileHeader extends HookWidget {
               rating: u.rating,
             ),
             const SizedBox(height: 12),
-            _StatsRow(
-              colorScheme: colorScheme,
-              userProfile: userProfile,
-            ),
+            _StatsRow(colorScheme: colorScheme, userProfile: userProfile),
           ],
         ),
       ),
@@ -578,9 +570,17 @@ class _StatsRow extends StatelessWidget {
 
     return Row(
       children: [
-        card(userProfile.solvedCount.toString(), '문제 해결', Icons.check_circle_outline),
+        card(
+          userProfile.solvedCount.toString(),
+          '문제 해결',
+          Icons.check_circle_outline,
+        ),
         const SizedBox(width: 12),
-        card(userProfile.contributionCount.toString(), '문제 기여', Icons.add_circle_outline),
+        card(
+          userProfile.contributionCount.toString(),
+          '문제 기여',
+          Icons.add_circle_outline,
+        ),
         const SizedBox(width: 12),
         card(userProfile.rivalCount.toString(), '명의 라이벌', Icons.people_outline),
       ],

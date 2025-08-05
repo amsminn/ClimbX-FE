@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
 import '../utils/color_schemes.dart';
+import '../utils/tier_provider.dart';
 import '../models/user_profile.dart';
 
 class TierWidget extends StatelessWidget {
@@ -15,8 +16,7 @@ class TierWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final TierType currentTier = TierColors.getTierFromString(userProfile.tier);
-    final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
+    final TierColorScheme colorScheme = TierProvider.of(context);
 
     return Container(
       width: double.infinity,
@@ -179,7 +179,7 @@ class TierWidget extends StatelessWidget {
                     ],
                   ),
                   child: Icon(
-                    TierColors.getTierIcon(currentTier),
+                    TierColors.getTierIcon(TierColors.getTierFromString(userProfile.tier)),
                     color: AppColorSchemes.backgroundPrimary,
                     size: screenWidth * 0.07,
                   ),
