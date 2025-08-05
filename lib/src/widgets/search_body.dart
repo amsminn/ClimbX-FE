@@ -4,8 +4,8 @@ import '../api/gym.dart';
 import '../models/problem.dart';
 import '../models/gym.dart';
 import '../utils/color_schemes.dart';
-import 'problem_list_item.dart';
-import 'search_filter_toggle.dart';
+import 'problem_grid_item.dart';
+import 'search_filter_dropdown.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
@@ -31,7 +31,7 @@ class _SearchBodyState extends State<SearchBody> {
   List<Problem> _problems = [];
   bool _isLoading = false;
 
-  // 사용 가능한 필터 옵션
+  // 사용 가능한 필터 옵션 (수정필요)
   static const List<String> localLevelOptions = ['빨강', '파랑', '초록', '노랑', '보라'];
   static const List<String> holdColorOptions = ['빨강', '파랑', '초록', '노랑', '보라'];
 
@@ -98,7 +98,7 @@ class _SearchBodyState extends State<SearchBody> {
         localLevel: _selectedLocalLevel,
         holdColor: _selectedHoldColor,
       );
-      
+
       setState(() {
         _problems = problems;
         _isLoading = false;
@@ -119,9 +119,21 @@ class _SearchBodyState extends State<SearchBody> {
         _filteredGyms = _gyms;
       } else {
         _filteredGyms = _gyms
-            .where((gym) => gym.name.toLowerCase().contains(query.toLowerCase()))
+            .where(
+              (gym) => gym.name.toLowerCase().contains(query.toLowerCase()),
+            )
+            .take(3) // 상위 3개만 표시
             .toList();
       }
+    });
+  }
+
+  /// 검색어 초기화
+  void _clearSearch() {
+    setState(() {
+      _searchController.clear();
+      _isSearching = false;
+      _filteredGyms = _gyms;
     });
   }
 
@@ -135,11 +147,16 @@ class _SearchBodyState extends State<SearchBody> {
     _loadProblems();
   }
 
+  /// 선택된 클라이밍장의 gymId 반환
+  int? get selectedGymId => _selectedGym?.gymId;
+
   /// 필터 변경 처리
   void _onFilterChanged({String? localLevel, String? holdColor}) {
     setState(() {
       if (localLevel != null) {
-        _selectedLocalLevel = _selectedLocalLevel == localLevel ? null : localLevel;
+        _selectedLocalLevel = _selectedLocalLevel == localLevel
+            ? null
+            : localLevel;
       }
       if (holdColor != null) {
         _selectedHoldColor = _selectedHoldColor == holdColor ? null : holdColor;
@@ -154,14 +171,15 @@ class _SearchBodyState extends State<SearchBody> {
       children: [
         // 검색바
         _buildSearchBar(),
-        
+
         // 필터 토글
         _buildFilterSection(),
-        
+
+        // 필터와 리스트 사이 간격
+        const SizedBox(height: 16),
+
         // 문제 리스트
-        Expanded(
-          child: _buildProblemList(),
-        ),
+        Expanded(child: _buildProblemList()),
       ],
     );
   }
@@ -192,6 +210,15 @@ class _SearchBodyState extends State<SearchBody> {
                   Icons.search,
                   color: AppColorSchemes.textSecondary,
                 ),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(
+                          Icons.clear,
+                          color: AppColorSchemes.textSecondary,
+                        ),
+                        onPressed: _clearSearch,
+                      )
+                    : null,
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -200,7 +227,7 @@ class _SearchBodyState extends State<SearchBody> {
               ),
             ),
           ),
-          
+
           // 검색 결과 드롭다운
           if (_isSearching && _filteredGyms.isNotEmpty)
             Container(
@@ -245,31 +272,20 @@ class _SearchBodyState extends State<SearchBody> {
   Widget _buildFilterSection() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
         children: [
-          const Text(
-            '필터',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColorSchemes.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          
           // 난이도색 필터
-          SearchFilterToggle(
+          SearchFilterDropdown(
             title: '난이도색',
             options: localLevelOptions,
             selectedOption: _selectedLocalLevel,
             onOptionSelected: (option) => _onFilterChanged(localLevel: option),
           ),
-          
-          const SizedBox(height: 12),
-          
+
+          const SizedBox(width: 8), // 간격 축소
           // 홀드색 필터
-          SearchFilterToggle(
+          SearchFilterDropdown(
             title: '홀드색',
             options: holdColorOptions,
             selectedOption: _selectedHoldColor,
@@ -283,9 +299,7 @@ class _SearchBodyState extends State<SearchBody> {
   /// 문제 리스트 위젯
   Widget _buildProblemList() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_problems.isEmpty) {
@@ -300,9 +314,7 @@ class _SearchBodyState extends State<SearchBody> {
             ),
             const SizedBox(height: 16),
             Text(
-              _selectedGym == null 
-                ? '클라이밍장을 선택해주세요'
-                : '조건에 맞는 문제가 없습니다',
+              _selectedGym == null ? '클라이밍장을 선택해주세요' : '조건에 맞는 문제가 없습니다',
               style: const TextStyle(
                 color: AppColorSchemes.textSecondary,
                 fontSize: 14,
@@ -315,12 +327,21 @@ class _SearchBodyState extends State<SearchBody> {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: ListView.builder(
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2, // 2열
+          crossAxisSpacing: 12, // 가로 간격
+          mainAxisSpacing: 16, // 세로 간격
+          childAspectRatio: 0.8, // 아이템 비율 (세로가 더 길게)
+        ),
         itemCount: _problems.length,
         itemBuilder: (context, index) {
-          return ProblemListItem(problem: _problems[index]);
+          return ProblemGridItem(
+            problem: _problems[index],
+            gymId: selectedGymId,
+          );
         },
       ),
     );
   }
-} 
+}
