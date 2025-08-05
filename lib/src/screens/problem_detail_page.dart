@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/problem.dart';
 import '../api/gym.dart';
 import '../utils/color_schemes.dart';
+import '../screens/problem_submit_page.dart';
 
 /// 문제 상세 정보 페이지
 class ProblemDetailPage extends StatefulWidget {
@@ -253,24 +254,25 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   Widget _buildSubmitButton() {
     return Container(
       width: double.infinity,
-      height: 56,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColorSchemes.accentBlue, AppColorSchemes.accentGreen],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColorSchemes.lightShadow,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       child: ElevatedButton(
         onPressed: () {
-          // 문제 제출 로직
-          _showSubmitDialog();
+          // 제출 페이지로 이동
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ProblemSubmitPage(
+                problem: widget.problem,
+                gymId: widget.gymId,
+              ),
+            ),
+          );
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
+          backgroundColor: AppColorSchemes.accentBlue,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: const Text(
@@ -278,7 +280,6 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColorSchemes.backgroundPrimary,
           ),
         ),
       ),

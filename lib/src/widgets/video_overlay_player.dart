@@ -8,8 +8,14 @@ import '../utils/tier_colors.dart';
 class VideoOverlayPlayer extends StatefulWidget {
   final Video video;
   final String? tierName;
+  final bool showSubmitButton; // 제출 버튼 표시 여부
 
-  const VideoOverlayPlayer({super.key, required this.video, this.tierName});
+  const VideoOverlayPlayer({
+    super.key, 
+    required this.video, 
+    this.tierName,
+    this.showSubmitButton = true, // 기본값은 true
+  });
 
   @override
   State<VideoOverlayPlayer> createState() => _VideoOverlayPlayerState();
@@ -148,7 +154,8 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildSubmitButton(tierColors),
+          // 제출 버튼이 표시되어야 할 때만 표시
+          if (widget.showSubmitButton) _buildSubmitButton(tierColors),
         ],
       ),
     );
