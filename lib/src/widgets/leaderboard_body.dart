@@ -20,7 +20,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
   LeaderboardType _selectedType = LeaderboardType.rating;
   
   // API 호출 상태 관리
-  Future<List<LeaderboardItem>>? _leaderboardFuture;
+  final Map<LeaderboardType, Future<List<LeaderboardItem>>?> _leaderboardFutures = {};
 
   @override
   void initState() {
@@ -30,8 +30,11 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
       vsync: this,
     );
     
+    // 탭 변경 리스너 추가
+    _tabController.addListener(_onTabChanged);
+    
     // 초기 데이터 로드
-    _loadLeaderboard();
+    _loadLeaderboard(_selectedType);
   }
 
   @override
@@ -41,18 +44,22 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
   }
 
   /// 리더보드 데이터 로드
-  void _loadLeaderboard() {
+  void _loadLeaderboard(LeaderboardType type) {
     setState(() {
-      _leaderboardFuture = LeaderboardApi.getRanking(type: _selectedType);
+      _leaderboardFutures[type] = LeaderboardApi.getRanking(type: type);
     });
   }
 
   /// 탭 변경 처리
-  void _onTabChanged(int index) {
-    setState(() {
-      _selectedType = LeaderboardType.values[index];
-      _loadLeaderboard(); // 새로운 데이터 로드
-    });
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) {
+      _selectedType = LeaderboardType.values[_tabController.index];
+      
+      // 새로운 탭의 데이터가 없으면 로드
+      if (_leaderboardFutures[_selectedType] == null) {
+        _loadLeaderboard(_selectedType);
+      }
+    }
   }
 
   @override
@@ -100,79 +107,88 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             indicatorSize: TabBarIndicatorSize.tab,
             dividerColor: Colors.transparent,
             overlayColor: WidgetStateProperty.all(Colors.transparent),
-            onTap: _onTabChanged,
             tabs: LeaderboardType.values
                 .map((type) => _buildTab(type.label))
                 .toList(),
           ),
         ),
 
-        // 리더보드 리스트
+        // 슬라이드 가능한 리더보드 페이지들
         Expanded(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: FutureBuilder<List<LeaderboardItem>>(
-              future: _leaderboardFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: AppColorSchemes.textSecondary,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          snapshot.error.toString().replaceFirst('Exception: ', ''),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: AppColorSchemes.textSecondary,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadLeaderboard,
-                          child: const Text('다시 시도'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                final users = snapshot.data ?? [];
-                if (users.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      '리더보드 데이터가 없습니다',
-                      style: TextStyle(
-                        color: AppColorSchemes.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    return _buildLeaderboardItem(users[index]);
-                  },
-                );
-              },
-            ),
+          child: TabBarView(
+            controller: _tabController,
+            children: LeaderboardType.values.map((type) {
+              return _buildLeaderboardPage(type);
+            }).toList(),
           ),
         ),
       ],
+    );
+  }
+
+  /// 각 탭별 리더보드 페이지 빌드
+  Widget _buildLeaderboardPage(LeaderboardType type) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: FutureBuilder<List<LeaderboardItem>>(
+        future: _leaderboardFutures[type],
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: AppColorSchemes.textSecondary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    snapshot.error.toString().replaceFirst('Exception: ', ''),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColorSchemes.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => _loadLeaderboard(type),
+                    child: const Text('다시 시도'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final users = snapshot.data ?? [];
+          if (users.isEmpty) {
+            return const Center(
+              child: Text(
+                '리더보드 데이터가 없습니다',
+                style: TextStyle(
+                  color: AppColorSchemes.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              return _buildLeaderboardItem(users[index]);
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -230,7 +246,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(22.5),
-              child: _buildProfileImage(user.profileImageUrl),
+              child: _buildProfileImage(user.profileImageCdnUrl),
             ),
           ),
 
@@ -294,7 +310,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
   }
 
   /// 프로필 이미지 빌드 (네트워크 이미지 또는 기본 아바타)
-  Widget _buildProfileImage(String? profileImageUrl) {
+  Widget _buildProfileImage(String? profileImageCdnUrl) {
     // 기본 아바타 위젯 
     final Widget defaultAvatar = Container(
       color: AppColorSchemes.backgroundTertiary,
@@ -305,14 +321,14 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
       ),
     );
 
-    if (profileImageUrl == null || profileImageUrl.isEmpty) {
+    if (profileImageCdnUrl == null || profileImageCdnUrl.isEmpty) {
       return defaultAvatar;
     }
 
     // 네트워크 이미지인지 로컬 이미지인지 판단
-    if (profileImageUrl.startsWith('/images/')) {
+    if (profileImageCdnUrl.startsWith('/images/')) {
       // 백엔드 이미지 경로에 base URL 추가
-      final fullUrl = '${ApiClient.baseUrl}$profileImageUrl';
+      final fullUrl = '${ApiClient.baseUrl}$profileImageCdnUrl';
       return Image.network(
         fullUrl,
         fit: BoxFit.cover,
@@ -337,7 +353,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
     // 로컬 asset 이미지
     return Image.asset(
-      profileImageUrl,
+      profileImageCdnUrl,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => defaultAvatar,
     );

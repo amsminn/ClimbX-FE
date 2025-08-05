@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
 import '../utils/color_schemes.dart';
+import '../utils/tier_provider.dart';
 import '../models/user_profile.dart';
 
 class TierWidget extends StatelessWidget {
-  final String tierName;
   final UserProfile userProfile;
 
   const TierWidget({
     super.key, 
-    this.tierName = 'Diamond I',
     required this.userProfile,
   });
 
@@ -17,8 +16,7 @@ class TierWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final TierType currentTier = TierColors.getTierFromString(tierName);
-    final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
+    final TierColorScheme colorScheme = TierProvider.of(context);
 
     return Container(
       width: double.infinity,
@@ -132,7 +130,7 @@ class TierWidget extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          tierName,
+                          userProfile.tier,
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 20 : 24,
                             fontWeight: FontWeight.w800,
@@ -181,7 +179,7 @@ class TierWidget extends StatelessWidget {
                     ],
                   ),
                   child: Icon(
-                    TierColors.getTierIcon(currentTier),
+                    TierColors.getTierIcon(TierColors.getTierFromString(userProfile.tier)),
                     color: AppColorSchemes.backgroundPrimary,
                     size: screenWidth * 0.07,
                   ),
