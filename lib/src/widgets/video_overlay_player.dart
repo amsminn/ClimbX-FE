@@ -8,8 +8,9 @@ import '../utils/tier_colors.dart';
 
 class VideoOverlayPlayer extends StatefulWidget {
   final Video video;
+  final TierColorScheme? tierColors;
 
-  const VideoOverlayPlayer({super.key, required this.video});
+  const VideoOverlayPlayer({super.key, required this.video, this.tierColors});
 
   @override
   State<VideoOverlayPlayer> createState() => _VideoOverlayPlayerState();
@@ -89,7 +90,8 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final tierColors = TierProvider.of(context);
+    // TierProvider에서 색상을 가져오거나, 전달받은 색상을 사용
+    final TierColorScheme colorScheme = widget.tierColors ?? TierProvider.of(context);
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -146,7 +148,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildSubmitButton(tierColors),
+          _buildSubmitButton(colorScheme),
         ],
       ),
     );

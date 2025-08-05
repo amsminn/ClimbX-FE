@@ -103,7 +103,9 @@ class VideoAnalysisWidget extends HookWidget {
 
         // 업로드 시작 - 진행률 표시를 위해 상태 업데이트
         final uploadingVideo = localVideo.copyWith(isUploading: true);
-        final index = localVideos.value.indexWhere((v) => v.localPath == pickedFile.path);
+        final index = localVideos.value.indexWhere(
+          (v) => v.localPath == pickedFile.path,
+        );
         localVideos.value = [
           ...localVideos.value.take(index),
           uploadingVideo,
@@ -187,7 +189,7 @@ class VideoAnalysisWidget extends HookWidget {
 
       try {
         isPickerActive.value = true;
-        
+
         // 카메라 권한 요청
         final cameraStatus = await Permission.camera.request();
         developer.log('카메라 권한 상태: $cameraStatus', name: 'VideoAnalysisWidget');
@@ -246,7 +248,7 @@ class VideoAnalysisWidget extends HookWidget {
 
       try {
         isPickerActive.value = true;
-        
+
         final XFile? picked = await picker.pickVideo(
           source: ImageSource.gallery,
           maxDuration: const Duration(minutes: 5),
@@ -281,6 +283,33 @@ class VideoAnalysisWidget extends HookWidget {
       }
       return null;
     }, [isActive]);
+
+    void onVideoTap(BuildContext context, Video video) {
+      if (video.isCompleted && video.hasValidUrl) {
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          barrierColor: Colors.black.withValues(alpha: 0.8),
+          builder: (BuildContext context) {
+            return VideoOverlayPlayer(video: video, tierColors: colorScheme);
+          },
+        );
+      } else if (video.isPending || video.isProcessing) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('영상 처리가 완료되면 재생할 수 있습니다'),
+            backgroundColor: AppColorSchemes.accentOrange,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('영상을 재생할 수 없습니다'),
+            backgroundColor: AppColorSchemes.accentRed,
+          ),
+        );
+      }
+    }
 
     return Container(
       width: double.infinity,
@@ -381,13 +410,19 @@ class VideoAnalysisWidget extends HookWidget {
                         return _buildActionTile(
                           icon: Icons.photo_library_outlined,
                           label: '갤러리에서 선택',
-                          onTap: isPickerActive.value ? null : selectFromGallery,
+                          onTap: isPickerActive.value
+                              ? null
+                              : selectFromGallery,
                           isDisabled: isPickerActive.value,
                         );
                       } else {
                         // 실제 영상들
                         final video = getAllVideos()[index - 2];
-                        return _buildVideoTile(context, video);
+                        return _buildVideoTile(
+                          context,
+                          video,
+                          () => onVideoTap(context, video),
+                        );
                       }
                     },
                   ),
@@ -408,7 +443,7 @@ class VideoAnalysisWidget extends HookWidget {
       onTap: isDisabled ? null : onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isDisabled 
+          color: isDisabled
               ? AppColorSchemes.backgroundSecondary.withValues(alpha: 0.5)
               : AppColorSchemes.backgroundSecondary,
           borderRadius: BorderRadius.circular(12),
@@ -423,9 +458,9 @@ class VideoAnalysisWidget extends HookWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              icon, 
-              size: 32, 
-              color: isDisabled 
+              icon,
+              size: 32,
+              color: isDisabled
                   ? AppColorSchemes.textSecondary.withValues(alpha: 0.5)
                   : AppColorSchemes.textSecondary,
             ),
@@ -433,7 +468,7 @@ class VideoAnalysisWidget extends HookWidget {
             Text(
               label,
               style: TextStyle(
-                color: isDisabled 
+                color: isDisabled
                     ? AppColorSchemes.textSecondary.withValues(alpha: 0.5)
                     : AppColorSchemes.textSecondary,
                 fontSize: 12,
@@ -448,9 +483,13 @@ class VideoAnalysisWidget extends HookWidget {
   }
 
   /// 영상 타일
-  Widget _buildVideoTile(BuildContext context, Video video) {
+  Widget _buildVideoTile(
+    BuildContext context,
+    Video video,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
-      onTap: () => _onVideoTap(context, video),
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
@@ -550,7 +589,9 @@ class VideoAnalysisWidget extends HookWidget {
                             valueColor: const AlwaysStoppedAnimation<Color>(
                               Colors.white,
                             ),
-                            backgroundColor: Colors.white.withValues(alpha: 0.3),
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -571,35 +612,5 @@ class VideoAnalysisWidget extends HookWidget {
         ),
       ),
     );
-  }
-
-  void _onVideoTap(BuildContext context, Video video) {
-    if (video.isCompleted && video.hasValidUrl) {
-      // 팝업으로 영상 재생
-      showDialog(
-        context: context,
-        barrierDismissible: true, // 바깥 영역 클릭으로 닫기 가능
-        barrierColor: Colors.black.withValues(alpha: 0.8), // 어두운 배경
-        builder: (BuildContext context) {
-          return VideoOverlayPlayer(
-            video: video,
-          );
-        },
-      );
-    } else if (video.isPending || video.isProcessing) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('영상 처리가 완료되면 재생할 수 있습니다'),
-          backgroundColor: AppColorSchemes.accentOrange,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('영상을 재생할 수 없습니다'),
-          backgroundColor: AppColorSchemes.accentRed,
-        ),
-      );
-    }
   }
 }
