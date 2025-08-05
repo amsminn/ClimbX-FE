@@ -6,10 +6,7 @@ import '../utils/color_schemes.dart';
 class ProblemListItem extends StatelessWidget {
   final Problem problem;
 
-  const ProblemListItem({
-    super.key,
-    required this.problem,
-  });
+  const ProblemListItem({super.key, required this.problem});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +27,7 @@ class ProblemListItem extends StatelessWidget {
               children: [
                 // 문제 ID
                 Text(
-                  '문제 #${problem.id}',
+                  '문제 #${problem.problemId.substring(0, 8)}',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -38,7 +35,7 @@ class ProblemListItem extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                
+
                 // 난이도 정보
                 Row(
                   children: [
@@ -48,7 +45,7 @@ class ProblemListItem extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                
+
                 // 점수 정보
                 Row(
                   children: [
@@ -69,8 +66,8 @@ class ProblemListItem extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                
-                // 위치 정보
+
+                // 영역 정보
                 Row(
                   children: [
                     const Icon(
@@ -80,7 +77,7 @@ class ProblemListItem extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '스팟 ${problem.spotId}',
+                      problem.gymAreaName,
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColorSchemes.textSecondary,
@@ -91,9 +88,9 @@ class ProblemListItem extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // 문제 이미지 (오른쪽)
           Container(
             width: 80,
@@ -120,10 +117,10 @@ class ProblemListItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _getColorForOption(color).withOpacity(0.1),
+        color: _getColorForOption(color).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getColorForOption(color).withOpacity(0.3),
+          color: _getColorForOption(color).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -164,13 +161,13 @@ class ProblemListItem extends StatelessWidget {
       ),
     );
 
-    if (problem.imageUrl.isEmpty) {
+    if (problem.problemImageCdnUrl.isEmpty) {
       return defaultImage;
     }
 
     // 네트워크 이미지
     return Image.network(
-      problem.imageUrl,
+      problem.problemImageCdnUrl,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => defaultImage,
       loadingBuilder: (context, child, loadingProgress) {
@@ -181,9 +178,7 @@ class ProblemListItem extends StatelessWidget {
             child: SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
         );
@@ -208,4 +203,4 @@ class ProblemListItem extends StatelessWidget {
         return AppColorSchemes.accentBlue;
     }
   }
-} 
+}
