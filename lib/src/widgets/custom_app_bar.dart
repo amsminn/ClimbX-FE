@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
-import '../utils/tier_test_helper.dart';
 import '../utils/navigation_helper.dart';
 import '../utils/color_schemes.dart';
 import '../api/auth.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String currentTier;
-  final Function(String) onTierChanged;
-
-  const CustomAppBar({
-    super.key,
-    required this.currentTier,
-    required this.onTierChanged,
-  });
+  const CustomAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -51,24 +43,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             },
           ),
         ),
-        // 팔레트 (임시, 나중에 제거 예정)
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppColorSchemes.backgroundSecondary,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            icon: const Icon(
-              Icons.palette_outlined,
-              color: AppColorSchemes.textSecondary,
-              size: 22,
-            ),
-            onPressed: () {
-              TierTestHelper.showTierSelector(context, onTierChanged);
-            },
-          ),
-        ),
+
         // 알림
         Container(
           margin: const EdgeInsets.only(right: 8),

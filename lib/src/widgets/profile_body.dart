@@ -9,28 +9,21 @@ import '../utils/tier_colors.dart';
 import '../utils/color_schemes.dart';
 import '../models/user_profile.dart';
 import '../api/user.dart';
-import 'video_analysis_widget.dart';
+import 'video_gallery_widget.dart';
+import '../utils/tier_provider.dart';
 
 /// 프로필 화면의 메인 바디 위젯
 /// 로딩/에러 상태 처리 및 탭 구조 관리
 
 class ProfileBody extends HookWidget {
-  final String currentTier;
-  final TierColorScheme colorScheme;
-
-  const ProfileBody({
-    super.key,
-    required this.currentTier,
-    required this.colorScheme,
-  });
+  const ProfileBody({super.key});
 
   @override
   Widget build(BuildContext context) {
     // 사용자 프로필 데이터 조회
-    final userQuery = useQuery<UserProfile, Exception>(
-      ['user_profile'],
-      UserApi.getUserProfile,
-    );
+    final userQuery = useQuery<UserProfile, Exception>([
+      'user_profile',
+    ], UserApi.getUserProfile);
 
     // 로딩 중 표시
     if (userQuery.isLoading) {
@@ -58,17 +51,14 @@ class ProfileBody extends HookWidget {
 
     // 데이터 로드 성공 - 프로필 정보 사용
     final userProfile = userQuery.data!;
+    final currentTier = userProfile.tier;
+    final colorScheme = TierProvider.of(context);
     return DefaultTabController(
       length: 5,
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
-            SliverToBoxAdapter(
-              child: ProfileHeader(
-                userProfile: userProfile,
-                tierName: currentTier,
-              ),
-            ),
+            SliverToBoxAdapter(child: ProfileHeader(userProfile: userProfile)),
             SliverPersistentHeader(
               delegate: _StickyTabBarDelegate(
                 TabBar(
@@ -106,12 +96,7 @@ class ProfileBody extends HookWidget {
         },
         body: TabBarView(
           children: [
-            _buildTabContent(
-              child: TierWidget(
-                tierName: currentTier,
-                userProfile: userProfile,
-              ),
-            ),
+            _buildTabContent(child: TierWidget(userProfile: userProfile)),
             _buildTabContent(child: HistoryWidget(tierName: currentTier)),
             _buildTabContent(
               child: StreakWidget(
@@ -119,9 +104,7 @@ class ProfileBody extends HookWidget {
                 userProfile: userProfile,
               ),
             ),
-            _buildTabContent(
-              child: VideoAnalysisWidget(tierName: currentTier),
-            ),
+            _buildTabContent(child: const VideoGalleryWidget()),
             _buildTabContent(
               child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
             ),
@@ -180,7 +163,11 @@ class ProfileBody extends HookWidget {
               gradient: colorScheme.gradient,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(icon, color: AppColorSchemes.backgroundPrimary, size: 32),
+            child: Icon(
+              icon,
+              color: AppColorSchemes.backgroundPrimary,
+              size: 32,
+            ),
           ),
           const SizedBox(height: 16),
           Text(

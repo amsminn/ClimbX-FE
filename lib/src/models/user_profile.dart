@@ -5,10 +5,13 @@ class UserProfile {
   final String? profileImageCdnUrl;
   final int ranking;
   final int rating;
-  final Map<String, int> categoryRatings;
+  final String tier;
+  final List<CategoryRating> categoryRatings;
   final int currentStreak;
   final int longestStreak;
-  final int solvedProblemsCount;
+  final int solvedCount;
+  final int submissionCount;
+  final int contributionCount;
   final int rivalCount;
 
   UserProfile({
@@ -17,10 +20,13 @@ class UserProfile {
     this.profileImageCdnUrl,
     required this.ranking,
     required this.rating,
+    required this.tier,
     required this.categoryRatings,
     required this.currentStreak,
     required this.longestStreak,
-    required this.solvedProblemsCount,
+    required this.solvedCount,
+    required this.submissionCount,
+    required this.contributionCount,
     required this.rivalCount,
   });
 
@@ -31,10 +37,15 @@ class UserProfile {
       profileImageCdnUrl: json['profileImageCdnUrl'],
       ranking: json['ranking'] ?? 0,
       rating: json['rating'] ?? 0,
-      categoryRatings: Map<String, int>.from(json['categoryRatings'] ?? {}),
+      tier: json['tier'] ?? '',
+      categoryRatings: (json['categoryRatings'] as List<dynamic>?)
+          ?.map((item) => CategoryRating.fromJson(item as Map<String, dynamic>))
+          .toList() ?? [],
       currentStreak: json['currentStreak'] ?? 0,
       longestStreak: json['longestStreak'] ?? 0,
-      solvedProblemsCount: json['solvedProblemsCount'] ?? 0,
+      solvedCount: json['solvedCount'] ?? 0,
+      submissionCount: json['submissionCount'] ?? 0,
+      contributionCount: json['contributionCount'] ?? 0,
       rivalCount: json['rivalCount'] ?? 0,
     );
   }
@@ -46,16 +57,49 @@ class UserProfile {
       'profileImageCdnUrl': profileImageCdnUrl,
       'ranking': ranking,
       'rating': rating,
-      'categoryRatings': categoryRatings,
+      'tier': tier,
+      'categoryRatings': categoryRatings.map((item) => item.toJson()).toList(),
       'currentStreak': currentStreak,
       'longestStreak': longestStreak,
-      'solvedProblemsCount': solvedProblemsCount,
+      'solvedCount': solvedCount,
+      'submissionCount': submissionCount,
+      'contributionCount': contributionCount,
       'rivalCount': rivalCount,
     };
   }
 
   @override
   String toString() {
-    return 'UserProfile(nickname: $nickname, ranking: $ranking, rating: $rating, streak: $currentStreak)';
+    return 'UserProfile(nickname: $nickname, ranking: $ranking, rating: $rating, tier: $tier, streak: $currentStreak)';
+  }
+}
+
+/// 카테고리별 레이팅 정보를 담는 모델
+class CategoryRating {
+  final String category;
+  final int rating;
+
+  CategoryRating({
+    required this.category,
+    required this.rating,
+  });
+
+  factory CategoryRating.fromJson(Map<String, dynamic> json) {
+    return CategoryRating(
+      category: json['category'] ?? '',
+      rating: json['rating'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'category': category,
+      'rating': rating,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'CategoryRating(category: $category, rating: $rating)';
   }
 } 

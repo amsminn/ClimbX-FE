@@ -38,20 +38,20 @@ class VideoGalleryWidget extends HookWidget {
       if (!isActive) return;
 
       try {
-        developer.log('서버 영상 목록 로드 시작', name: 'VideoAnalysisWidget');
+        developer.log('서버 영상 목록 로드 시작', name: 'VideoGalleryWidget');
         final videos = await VideoApi.getCurrentUserVideos();
 
         if (context.mounted) {
           serverVideos.value = videos;
           developer.log(
             '서버 영상 목록 로드 완료: ${videos.length}개',
-            name: 'VideoAnalysisWidget',
+            name: 'VideoGalleryWidget',
           );
         }
       } catch (e) {
         developer.log(
           '서버 영상 목록 로드 실패: $e',
-          name: 'VideoAnalysisWidget',
+          name: 'VideoGalleryWidget',
           error: e,
         );
         if (context.mounted) {
@@ -98,7 +98,7 @@ class VideoGalleryWidget extends HookWidget {
 
         developer.log(
           '영상 업로드 시작: ${pickedFile.path}',
-          name: 'VideoAnalysisWidget',
+          name: 'VideoGalleryWidget',
         );
 
         // 업로드 시작 - 진행률 표시를 위해 상태 업데이트
@@ -132,7 +132,7 @@ class VideoGalleryWidget extends HookWidget {
           },
         );
 
-        developer.log('영상 업로드 완료: $videoId', name: 'VideoAnalysisWidget');
+        developer.log('영상 업로드 완료: $videoId', name: 'VideoGalleryWidget');
 
         // 업로드 완료 - 업로드 상태만 해제하고 로컬에서 삭제하지 않음
         final currentIndex = localVideos.value.indexWhere(
@@ -161,7 +161,7 @@ class VideoGalleryWidget extends HookWidget {
 
         refreshVideos();
       } catch (e) {
-        developer.log('영상 업로드 실패: $e', name: 'VideoAnalysisWidget', error: e);
+        developer.log('영상 업로드 실패: $e', name: 'VideoGalleryWidget', error: e);
 
         // 실패한 영상을 로컬 목록에서 제거
         localVideos.value = localVideos.value
@@ -183,7 +183,7 @@ class VideoGalleryWidget extends HookWidget {
     // 비디오 촬영
     Future<void> recordVideo() async {
       if (isPickerActive.value) {
-        developer.log('이미 picker가 활성화되어 있습니다', name: 'VideoAnalysisWidget');
+        developer.log('이미 picker가 활성화되어 있습니다', name: 'VideoGalleryWidget');
         return;
       }
 
@@ -192,7 +192,7 @@ class VideoGalleryWidget extends HookWidget {
 
         // 카메라 권한 요청
         final cameraStatus = await Permission.camera.request();
-        developer.log('카메라 권한 상태: $cameraStatus', name: 'VideoAnalysisWidget');
+        developer.log('카메라 권한 상태: $cameraStatus', name: 'VideoGalleryWidget');
 
         if (!cameraStatus.isGranted) {
           if (context.mounted) {
@@ -205,7 +205,7 @@ class VideoGalleryWidget extends HookWidget {
                     final result = await openAppSettings();
                     developer.log(
                       '설정 페이지 열기: $result',
-                      name: 'VideoAnalysisWidget',
+                      name: 'VideoGalleryWidget',
                     );
                   },
                 ),
@@ -225,7 +225,7 @@ class VideoGalleryWidget extends HookWidget {
           await handleVideoUpload(video, '촬영된 영상을 업로드 중입니다...');
         }
       } catch (e) {
-        developer.log('비디오 촬영 실패: $e', name: 'VideoAnalysisWidget', error: e);
+        developer.log('비디오 촬영 실패: $e', name: 'VideoGalleryWidget', error: e);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -242,7 +242,7 @@ class VideoGalleryWidget extends HookWidget {
     // 갤러리에서 영상 선택
     Future<void> selectFromGallery() async {
       if (isPickerActive.value) {
-        developer.log('이미 picker가 활성화되어 있습니다', name: 'VideoAnalysisWidget');
+        developer.log('이미 picker가 활성화되어 있습니다', name: 'VideoGalleryWidget');
         return;
       }
 
@@ -260,7 +260,7 @@ class VideoGalleryWidget extends HookWidget {
       } catch (e) {
         developer.log(
           '갤러리 영상 선택 실패: $e',
-          name: 'VideoAnalysisWidget',
+          name: 'VideoGalleryWidget',
           error: e,
         );
         if (context.mounted) {
