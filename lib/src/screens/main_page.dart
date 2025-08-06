@@ -89,7 +89,7 @@ class _MainPageState extends State<MainPage> {
           // 1: 리더보드
           const LeaderboardBody(),
           // 2: 검색
-          _buildComingSoon('검색', Icons.search),
+          const SearchBody(),
           // 3: 지도
           const MapBody(),
         ],
@@ -108,62 +108,7 @@ class _MainPageState extends State<MainPage> {
       ),
     );
   }
-
-  // 출시 예정 페이지 (임시페이지임 삭제 예정)
-  Widget _buildComingSoon(
-    String title,
-    IconData icon,
-  ) {
-    final screenSize = MediaQuery.of(context).size;
-
-    return Center(
-      child: Container(
-        width: screenSize.width * 0.85,
-        height: screenSize.height * 0.4,
-        decoration: BoxDecoration(
-          color: AppColorSchemes.backgroundPrimary,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: AppColorSchemes.lightShadow,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(screenSize.width * 0.05),
-              decoration: BoxDecoration(
-                gradient: AppColorSchemes.defaultGradient,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                icon,
-                color: AppColorSchemes.backgroundPrimary,
-                size: screenSize.width * 0.08,
-              ),
-            ),
-            SizedBox(height: screenSize.height * 0.02),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: screenSize.width * 0.05,
-                fontWeight: FontWeight.w700,
-                color: AppColorSchemes.textPrimary,
-              ),
-            ),
-            SizedBox(height: screenSize.height * 0.01),
-            Text(
-              '곧 출시 예정입니다',
-              style: TextStyle(
-                fontSize: screenSize.width * 0.035,
-                color: AppColorSchemes.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
+  
   /// 유저 프로필 로드
   Future<void> _loadUserProfile() async {
     setState(() {

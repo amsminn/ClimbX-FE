@@ -4,16 +4,22 @@ import '../utils/color_schemes.dart';
 /// 드롭다운 형태의 필터 선택 위젯
 class SearchFilterDropdown extends StatefulWidget {
   final String title;
+  final String identifier; // 드롭다운 식별자
   final List<String> options;
   final String? selectedOption;
   final Function(String?) onOptionSelected;
+  final Function(String?)? onDropdownStateChanged; // 드롭다운 상태 변경 콜백
+  final bool forceClose; // 강제로 드롭다운 닫기
 
   const SearchFilterDropdown({
     super.key,
     required this.title,
+    required this.identifier,
     required this.options,
     required this.selectedOption,
     required this.onOptionSelected,
+    this.onDropdownStateChanged,
+    this.forceClose = false,
   });
 
   @override
@@ -31,9 +37,31 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(SearchFilterDropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 외부에서 강제로 닫기 요청이 오면 드롭다운 닫기
+    if (widget.forceClose && !oldWidget.forceClose && _isExpanded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _closeDropdown();
+      });
+    }
+  }
+
   void _removeOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = null;
+  }
+
+  void _closeDropdown() {
+    setState(() {
+      _isExpanded = false;
+    });
+    _removeOverlay();
+    // 빌드 과정 중이 아닐 때만 콜백 호출
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onDropdownStateChanged?.call(null);
+    });
   }
 
   void _showOverlay() {
@@ -61,8 +89,8 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 전체 선택 옵션
-                  _buildDropdownItem(null, '전체'),
+                  // 모든 옵션 선택
+                  _buildDropdownItem(null, '모두'),
                   const SizedBox(height: 4),
                   ...widget.options.map((option) => _buildDropdownItem(option, option)),
                 ],
@@ -87,9 +115,12 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
           });
           
           if (_isExpanded) {
+            // 다른 드롭다운들에게 닫기 신호 전송
+            widget.onDropdownStateChanged?.call(widget.identifier);
             _showOverlay();
           } else {
             _removeOverlay();
+            widget.onDropdownStateChanged?.call(null);
           }
         },
         child: Container(
@@ -114,16 +145,21 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
                 ),
               ),
               const SizedBox(width: 6), // 간격 축소
-              // 선택된 색상 동그라미
-              if (widget.selectedOption != null)
-                Container(
-                  width: 10, // 동그라미 크기 축소
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: _getColorForOption(widget.selectedOption!),
-                    shape: BoxShape.circle,
+              // 선택된 색상 표시 또는 "모두" 아이콘
+              widget.selectedOption == null 
+                ? Icon(
+                    Icons.select_all,
+                    size: 10,
+                    color: AppColorSchemes.textSecondary,
+                  )
+                : Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: _getColorForOption(widget.selectedOption!),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
               const SizedBox(width: 6), // 간격 축소
               Icon(
                 _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
@@ -148,6 +184,10 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
           _isExpanded = false;
         });
         _removeOverlay();
+        // 상태 변경을 안전하게 처리
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          widget.onDropdownStateChanged?.call(null);
+        });
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), // 패딩 축소
@@ -159,17 +199,22 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
         ),
         child: Row(
           children: [
-            if (option != null) ...[
-              Container(
-                width: 10, // 동그라미 크기 축소
-                height: 10,
-                decoration: BoxDecoration(
-                  color: _getColorForOption(option),
-                  shape: BoxShape.circle,
+            // 모든 옵션 아이콘 또는 색상 동그라미
+            option == null 
+              ? Icon(
+                  Icons.select_all,
+                  size: 10,
+                  color: AppColorSchemes.textSecondary,
+                )
+              : Container(
+                  width: 10, // 동그라미 크기 축소
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: _getColorForOption(option),
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6), // 간격 축소
-            ],
+            const SizedBox(width: 6), // 간격 축소
             Expanded(
               child: Text(
                 label,

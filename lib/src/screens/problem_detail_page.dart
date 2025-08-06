@@ -21,35 +21,11 @@ class ProblemDetailPage extends StatefulWidget {
 
 class _ProblemDetailPageState extends State<ProblemDetailPage> {
   final TextEditingController _commentController = TextEditingController();
-  String? _gymName; // 클라이밍장 이름 저장
-
-  @override
-  void initState() {
-    super.initState();
-    _loadGymName();
-  }
 
   @override
   void dispose() {
     _commentController.dispose();
     super.dispose();
-  }
-
-  /// 클라이밍장 이름 로드
-  Future<void> _loadGymName() async {
-    if (widget.gymId != null) {
-      try {
-        final gym = await GymApi.getGymById(widget.gymId!);
-        setState(() {
-          _gymName = gym.name;
-        });
-      } catch (e) {
-        // 에러 처리 - 기본값 사용
-        setState(() {
-          _gymName = '클라이밍장';
-        });
-      }
-    }
   }
 
   @override
@@ -149,7 +125,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         children: [
           // 문제 제목 (클라이밍장 이름 포함)
           Text(
-            _gymName != null ? '$_gymName - ${widget.problem.gymAreaName}' : widget.problem.gymAreaName,
+            '${widget.problem.gymName} - ${widget.problem.gymAreaName}',
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,

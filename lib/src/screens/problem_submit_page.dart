@@ -195,25 +195,32 @@ class ProblemSubmitPage extends HookWidget {
       ),
       body: Column(
         children: [
-          // 상단: 문제 정보
-          _buildProblemInfo(),
-          
-          // 중간: 영상 업로드 버튼 + 영상 목록
+          // 스크롤 영역 (문제 정보 + 영상 업로드 + 영상 리스트)
           Expanded(
-            child: _buildVideoSection(
-              context,
-              completedVideos,
-              selectedVideoIds,
-              videosQuery.isLoading,
-              videosQuery.isError,
-              isUploading,
-              recordVideo,
-              selectFromGallery,
-              () => videosQuery.refetch(), // 콜백 함수로 전달
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // 상단: 문제 정보
+                  _buildProblemInfo(),
+                  
+                  // 중간: 영상 업로드 버튼 + 영상 목록
+                  _buildVideoSection(
+                    context,
+                    completedVideos,
+                    selectedVideoIds,
+                    videosQuery.isLoading,
+                    videosQuery.isError,
+                    isUploading,
+                    recordVideo,
+                    selectFromGallery,
+                    () => videosQuery.refetch(), // 콜백 함수로 전달
+                  ),
+                ],
+              ),
             ),
           ),
           
-          // 하단: 제출 버튼
+          // 하단: 제출 버튼 (고정)
           _buildSubmitButton(
             context,
             canSubmit,
@@ -438,14 +445,12 @@ class ProblemSubmitPage extends HookWidget {
           const SizedBox(height: 16),
           
           // 영상 목록
-          Expanded(
-            child: _buildVideoList(
-              context,
-              videos,
-              selectedVideoIds,
-              isLoading,
-              isError,
-            ),
+          _buildVideoList(
+            context,
+            videos,
+            selectedVideoIds,
+            isLoading,
+            isError,
           ),
         ],
       ),
@@ -573,10 +578,10 @@ class ProblemSubmitPage extends HookWidget {
       );
     }
 
-    return ListView.builder(
-      itemCount: videos.length,
-      itemBuilder: (context, index) {
-        final video = videos[index];
+    return Column(
+      children: videos.asMap().entries.map((entry) {
+        final index = entry.key;
+        final video = entry.value;
         final isSelected = selectedVideoIds.value.contains(video.videoId);
         
         return Container(
@@ -599,7 +604,7 @@ class ProblemSubmitPage extends HookWidget {
             },
           ),
         );
-      },
+      }).toList(),
     );
   }
 
@@ -729,8 +734,8 @@ class ProblemSubmitPage extends HookWidget {
       builder: (BuildContext context) {
         return VideoOverlayPlayer(
           video: video,
-          tierName: null,
           showSubmitButton: false, // 제출 페이지에서는 제출 버튼 숨기기
+          tierColors: null, // 기본 색상 사용
         );
       },
     );

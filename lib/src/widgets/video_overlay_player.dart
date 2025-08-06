@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../models/video.dart';
 import 'dart:developer' as developer;
-import '../utils/tier_provider.dart';
 import '../utils/tier_colors.dart';
 
 class VideoOverlayPlayer extends StatefulWidget {
@@ -96,8 +95,9 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    // TierProvider에서 색상을 가져오거나, 전달받은 색상을 사용
-    final TierColorScheme colorScheme = widget.tierColors ?? TierProvider.of(context);
+    // 전달받은 색상을 사용하거나, 기본 색상 사용
+    final TierColorScheme colorScheme = widget.tierColors ?? 
+      TierColors.getColorScheme(TierColors.getTierFromString('Bronze III'));
 
     return Dialog(
       backgroundColor: Colors.transparent,
