@@ -65,4 +65,5 @@ app.*.map.json
 GoogleService-Info.plist
 **/GoogleService-Info.plist
 
-ios/Runner/Secrets.xcconfig
+ios/Flutter/Debug.xcconfig
+ios/Flutter/Release.xcconfig
