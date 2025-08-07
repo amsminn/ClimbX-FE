@@ -22,20 +22,21 @@ class LeaderboardApi {
   static const String _criteriaSolvedProblems = 'solved_count';
 
   /// 리더보드 조회
+  /// 서버 규격: /api/ranking/users?criteria=...&page=0&size=10&sort=desc
   static Future<List<LeaderboardItem>> getRanking({
     required LeaderboardType type,
     String order = 'desc',
     int page = 0,
-    int perPage = 10000, // 모든 데이터를 가져오기 위해 충분히 큰 값 설정 (추후 변경예정)
+    int size = 50,
   }) async {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
         '/api/ranking/users',
         queryParameters: {
           'criteria': type.criteria,
-          'order': order,
+          'sort': order, // desc | asc
           'page': page,
-          'per_page': perPage,
+          'size': size,
         },
         logContext: 'LeaderboardApi',
       );
