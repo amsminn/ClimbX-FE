@@ -49,10 +49,9 @@
         <true/>
         <key>UIApplicationSupportsIndirectInputEvents</key>
         <true/>
-        <!-- todo: 더 정확한 권한 설명 추가 -->
+        <!-- 네이버 지도 기능에서 유저의 위치를 보여주는 기능을 위해 유저의 위치 권한이 필요합니다 -->
         <key>NSLocationUsageDescription</key>
         <string>need location permission to show user's currnet location in map</string>
-        <!-- todo: 더 정확한 권한 설명 추가 -->
         <key>NSLocationWhenInUseUsageDescription</key>
         <string>need location permission to show user's currnet location in map</string>
         <key>CFBundleURLTypes</key>
