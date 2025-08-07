@@ -131,15 +131,6 @@ class AuthApi {
         } catch (error) {
           developer.log('카카오톡으로 로그인 실패: $error', name: 'AuthApi');
           _handleKakaoLoginError(error, ctx: '카카오톡 로그인에 실패했습니다');
-
-          // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인
-          try {
-            await UserApi.instance.loginWithKakaoAccount(nonce: nonce);
-            developer.log('카카오계정으로 로그인 성공', name: 'AuthApi');
-          } catch (error) {
-            developer.log('카카오계정으로 로그인 실패: $error', name: 'AuthApi');
-            _handleKakaoLoginError(error, ctx: '카카오톡 로그인에 실패했습니다');
-          }
         }
       } else {
         // 카카오톡이 설치되지 않은 경우 카카오계정으로 로그인
