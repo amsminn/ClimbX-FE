@@ -26,9 +26,6 @@ class _SearchBodyState extends State<SearchBody> {
   // 필터 관련 상태
   String? _selectedLocalLevel;
   String? _selectedHoldColor;
-  
-  // 드롭다운 상태 관리
-  String? _openDropdown; // 현재 열려있는 드롭다운 식별자
 
   // 문제 리스트 상태
   List<Problem> _problems = [];
@@ -60,10 +57,31 @@ class _SearchBodyState extends State<SearchBody> {
         _filteredGyms = gyms;
       });
     } catch (e) {
-      // API 호출 실패 시 빈 리스트로 설정
+      // 에러 처리 (더미 데이터 사용)
       setState(() {
-        _gyms = [];
-        _filteredGyms = [];
+        _gyms = [
+          Gym(
+            gymId: 1,
+            name: '더클라임 클라이밍 B 홍대점',
+            latitude: 37.5665,
+            longitude: 126.9780,
+            address: '서울특별시 마포구 홍대로 123',
+            phoneNumber: '02-1234-5678',
+            description: '홍대 근처 클라이밍장',
+            map2DUrl: 'https://example.com/map1.jpg',
+          ),
+          Gym(
+            gymId: 2,
+            name: '더클라임 클라이밍 일산점',
+            latitude: 37.6584,
+            longitude: 126.7698,
+            address: '경기도 고양시 일산동구 456',
+            phoneNumber: '031-9876-5432',
+            description: '일산 지역 클라이밍장',
+            map2DUrl: 'https://example.com/map2.jpg',
+          ),
+        ];
+        _filteredGyms = _gyms;
       });
     }
   }
@@ -79,7 +97,6 @@ class _SearchBodyState extends State<SearchBody> {
         gymId: _selectedGym?.gymId,
         localLevel: _selectedLocalLevel,
         holdColor: _selectedHoldColor,
-        activeStatus: 'active',
       );
 
       setState(() {
@@ -116,20 +133,7 @@ class _SearchBodyState extends State<SearchBody> {
     setState(() {
       _searchController.clear();
       _isSearching = false;
-      _selectedGym = null; // 선택된 클라이밍장도 초기화
       _filteredGyms = _gyms;
-    });
-    _loadProblems(); // 클라이밍장 선택 해제 후 문제 목록 다시 로드
-  }
-
-  /// 드롭다운 상태 변경 처리
-  void _onDropdownStateChanged(String? openDropdownId) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-          _openDropdown = openDropdownId;
-        });
-      }
     });
   }
 
@@ -146,37 +150,45 @@ class _SearchBodyState extends State<SearchBody> {
   /// 선택된 클라이밍장의 gymId 반환
   int? get selectedGymId => _selectedGym?.gymId;
 
-  /// 난이도 필터 변경 처리
-  void _onLocalLevelChanged(String? level) {
+  /// 필터 변경 처리
+  void _onFilterChanged({String? localLevel, String? holdColor}) {
     setState(() {
-      _selectedLocalLevel = level; // null이면 "모두" 선택
-    });
-    _loadProblems();
-  }
-  
-  /// 홀드색 필터 변경 처리  
-  void _onHoldColorChanged(String? color) {
-    setState(() {
-      _selectedHoldColor = color; // null이면 "모두" 선택
+      if (localLevel != null) {
+        _selectedLocalLevel = _selectedLocalLevel == localLevel
+            ? null
+            : localLevel;
+      }
+      if (holdColor != null) {
+        _selectedHoldColor = _selectedHoldColor == holdColor ? null : holdColor;
+      }
     });
     _loadProblems();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        // 검색바
-        _buildSearchBar(),
+        // 메인 컨텐츠
+        Column(
+          children: [
+            // 검색바
+            _buildSearchBar(),
 
-        // 필터 토글
-        _buildFilterSection(),
+            // 필터 토글
+            _buildFilterSection(),
 
-        // 필터와 리스트 사이 간격
-        const SizedBox(height: 16),
+            // 필터와 리스트 사이 간격
+            const SizedBox(height: 16),
 
-        // 문제 리스트
-        Expanded(child: _buildProblemList()),
+            // 문제 리스트
+            Expanded(child: _buildProblemList()),
+          ],
+        ),
+
+        // 검색 결과 오버레이
+        if (_isSearching && _filteredGyms.isNotEmpty)
+          _buildSearchOverlay(),
       ],
     );
   }
@@ -185,82 +197,94 @@ class _SearchBodyState extends State<SearchBody> {
   Widget _buildSearchBar() {
     return Container(
       margin: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // 검색 입력 필드
-          Container(
-            decoration: BoxDecoration(
-              color: AppColorSchemes.backgroundPrimary,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: AppColorSchemes.lightShadow,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColorSchemes.backgroundPrimary,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppColorSchemes.lightShadow,
+        ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: _onSearchChanged,
+          decoration: InputDecoration(
+            hintText: '클라이밍장을 검색하세요',
+            hintStyle: const TextStyle(
+              color: AppColorSchemes.textTertiary,
+              fontSize: 14,
             ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: '클라이밍장을 검색하세요',
-                hintStyle: const TextStyle(
-                  color: AppColorSchemes.textTertiary,
-                  fontSize: 14,
-                ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: AppColorSchemes.textSecondary,
-                ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(
-                          Icons.clear,
-                          color: AppColorSchemes.textSecondary,
-                        ),
-                        onPressed: _clearSearch,
-                      )
-                    : null,
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
+            prefixIcon: const Icon(
+              Icons.search,
+              color: AppColorSchemes.textSecondary,
+            ),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(
+                      Icons.clear,
+                      color: AppColorSchemes.textSecondary,
+                    ),
+                    onPressed: _clearSearch,
+                  )
+                : null,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
             ),
           ),
+        ),
+      ),
+    );
+  }
 
-          // 검색 결과 드롭다운
-          if (_isSearching && _filteredGyms.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              decoration: BoxDecoration(
-                color: AppColorSchemes.backgroundPrimary,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: AppColorSchemes.lightShadow,
+  /// 검색 결과 오버레이 위젯
+  Widget _buildSearchOverlay() {
+    return Positioned(
+      top: 80, // 검색바 아래에 위치
+      left: 16,
+      right: 16,
+      child: Material(
+        elevation: 8,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColorSchemes.backgroundPrimary,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                spreadRadius: 2,
+                offset: const Offset(0, 4),
               ),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _filteredGyms.length,
-                itemBuilder: (context, index) {
-                  final gym = _filteredGyms[index];
-                  return ListTile(
-                    title: Text(
-                      gym.name,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColorSchemes.textPrimary,
-                      ),
-                    ),
-                    subtitle: Text(
-                      gym.address,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColorSchemes.textSecondary,
-                      ),
-                    ),
-                    onTap: () => _onGymSelected(gym),
-                  );
-                },
-              ),
-            ),
-        ],
+            ],
+          ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            itemCount: _filteredGyms.length,
+            itemBuilder: (context, index) {
+              final gym = _filteredGyms[index];
+              return ListTile(
+                title: Text(
+                  gym.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColorSchemes.textPrimary,
+                  ),
+                ),
+                subtitle: Text(
+                  gym.address,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColorSchemes.textSecondary,
+                  ),
+                ),
+                onTap: () => _onGymSelected(gym),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -274,25 +298,19 @@ class _SearchBodyState extends State<SearchBody> {
         children: [
           // 난이도색 필터
           SearchFilterDropdown(
-            identifier: 'difficulty',
             title: '난이도색',
             options: localLevelOptions,
             selectedOption: _selectedLocalLevel,
-            onOptionSelected: _onLocalLevelChanged,
-            onDropdownStateChanged: _onDropdownStateChanged,
-            forceClose: _openDropdown != null && _openDropdown != 'difficulty',
+            onOptionSelected: (option) => _onFilterChanged(localLevel: option),
           ),
 
           const SizedBox(width: 8), // 간격 축소
           // 홀드색 필터
           SearchFilterDropdown(
-            identifier: 'holdColor',
             title: '홀드색',
             options: holdColorOptions,
             selectedOption: _selectedHoldColor,
-            onOptionSelected: _onHoldColorChanged,
-            onDropdownStateChanged: _onDropdownStateChanged,
-            forceClose: _openDropdown != null && _openDropdown != 'holdColor',
+            onOptionSelected: (option) => _onFilterChanged(holdColor: option),
           ),
         ],
       ),
