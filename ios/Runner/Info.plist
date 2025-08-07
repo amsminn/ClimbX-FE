@@ -49,14 +49,15 @@
         <true/>
         <key>UIApplicationSupportsIndirectInputEvents</key>
         <true/>
-        <!-- 네이버 지도 기능에서 유저의 위치를 보여주는 기능을 위해 유저의 위치 권한이 필요합니다 -->
         <key>NSLocationUsageDescription</key>
-        <string>need location permission to show user's currnet location in map</string>
+        <string>지도에 현재 위치를 표시하기 위해 위치 정보 접근 권한이 필요합니다.</string>
         <key>NSLocationWhenInUseUsageDescription</key>
-        <string>need location permission to show user's currnet location in map</string>
+        <string>지도에 현재 위치를 표시하기 위해 위치 정보 접근 권한이 필요합니다.</string>
         <key>CFBundleURLTypes</key>
         <array>
             <dict>
+                <key>CFBundleTypeRole</key>
+                <string>Editor</string>
                 <key>CFBundleURLSchemes</key>
                 <array>
                     <string>$(KAKAO_NATIVE_APP_KEY)</string>
