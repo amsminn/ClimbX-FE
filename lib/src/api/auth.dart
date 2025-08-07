@@ -105,6 +105,13 @@ class AuthApi {
     return accessToken;
   }
 
+  static Never _handleKakaoLoginError(Object error, {required String ctx}) {
+    if (error is PlatformException && error.code == 'CANCELED') {
+      throw const AuthCancelledException('카카오 로그인이 취소되었습니다.');
+    }
+    throw Exception('$ctx: $error');
+  }
+
   /// 카카오 로그인
   static Future<String> signInWithKakao() async {
     try {
@@ -123,12 +130,7 @@ class AuthApi {
           developer.log('카카오톡으로 로그인 성공', name: 'AuthApi');
         } catch (error) {
           developer.log('카카오톡으로 로그인 실패: $error', name: 'AuthApi');
-
-          // 사용자가 카카오톡 설치 후 디바이스 권한 요청 화면에서 로그인을 취소한 경우,
-          // 의도적인 로그인 취소로 보고 카카오계정으로 로그인 시도 없이 로그인 취소로 처리
-          if (error is PlatformException && error.code == 'CANCELED') {
-            throw const AuthCancelledException('카카오 로그인이 취소되었습니다.');
-          }
+          _handleKakaoLoginError(error, ctx: '카카오톡 로그인에 실패했습니다');
 
           // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인
           try {
@@ -136,10 +138,7 @@ class AuthApi {
             developer.log('카카오계정으로 로그인 성공', name: 'AuthApi');
           } catch (error) {
             developer.log('카카오계정으로 로그인 실패: $error', name: 'AuthApi');
-            if (error is PlatformException && error.code == 'CANCELED') {
-              throw const AuthCancelledException('카카오 로그인이 취소되었습니다.');
-            }
-            throw Exception('카카오계정으로 로그인에 실패했습니다: $error');
+            _handleKakaoLoginError(error, ctx: '카카오톡 로그인에 실패했습니다');
           }
         }
       } else {
@@ -150,10 +149,7 @@ class AuthApi {
           developer.log('카카오계정으로 로그인 성공', name: 'AuthApi');
         } catch (error) {
           developer.log('카카오계정으로 로그인 실패: $error', name: 'AuthApi');
-          if (error is PlatformException && error.code == 'CANCELED') {
-            throw const AuthCancelledException('카카오 로그인이 취소되었습니다.');
-          }
-          throw Exception('카카오계정으로 로그인에 실패했습니다: $error');
+          _handleKakaoLoginError(error, ctx: '카카오톡 로그인에 실패했습니다');
         }
       }
 
@@ -283,8 +279,7 @@ class AuthApi {
         final code = e.code.toString().toLowerCase();
         final message = (e.message ?? '').toLowerCase();
         if (code.contains('canceled') || code.contains('cancelled') ||
-            code.contains('sign_in_canceled') || message.contains('canceled') ||
-            message.contains('cancelled')) {
+            message.contains('canceled') || message.contains('cancelled')) {
           throw const AuthCancelledException('Google 로그인이 취소되었습니다.');
         }
       }

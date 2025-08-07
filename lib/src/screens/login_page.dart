@@ -21,18 +21,6 @@ class LoginPage extends HookWidget {
       },
       onError: (error, _, __) {
         if (error is AuthCancelledException) return; // 사용자가 취소한 경우 무시
-        final errText = error.toString().toLowerCase();
-        if (errText.contains('취소') ||
-            errText.contains('canceled') ||
-            errText.contains('cancelled')) {
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
       },
     );
 
@@ -44,18 +32,6 @@ class LoginPage extends HookWidget {
       },
       onError: (error, _, __) {
         if (error is AuthCancelledException) return;
-        final errText = error.toString().toLowerCase();
-        if (errText.contains('취소') ||
-            errText.contains('canceled') ||
-            errText.contains('cancelled')) {
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
       },
     );
 
@@ -67,19 +43,6 @@ class LoginPage extends HookWidget {
       },
       onError: (error, _, __) {
         if (error is AuthCancelledException) return;
-        final errText = error.toString().toLowerCase();
-        if (errText.contains('취소') ||
-            errText.contains('canceled') ||
-            errText.contains('cancelled') ||
-            errText.contains('sign_in_canceled')) {
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('로그인에 실패했습니다. 다시 시도해주세요.'),
-            backgroundColor: Colors.red,
-          ),
-        );
       },
     );
 
