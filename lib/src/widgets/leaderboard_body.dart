@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../api/leaderboard.dart';
-import '../api/util/core/api_client.dart';
 import '../models/leaderboard_item.dart';
 import '../utils/color_schemes.dart';
 import '../utils/leaderboard_type.dart';
@@ -18,9 +17,15 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   LeaderboardType _selectedType = LeaderboardType.rating;
-  
-  // API 호출 상태 관리
-  final Map<LeaderboardType, Future<List<LeaderboardItem>>?> _leaderboardFutures = {};
+
+  // 무한스크롤 상태 관리
+  static const int _pageSize = 50;
+  static const double _scrollThreshold = 200.0; // 바닥 근처에서 다음 페이지 로드
+  final Map<LeaderboardType, List<LeaderboardItem>> _itemsByType = {};
+  final Map<LeaderboardType, int> _pageByType = {};
+  final Map<LeaderboardType, bool> _isLoadingByType = {};
+  final Map<LeaderboardType, bool> _hasMoreByType = {};
+  final Map<LeaderboardType, String?> _errorByType = {};
 
   @override
   void initState() {
@@ -34,7 +39,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     _tabController.addListener(_onTabChanged);
     
     // 초기 데이터 로드
-    _loadLeaderboard(_selectedType);
+    _loadInitial(_selectedType);
   }
 
   @override
@@ -43,21 +48,63 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     super.dispose();
   }
 
-  /// 리더보드 데이터 로드
-  void _loadLeaderboard(LeaderboardType type) {
-    setState(() {
-      _leaderboardFutures[type] = LeaderboardApi.getRanking(type: type);
-    });
+  /// 초기 페이지 로드
+  Future<void> _loadInitial(LeaderboardType type) async {
+    _errorByType[type] = null;
+    _pageByType[type] = 0;
+    _hasMoreByType[type] = true;
+    _isLoadingByType[type] = true;
+    setState(() {});
+    try {
+      final result = await LeaderboardApi.getRanking(
+        type: type,
+        page: 0,
+        size: _pageSize,
+      );
+      _itemsByType[type] = result;
+      _hasMoreByType[type] = result.length >= _pageSize;
+    } catch (e) {
+      _errorByType[type] = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _isLoadingByType[type] = false;
+      setState(() {});
+    }
+  }
+
+  /// 다음 페이지 로드
+  Future<void> _loadMore(LeaderboardType type) async {
+    if (_isLoadingByType[type] == true) return;
+    if (_hasMoreByType[type] == false) return;
+    _isLoadingByType[type] = true;
+    setState(() {});
+    try {
+      final nextPage = (_pageByType[type] ?? 0) + 1;
+      final result = await LeaderboardApi.getRanking(
+        type: type,
+        page: nextPage,
+        size: _pageSize,
+      );
+      final current = _itemsByType[type] ?? <LeaderboardItem>[];
+      _itemsByType[type] = [...current, ...result];
+      _pageByType[type] = nextPage;
+      _hasMoreByType[type] = result.length >= _pageSize;
+    } catch (e) {
+      _errorByType[type] = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _isLoadingByType[type] = false;
+      setState(() {});
+    }
   }
 
   /// 탭 변경 처리
   void _onTabChanged() {
-    if (_tabController.indexIsChanging) {
-      _selectedType = LeaderboardType.values[_tabController.index];
-      
-      // 새로운 탭의 데이터가 없으면 로드
-      if (_leaderboardFutures[_selectedType] == null) {
-        _loadLeaderboard(_selectedType);
+    // 실제 인덱스 변화만 감지하여 처리
+    final newType = LeaderboardType.values[_tabController.index];
+    if (_selectedType != newType) {
+      _selectedType = newType;
+      if ((_itemsByType[_selectedType] ?? const <LeaderboardItem>[]).isEmpty &&
+          _isLoadingByType[_selectedType] != true) {
+        _loadInitial(_selectedType);
       }
     }
   }
@@ -128,18 +175,18 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
   /// 각 탭별 리더보드 페이지 빌드
   Widget _buildLeaderboardPage(LeaderboardType type) {
+    final isLoading = _isLoadingByType[type] == true && (_itemsByType[type]?.isEmpty ?? true);
+    final items = _itemsByType[type] ?? const <LeaderboardItem>[];
+    final error = _errorByType[type];
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: FutureBuilder<List<LeaderboardItem>>(
-        future: _leaderboardFutures[type],
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+      child: Builder(
+        builder: (context) {
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator());
           }
-
-          if (snapshot.hasError) {
+          if (error != null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -151,7 +198,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    snapshot.error.toString().replaceFirst('Exception: ', ''),
+                    error,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: AppColorSchemes.textSecondary,
@@ -160,16 +207,14 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => _loadLeaderboard(type),
+                    onPressed: () => _loadInitial(type),
                     child: const Text('다시 시도'),
                   ),
                 ],
               ),
             );
           }
-
-          final users = snapshot.data ?? [];
-          if (users.isEmpty) {
+          if (items.isEmpty) {
             return const Center(
               child: Text(
                 '리더보드 데이터가 없습니다',
@@ -181,11 +226,30 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             );
           }
 
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              return _buildLeaderboardItem(users[index]);
+          return NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollEndNotification ||
+                  notification is UserScrollNotification) {
+                final metrics = notification.metrics;
+                if (metrics.pixels + _scrollThreshold >= metrics.maxScrollExtent) {
+                  _loadMore(type);
+                }
+              }
+              return false;
             },
+            child: ListView.builder(
+              itemCount: items.length + ((_hasMoreByType[type] == true) ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index >= items.length) {
+                  // 로딩 인디케이터 셀
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return _buildLeaderboardItem(items[index]);
+              },
+            ),
           );
         },
       ),
@@ -226,7 +290,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
         children: [
           // 등수
           Text(
-            '${user.rank}',
+            '${user.ranking}',
             style: const TextStyle(
               color: AppColorSchemes.textSpecial,
               fontWeight: FontWeight.w700,
@@ -325,37 +389,27 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
       return defaultAvatar;
     }
 
-    // 네트워크 이미지인지 로컬 이미지인지 판단
-    if (profileImageCdnUrl.startsWith('/images/')) {
-      // 백엔드 이미지 경로에 base URL 추가
-      final fullUrl = '${ApiClient.baseUrl}$profileImageCdnUrl';
-      return Image.network(
-        fullUrl,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => defaultAvatar,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            color: AppColorSchemes.backgroundTertiary,
-            child: const Center(
-              child: SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                ),
-              ),
-            ),
-          );
-        },
-      );
-    }
-
-    // 로컬 asset 이미지
-    return Image.asset(
-      profileImageCdnUrl,
+    // 백엔드 이미지 경로에 base URL 추가
+    final fullUrl = profileImageCdnUrl;
+    return Image.network(
+      fullUrl,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => defaultAvatar,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: AppColorSchemes.backgroundTertiary,
+          child: const Center(
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
