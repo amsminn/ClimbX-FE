@@ -45,7 +45,6 @@ class LeaderboardApi {
 
       // LeaderboardItem 리스트로 변환
       final users = rankingListData.asMap().entries.map((entry) {
-        final index = entry.key;
         final userData = entry.value as Map<String, dynamic>;
 
         // 프론트엔드에서 계산되는 값들
