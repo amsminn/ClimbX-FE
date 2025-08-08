@@ -592,14 +592,11 @@ class ProblemSubmitPage extends HookWidget {
             isSelected,
             (selected) {
               if (selected) {
-                selectedVideoIds.value = {
-                  ...selectedVideoIds.value,
-                  video.videoId!,
-                };
+                // 단일 선택: 라디오 동작으로 현재 선택만 유지
+                selectedVideoIds.value = {video.videoId!};
               } else {
-                selectedVideoIds.value = {
-                  ...selectedVideoIds.value,
-                }..remove(video.videoId);
+                // 선택 해제 시 비우기 (0개 선택 상태 허용)
+                selectedVideoIds.value = {};
               }
             },
           ),
@@ -638,22 +635,24 @@ class ProblemSubmitPage extends HookWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: isSelected 
-                    ? AppColorSchemes.accentBlue 
-                    : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
+                  shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected 
-                      ? AppColorSchemes.accentBlue 
-                      : AppColorSchemes.borderPrimary,
+                    color: isSelected
+                        ? AppColorSchemes.accentBlue
+                        : AppColorSchemes.borderPrimary,
                     width: 2,
                   ),
                 ),
                 child: isSelected
-                    ? const Icon(
-                        Icons.check,
-                        size: 16,
-                        color: Colors.white,
+                    ? Center(
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColorSchemes.accentBlue,
+                          ),
+                        ),
                       )
                     : null,
               ),
