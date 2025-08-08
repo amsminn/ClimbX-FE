@@ -290,7 +290,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
         children: [
           // 등수
           Text(
-            '${user.rank}',
+            '${user.ranking}',
             style: const TextStyle(
               color: AppColorSchemes.textSpecial,
               fontWeight: FontWeight.w700,

@@ -49,7 +49,6 @@ class LeaderboardApi {
         final userData = entry.value as Map<String, dynamic>;
 
         // 프론트엔드에서 계산되는 값들
-        final rank = index + 1;
         final tier = TierColors.getTierStringFromRating(
           userData[_keyRating] ?? 0,
         );
@@ -57,7 +56,6 @@ class LeaderboardApi {
 
         return LeaderboardItem.fromJson(
           userData,
-          rank: rank,
           tier: tier,
           value: value,
         );
