@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../api/leaderboard.dart';
-import '../api/util/core/api_client.dart';
 import '../models/leaderboard_item.dart';
 import '../utils/color_schemes.dart';
 import '../utils/leaderboard_type.dart';
