@@ -21,6 +21,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
   // 무한스크롤 상태 관리
   static const int _pageSize = 50;
+  static const double _scrollThreshold = 200.0; // 바닥 근처에서 다음 페이지 로드
   final Map<LeaderboardType, List<LeaderboardItem>> _itemsByType = {};
   final Map<LeaderboardType, int> _pageByType = {};
   final Map<LeaderboardType, bool> _isLoadingByType = {};
@@ -106,7 +107,6 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
           _isLoadingByType[_selectedType] != true) {
         _loadInitial(_selectedType);
       }
-      setState(() {});
     }
   }
 
@@ -232,8 +232,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
               if (notification is ScrollEndNotification ||
                   notification is UserScrollNotification) {
                 final metrics = notification.metrics;
-                final threshold = 200.0; // 바닥 근처
-                if (metrics.pixels + threshold >= metrics.maxScrollExtent) {
+                if (metrics.pixels + _scrollThreshold >= metrics.maxScrollExtent) {
                   _loadMore(type);
                 }
               }
