@@ -93,10 +93,10 @@ class ProblemGridItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3), // 패딩 축소
       decoration: BoxDecoration(
-        color: _getColorForOption(color).withOpacity(0.1),
+        color: _getColorForOption(color).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8), // 둥근 모서리 축소
         border: Border.all(
-          color: _getColorForOption(color).withOpacity(0.3),
+          color: _getColorForOption(color).withValues(alpha: 0.3),
           width: 1,
         ),
       ),

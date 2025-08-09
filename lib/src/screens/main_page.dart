@@ -83,15 +83,15 @@ class _MainPageState extends State<MainPage> {
       // Body - Indexed Stack으로 화면 전환
       body: IndexedStack(
         index: _currentTab.index,
-        children: [
+        children: const [
           // 0: 프로필
-          const ProfileBody(),
+          ProfileBody(),
           // 1: 리더보드
-          const LeaderboardBody(),
+          LeaderboardBody(),
           // 2: 검색
-          const SearchBody(),
+          SearchBody(),
           // 3: 지도
-          const MapBody(),
+          MapBody(),
         ],
       ),
 

@@ -180,10 +180,10 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: _getColorForOption(value).withOpacity(0.1),
+          color: _getColorForOption(value).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _getColorForOption(value).withOpacity(0.3),
+            color: _getColorForOption(value).withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -226,29 +226,6 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     );
   }
 
-  /// 정보 행 위젯
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      children: [
-        Text(
-          '$label: ',
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: AppColorSchemes.textSecondary,
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColorSchemes.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
 
   /// 제출 버튼 위젯
   Widget _buildSubmitButton() {
@@ -299,9 +276,9 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 코멘트 제목
-          Text(
+          const Text(
             '코멘트',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppColorSchemes.textPrimary,
@@ -358,33 +335,6 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 문제 제출 다이얼로그
-  void _showSubmitDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('문제 제출'),
-        content: const Text('이 문제를 제출하시겠습니까?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('취소'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // 제출 로직 구현
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('문제가 제출되었습니다!')),
-              );
-            },
-            child: const Text('제출'),
           ),
         ],
       ),

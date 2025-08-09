@@ -279,7 +279,7 @@ class ProblemSubmitPage extends HookWidget {
 
   /// 문제 이미지 위젯
   Widget _buildProblemImage() {
-    Widget defaultImage = Container(
+    final Widget defaultImage = Container(
       color: AppColorSchemes.backgroundSecondary,
       child: const Center(
         child: Icon(
@@ -316,10 +316,10 @@ class ProblemSubmitPage extends HookWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: _getColorForOption(value).withOpacity(0.1),
+          color: _getColorForOption(value).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _getColorForOption(value).withOpacity(0.3),
+            color: _getColorForOption(value).withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -546,17 +546,17 @@ class ProblemSubmitPage extends HookWidget {
     }
 
     if (videos.isEmpty) {
-      return Center(
+      return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.video_library_outlined,
               size: 64,
               color: AppColorSchemes.textTertiary,
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: 16),
+            Text(
               '완료된 영상이 없습니다',
               style: TextStyle(
                 fontSize: 16,
@@ -564,8 +564,8 @@ class ProblemSubmitPage extends HookWidget {
                 color: AppColorSchemes.textSecondary,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8),
+            Text(
               '영상을 업로드하고 처리가 완료되면\n여기서 선택할 수 있습니다',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -580,7 +580,6 @@ class ProblemSubmitPage extends HookWidget {
 
     return Column(
       children: videos.asMap().entries.map((entry) {
-        final index = entry.key;
         final video = entry.value;
         final isSelected = selectedVideoIds.value.contains(video.videoId);
         
@@ -729,7 +728,7 @@ class ProblemSubmitPage extends HookWidget {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.8),
+      barrierColor: Colors.black.withValues(alpha: 0.8),
       builder: (BuildContext context) {
         return VideoOverlayPlayer(
           video: video,
@@ -751,13 +750,13 @@ class ProblemSubmitPage extends HookWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColorSchemes.backgroundPrimary,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
       ),
       child: SafeArea(
         child: SizedBox(

@@ -64,7 +64,7 @@ class SearchFilterToggle extends StatelessWidget {
           boxShadow: isSelected 
             ? [
                 BoxShadow(
-                  color: _getColorForOption(option).withOpacity(0.3),
+                  color: _getColorForOption(option).withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
