@@ -25,17 +25,35 @@ class Problem {
   });
 
   factory Problem.fromJson(Map<String, dynamic> json) {
+    // Required fields: problemId, createdAt
+    final String? problemId = json['problemId'] as String?;
+    final dynamic createdAtRaw = json['createdAt'];
+
+    if (problemId == null || problemId.isEmpty) {
+      throw const FormatException('problemId 필드는 필수입니다.');
+    }
+
+    if (createdAtRaw == null) {
+      throw const FormatException('createdAt 필드는 필수입니다.');
+    }
+
+    final String createdAtString = createdAtRaw as String;
+    final DateTime? createdAt = DateTime.tryParse(createdAtString);
+    if (createdAt == null) {
+      throw FormatException('createdAt 형식이 올바르지 않습니다: $createdAtString');
+    }
+
     return Problem(
-      problemId: json['problemId'] ?? '',
-      gymId: json['gymId'] ?? 0,
-      gymAreaId: json['gymAreaId'] ?? 0,
-      gymAreaName: json['gymAreaName'] ?? '',
-      localLevel: json['localLevel'] ?? '',
-      holdColor: json['holdColor'] ?? '',
-      problemRating: json['problemRating'] ?? 0,
-      problemImageCdnUrl: json['problemImageCdnUrl'] ?? '',
-      activeStatus: json['activeStatus'] ?? 'ACTIVE',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      problemId: problemId,
+      gymId: (json['gymId'] as num?)?.toInt() ?? 0,
+      gymAreaId: (json['gymAreaId'] as num?)?.toInt() ?? 0,
+      gymAreaName: json['gymAreaName'] as String? ?? '',
+      localLevel: json['localLevel'] as String? ?? '',
+      holdColor: json['holdColor'] as String? ?? '',
+      problemRating: (json['problemRating'] as num?)?.toInt() ?? 0,
+      problemImageCdnUrl: json['problemImageCdnUrl'] as String? ?? '',
+      activeStatus: json['activeStatus'] as String? ?? 'ACTIVE',
+      createdAt: createdAt,
     );
   }
 

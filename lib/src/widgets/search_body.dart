@@ -57,32 +57,15 @@ class _SearchBodyState extends State<SearchBody> {
         _filteredGyms = gyms;
       });
     } catch (e) {
-      // 에러 처리 (더미 데이터 사용)
-      setState(() {
-        _gyms = [
-          Gym(
-            gymId: 1,
-            name: '더클라임 클라이밍 B 홍대점',
-            latitude: 37.5665,
-            longitude: 126.9780,
-            address: '서울특별시 마포구 홍대로 123',
-            phoneNumber: '02-1234-5678',
-            description: '홍대 근처 클라이밍장',
-            map2DUrl: 'https://example.com/map1.jpg',
-          ),
-          Gym(
-            gymId: 2,
-            name: '더클라임 클라이밍 일산점',
-            latitude: 37.6584,
-            longitude: 126.7698,
-            address: '경기도 고양시 일산동구 456',
-            phoneNumber: '031-9876-5432',
-            description: '일산 지역 클라이밍장',
-            map2DUrl: 'https://example.com/map2.jpg',
-          ),
-        ];
-        _filteredGyms = _gyms;
-      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('클라이밍장 목록을 불러오는 데 실패했습니다: $e')),
+        );
+        setState(() {
+          _gyms = [];
+          _filteredGyms = [];
+        });
+      }
     }
   }
 
@@ -104,6 +87,11 @@ class _SearchBodyState extends State<SearchBody> {
         _isLoading = false;
       });
     } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('문제 목록을 불러오는 데 실패했습니다: $e')),
+        );
+      }
       setState(() {
         _problems = [];
         _isLoading = false;
