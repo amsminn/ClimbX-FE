@@ -4,12 +4,12 @@ class LeaderboardItem {
   final String statusMessage;
   final String? profileImageCdnUrl;
   final int rating;
+  final int ranking;
   final int currentStreak;
   final int longestStreak;
   final int solvedCount;
   
   // 프론트엔드에서 계산되는 필드들
-  final int rank;
   final String tier;
   final String value;
 
@@ -18,10 +18,10 @@ class LeaderboardItem {
     required this.statusMessage,
     this.profileImageCdnUrl,
     required this.rating,
+    required this.ranking,
     required this.currentStreak,
     required this.longestStreak,
     required this.solvedCount,
-    required this.rank,
     required this.tier,
     required this.value,
   });
@@ -29,7 +29,6 @@ class LeaderboardItem {
   /// 백엔드 응답에서 LeaderboardItem 객체 생성
   factory LeaderboardItem.fromJson(
     Map<String, dynamic> json, {
-    required int rank,
     required String tier,
     required String value,
   }) {
@@ -38,10 +37,10 @@ class LeaderboardItem {
       statusMessage: json['statusMessage'] ?? '',
       profileImageCdnUrl: json['profileImageCdnUrl'],
       rating: json['rating'] ?? 0,
+      ranking: json['ranking'] ?? 0,
       currentStreak: json['currentStreak'] ?? 0,
       longestStreak: json['longestStreak'] ?? 0,
       solvedCount: json['solvedCount'] ?? 0,
-      rank: rank,
       tier: tier,
       value: value,
     );
@@ -54,17 +53,12 @@ class LeaderboardItem {
       'statusMessage': statusMessage,
       'profileImageCdnUrl': profileImageCdnUrl,
       'rating': rating,
+      'ranking': ranking,
       'currentStreak': currentStreak,
       'longestStreak': longestStreak,
       'solvedCount': solvedCount,
-      'rank': rank,
       'tier': tier,
       'value': value,
     };
-  }
-
-  @override
-  String toString() {
-    return 'LeaderboardItem(rank: $rank, nickname: $nickname, rating: $rating, value: $value)';
   }
 } 

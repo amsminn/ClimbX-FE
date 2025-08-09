@@ -9,6 +9,7 @@ import 'util/auth/token_storage.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'util/error/auth_cancelled_exception.dart';
 
 /// 인증 관련 API 호출 함수들
 class AuthApi {
@@ -104,6 +105,13 @@ class AuthApi {
     return accessToken;
   }
 
+  static Never _handleKakaoLoginError(Object error, {required String ctx}) {
+    if (error is PlatformException && error.code == 'CANCELED') {
+      throw const AuthCancelledException('카카오 로그인이 취소되었습니다.');
+    }
+    throw Exception('$ctx: $error');
+  }
+
   /// 카카오 로그인
   static Future<String> signInWithKakao() async {
     try {
@@ -115,36 +123,24 @@ class AuthApi {
 
       // 카카오톡 설치 확인
       if (await isKakaoTalkInstalled()) {
+        developer.log('카카오톡 설치되어 있음', name: 'AuthApi');
         try {
           // 카카오톡으로 로그인 시도 (nonce 포함)
           await UserApi.instance.loginWithKakaoTalk(nonce: nonce);
           developer.log('카카오톡으로 로그인 성공', name: 'AuthApi');
         } catch (error) {
           developer.log('카카오톡으로 로그인 실패: $error', name: 'AuthApi');
-
-          // 사용자가 카카오톡 설치 후 디바이스 권한 요청 화면에서 로그인을 취소한 경우,
-          // 의도적인 로그인 취소로 보고 카카오계정으로 로그인 시도 없이 로그인 취소로 처리
-          if (error is PlatformException && error.code == 'CANCELED') {
-            throw Exception('카카오 로그인이 취소되었습니다.');
-          }
-
-          // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인
-          try {
-            await UserApi.instance.loginWithKakaoAccount(nonce: nonce);
-            developer.log('카카오계정으로 로그인 성공', name: 'AuthApi');
-          } catch (error) {
-            developer.log('카카오계정으로 로그인 실패: $error', name: 'AuthApi');
-            throw Exception('카카오계정으로 로그인에 실패했습니다: $error');
-          }
+          _handleKakaoLoginError(error, ctx: '카카오톡 로그인에 실패했습니다');
         }
       } else {
         // 카카오톡이 설치되지 않은 경우 카카오계정으로 로그인
+        developer.log('카카오톡 설치되어 있지 않음', name: 'AuthApi');
         try {
           await UserApi.instance.loginWithKakaoAccount(nonce: nonce);
           developer.log('카카오계정으로 로그인 성공', name: 'AuthApi');
         } catch (error) {
           developer.log('카카오계정으로 로그인 실패: $error', name: 'AuthApi');
-          throw Exception('카카오계정으로 로그인에 실패했습니다: $error');
+          _handleKakaoLoginError(error, ctx: '카카오톡 로그인에 실패했습니다');
         }
       }
 
@@ -176,6 +172,9 @@ class AuthApi {
       developer.log('로그인 성공 - 토큰 저장 완료', name: 'AuthApi');
       return accessToken;
     } catch (e) {
+      if (e is AuthCancelledException) {
+        rethrow;
+      }
       throw Exception('카카오 로그인에 실패했습니다: $e');
     }
   }
@@ -214,6 +213,15 @@ class AuthApi {
       final accessToken = await _processAuthResponse(dioResponse);
       return accessToken;
     } catch (e) {
+      // 사용자가 Apple 로그인을 취소한 경우
+      if (e is SignInWithAppleAuthorizationException &&
+          e.code == AuthorizationErrorCode.canceled) {
+        throw const AuthCancelledException('Apple 로그인이 취소되었습니다.');
+      }
+      if (e is PlatformException &&
+          e.code.toString().toLowerCase().contains('canceled')) {
+        throw const AuthCancelledException('Apple 로그인이 취소되었습니다.');
+      }
       throw Exception('Apple 로그인에 실패했습니다: \\${e.toString()}');
     }
   }
@@ -229,7 +237,9 @@ class AuthApi {
       final webClientId = dotenv.env['GOOGLE_WEB_CLIENT_ID'];
 
       await GoogleSignIn.instance.initialize(
-        clientId: defaultTargetPlatform == TargetPlatform.iOS ? iosClientId : null,
+        clientId: defaultTargetPlatform == TargetPlatform.iOS
+            ? iosClientId
+            : null,
         serverClientId: webClientId,
       );
 
@@ -253,6 +263,17 @@ class AuthApi {
       final accessToken = await _processAuthResponse(dioResponse);
       return accessToken;
     } catch (e) {
+      if (e is AuthCancelledException) {
+        rethrow;
+      }
+      if (e is PlatformException) {
+        final code = e.code.toString().toLowerCase();
+        final message = (e.message ?? '').toLowerCase();
+        if (code.contains('canceled') || code.contains('cancelled') ||
+            message.contains('canceled') || message.contains('cancelled')) {
+          throw const AuthCancelledException('Google 로그인이 취소되었습니다.');
+        }
+      }
       throw Exception('Google 로그인에 실패했습니다: ${e.toString()}');
     }
   }
@@ -301,10 +322,12 @@ class AuthHelpers {
   static Future<bool> isLoggedIn() async {
     // 1. 토큰 존재 확인
     if (!await TokenStorage.hasToken()) return false;
-    
+
     // 2. 토큰 유효성 검증 + 닉네임 최신화
     try {
-      final authData = await ApiClient.instance.get<Map<String, dynamic>>('/api/auth/me');
+      final authData = await ApiClient.instance.get<Map<String, dynamic>>(
+        '/api/auth/me',
+      );
       final nickname = authData['nickname'] as String?;
       if (nickname != null && nickname.isNotEmpty) {
         await TokenStorage.saveUserNickname(nickname);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
 import '../api/auth.dart';
+import '../api/util/error/auth_cancelled_exception.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:io';
 import '../utils/navigation_helper.dart';
@@ -19,13 +20,7 @@ class LoginPage extends HookWidget {
         NavigationHelper.navigateToMainAfterLogin(context);
       },
       onError: (error, _, __) {
-        // 토큰 발급 실패 - 스낵바로 알림
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (error is AuthCancelledException) return; // 사용자가 취소한 경우 무시
       },
     );
 
@@ -36,12 +31,7 @@ class LoginPage extends HookWidget {
         NavigationHelper.navigateToMainAfterLogin(context);
       },
       onError: (error, _, __) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (error is AuthCancelledException) return;
       },
     );
 
@@ -52,12 +42,7 @@ class LoginPage extends HookWidget {
         NavigationHelper.navigateToMainAfterLogin(context);
       },
       onError: (error, _, __) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('로그인에 실패했습니다. 다시 시도해주세요.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (error is AuthCancelledException) return;
       },
     );
 
