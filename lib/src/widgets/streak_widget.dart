@@ -20,7 +20,8 @@ class StreakWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final TierType currentTier = TierColors.getTierFromString(tierName);
+    // 색상은 rating 기반으로 계산
+    final TierType currentTier = userProfile.tierType;
     final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
 
     // fquery로 스트릭 데이터 get

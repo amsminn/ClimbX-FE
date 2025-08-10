@@ -387,7 +387,7 @@ class ProfileHeader extends HookWidget {
             const SizedBox(height: 12),
             _TierCard(
               colorScheme: colorScheme,
-              tierName: userProfile.tier,
+              tierName: userProfile.displayTier,
               rating: u.rating,
             ),
             const SizedBox(height: 12),
@@ -430,7 +430,14 @@ class _TierCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _UserRatingLabel(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const _UserRatingLabel(),
+              _NextTierInfo(currentRating: rating),
+            ],
+          ),
           const SizedBox(height: 12),
           Text(
             tierName,
@@ -452,7 +459,7 @@ class _TierCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const _ProgressBar(),
+          _ProgressBar(currentRating: rating),
         ],
       ),
     );
@@ -484,12 +491,52 @@ class _UserRatingLabel extends StatelessWidget {
   }
 }
 
-/// 진행률 바
-class _ProgressBar extends StatelessWidget {
-  const _ProgressBar();
+/// 다음 티어까지 남은 점수 텍스트
+class _NextTierInfo extends StatelessWidget {
+  const _NextTierInfo({required this.currentRating});
+
+  final int currentRating;
 
   @override
   Widget build(BuildContext context) {
+    final int? nextStart = TierColors.getNextStepStart(currentRating);
+    if (nextStart == null) {
+      // Master면 표시 안 함
+      return const SizedBox.shrink();
+    }
+    final int remain = (nextStart - currentRating).clamp(0, nextStart);
+    final String nextTier = TierColors.getTierStringFromRating(nextStart);
+    return Text(
+      '$nextTier까지 $remain점',
+      style: const TextStyle(
+        fontSize: 10,
+        color: AppColorSchemes.backgroundPrimary,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.2,
+      ),
+    );
+  }
+}
+
+/// 진행률 바
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({required this.currentRating});
+
+  final int currentRating;
+
+  @override
+  Widget build(BuildContext context) {
+    // 진행률 계산: 현재 단계 시작과 다음 단계 시작을 기준으로 퍼센트 계산
+    final int start = TierColors.getCurrentStepStart(currentRating);
+    final int? next = TierColors.getNextStepStart(currentRating);
+    final double progress = () {
+      if (next == null) return 1.0; // Master는 꽉 찬 상태
+      final int span = next - start;
+      if (span <= 0) return 0.0;
+      final double ratio = (currentRating - start) / span;
+      return ratio.clamp(0.0, 1.0);
+    }();
+
     return SizedBox(
       height: 6,
       child: Stack(
@@ -501,7 +548,7 @@ class _ProgressBar extends StatelessWidget {
             ),
           ),
           FractionallySizedBox(
-            widthFactor: 0.14,
+            widthFactor: progress,
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
