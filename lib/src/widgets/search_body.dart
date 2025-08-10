@@ -52,6 +52,7 @@ class _SearchBodyState extends State<SearchBody> {
   Future<void> _loadGyms() async {
     try {
       final gyms = await GymApi.getAllGyms();
+      if (!mounted) return;
       setState(() {
         _gyms = gyms;
         _filteredGyms = gyms;
@@ -61,6 +62,7 @@ class _SearchBodyState extends State<SearchBody> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('클라이밍장 목록을 불러오는 데 실패했습니다: $e')),
         );
+        if (!mounted) return;
         setState(() {
           _gyms = [];
           _filteredGyms = [];
@@ -71,6 +73,7 @@ class _SearchBodyState extends State<SearchBody> {
 
   /// 문제 목록 로드
   Future<void> _loadProblems() async {
+    if (_isLoading) return; // 중복 요청 방지
     setState(() {
       _isLoading = true;
     });
@@ -82,6 +85,7 @@ class _SearchBodyState extends State<SearchBody> {
         holdColor: _selectedHoldColor,
       );
 
+      if (!mounted) return;
       setState(() {
         _problems = problems;
         _isLoading = false;
@@ -91,11 +95,12 @@ class _SearchBodyState extends State<SearchBody> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('문제 목록을 불러오는 데 실패했습니다: $e')),
         );
+        if (!mounted) return;
+        setState(() {
+          _problems = [];
+          _isLoading = false;
+        });
       }
-      setState(() {
-        _problems = [];
-        _isLoading = false;
-      });
     }
   }
 
