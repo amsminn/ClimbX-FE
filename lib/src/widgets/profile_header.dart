@@ -452,7 +452,7 @@ class _TierCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const _ProgressBar(),
+          _ProgressBar(currentRating: rating),
         ],
       ),
     );
@@ -486,10 +486,23 @@ class _UserRatingLabel extends StatelessWidget {
 
 /// 진행률 바
 class _ProgressBar extends StatelessWidget {
-  const _ProgressBar();
+  const _ProgressBar({required this.currentRating});
+
+  final int currentRating;
 
   @override
   Widget build(BuildContext context) {
+    // 진행률 계산: 현재 단계 시작과 다음 단계 시작을 기준으로 퍼센트 계산
+    final int start = TierColors.getCurrentStepStart(currentRating);
+    final int? next = TierColors.getNextStepStart(currentRating);
+    final double progress = () {
+      if (next == null) return 1.0; // Master는 꽉 찬 상태
+      final int span = next - start;
+      if (span <= 0) return 0.0;
+      final double ratio = (currentRating - start) / span;
+      return ratio.clamp(0.0, 1.0);
+    }();
+
     return SizedBox(
       height: 6,
       child: Stack(
@@ -501,7 +514,7 @@ class _ProgressBar extends StatelessWidget {
             ),
           ),
           FractionallySizedBox(
-            widthFactor: 0.14,
+            widthFactor: progress,
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,

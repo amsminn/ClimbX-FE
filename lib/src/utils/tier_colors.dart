@@ -114,33 +114,89 @@ class TierColors {
     }
   }
 
+  /// 상세 티어 단계 경계(start 포함, end 미포함) 목록 정의
+  /// 마지막 Master 단계는 상한이 없으므로 end를 null로 표기
+  static const List<(int start, int? end)> _stepBounds = <(int, int?)>[
+    (0, 150),
+    (150, 300),
+    (300, 450),
+    (450, 600),
+    (600, 750),
+    (750, 900),
+    (900, 1050),
+    (1050, 1200),
+    (1200, 1350),
+    (1350, 1500),
+    (1500, 1650),
+    (1650, 1800),
+    (1800, 1950),
+    (1950, 2100),
+    (2100, 2250),
+    (2250, null), // Master
+  ];
+
+  /// 현재 레이팅이 속한 단계의 시작값 반환
+  static int getCurrentStepStart(int rating) {
+    for (final (start, end) in _stepBounds) {
+      if (end == null) {
+        if (rating >= start) return start;
+      } else {
+        if (rating >= start && rating < end) return start;
+      }
+    }
+    return 0; // fallback
+  }
+
+  /// 현재 레이팅에서 다음 단계의 시작값 반환 (Master면 null)
+  static int? getNextStepStart(int rating) {
+    for (final (start, end) in _stepBounds) {
+      if (end == null) {
+        if (rating >= start) return null; // Master
+      } else {
+        if (rating >= start && rating < end) return end;
+      }
+    }
+    return _stepBounds.first.$1; // fallback (0)
+  }
+
   /// Rating 점수를 TierType으로 변환
   static TierType getTierTypeFromRating(int rating) {
-    if (rating >= 2800) return TierType.master;
-    if (rating >= 2200) return TierType.diamond; // Diamond I, II, III
-    if (rating >= 1600) return TierType.platinum; // Platinum I, II, III
-    if (rating >= 1000) return TierType.gold; // Gold I, II, III
-    if (rating >= 400) return TierType.silver; // Silver I, II, III
-    return TierType.bronze; // Bronze I, II, III
+    if (rating >= 2250) return TierType.master;      // Master
+    if (rating >= 1800) return TierType.diamond;     // Diamond I, II, III
+    if (rating >= 1350) return TierType.platinum;    // Platinum I, II, III
+    if (rating >= 900) return TierType.gold;         // Gold I, II, III
+    if (rating >= 450) return TierType.silver;       // Silver I, II, III
+    return TierType.bronze;                          // Bronze I, II, III
   }
 
   /// Rating 점수를 상세 티어 문자열로 변환
   static String getTierStringFromRating(int rating) {
-    if (rating >= 2800) return 'Master';
-    if (rating >= 2600) return 'Diamond I';
-    if (rating >= 2400) return 'Diamond II';
-    if (rating >= 2200) return 'Diamond III';
-    if (rating >= 2000) return 'Platinum I';
-    if (rating >= 1800) return 'Platinum II';
-    if (rating >= 1600) return 'Platinum III';
-    if (rating >= 1400) return 'Gold I';
-    if (rating >= 1200) return 'Gold II';
-    if (rating >= 1000) return 'Gold III';
-    if (rating >= 800) return 'Silver I';
+    // Master
+    if (rating >= 2250) return 'Master';
+
+    // Diamond
+    if (rating >= 2100) return 'Diamond I';
+    if (rating >= 1950) return 'Diamond II';
+    if (rating >= 1800) return 'Diamond III';
+
+    // Platinum
+    if (rating >= 1650) return 'Platinum I';
+    if (rating >= 1500) return 'Platinum II';
+    if (rating >= 1350) return 'Platinum III';
+
+    // Gold
+    if (rating >= 1200) return 'Gold I';
+    if (rating >= 1050) return 'Gold II';
+    if (rating >= 900) return 'Gold III';
+
+    // Silver
+    if (rating >= 750) return 'Silver I';
     if (rating >= 600) return 'Silver II';
-    if (rating >= 400) return 'Silver III';
-    if (rating >= 200) return 'Bronze I';
-    if (rating >= 100) return 'Bronze II';
+    if (rating >= 450) return 'Silver III';
+
+    // Bronze
+    if (rating >= 300) return 'Bronze I';
+    if (rating >= 150) return 'Bronze II';
     return 'Bronze III';
   }
 
