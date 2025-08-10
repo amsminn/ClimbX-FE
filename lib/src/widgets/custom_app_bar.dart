@@ -7,6 +7,7 @@ import 'package:dio/dio.dart'; // TEMP: debug PATCH
 import 'package:flutter/services.dart'; // TEMP: input formatter
 import '../api/util/auth/token_storage.dart'; // TEMP: get current nickname
 import '../api/util/core/api_client.dart'; // TEMP: BASE_URL 사용
+import 'package:flutter/foundation.dart'; // kDebugMode
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -52,7 +53,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
 
-        // TEMP: 디버그 - 현재 닉네임의 레이팅 PATCH 후 즉시 로그아웃
+        // TEMP: 디버그 - 현재 닉네임의 레이팅 PATCH 후 즉시 로그아웃 
+        if (kDebugMode)
         Container(
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(

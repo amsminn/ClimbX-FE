@@ -135,6 +135,61 @@ class TierColors {
     (2250, null), // Master
   ];
 
+  /// 단계별 표시 문자열 (경계와 동일한 인덱스)
+  static const List<String> _stepDisplayNames = <String>[
+    'Bronze III', // 0
+    'Bronze II',  // 1
+    'Bronze I',   // 2
+    'Silver III', // 3
+    'Silver II',  // 4
+    'Silver I',   // 5
+    'Gold III',   // 6
+    'Gold II',    // 7
+    'Gold I',     // 8
+    'Platinum III', // 9
+    'Platinum II',  // 10
+    'Platinum I',   // 11
+    'Diamond III',  // 12
+    'Diamond II',   // 13
+    'Diamond I',    // 14
+    'Master',       // 15
+  ];
+
+  /// 단계별 대분류 타입 (경계와 동일한 인덱스)
+  static const List<TierType> _stepTierTypes = <TierType>[
+    TierType.bronze, // 0
+    TierType.bronze, // 1
+    TierType.bronze, // 2
+    TierType.silver, // 3
+    TierType.silver, // 4
+    TierType.silver, // 5
+    TierType.gold,   // 6
+    TierType.gold,   // 7
+    TierType.gold,   // 8
+    TierType.platinum, // 9
+    TierType.platinum, // 10
+    TierType.platinum, // 11
+    TierType.diamond,  // 12
+    TierType.diamond,  // 13
+    TierType.diamond,  // 14
+    TierType.master,   // 15
+  ];
+
+  /// 주어진 레이팅이 속한 단계 인덱스 반환
+  static int _findStepIndex(int rating) {
+    for (int i = 0; i < _stepBounds.length; i++) {
+      final record = _stepBounds[i];
+      final int start = record.$1;
+      final int? end = record.$2;
+      if (end == null) {
+        if (rating >= start) return i; // Master 포함
+      } else {
+        if (rating >= start && rating < end) return i;
+      }
+    }
+    return 0; // fallback
+  }
+
   /// 현재 레이팅이 속한 단계의 시작값 반환
   static int getCurrentStepStart(int rating) {
     for (final (start, end) in _stepBounds) {
@@ -161,43 +216,14 @@ class TierColors {
 
   /// Rating 점수를 TierType으로 변환
   static TierType getTierTypeFromRating(int rating) {
-    if (rating >= 2250) return TierType.master;      // Master
-    if (rating >= 1800) return TierType.diamond;     // Diamond I, II, III
-    if (rating >= 1350) return TierType.platinum;    // Platinum I, II, III
-    if (rating >= 900) return TierType.gold;         // Gold I, II, III
-    if (rating >= 450) return TierType.silver;       // Silver I, II, III
-    return TierType.bronze;                          // Bronze I, II, III
+    final int idx = _findStepIndex(rating);
+    return _stepTierTypes[idx];
   }
 
   /// Rating 점수를 상세 티어 문자열로 변환
   static String getTierStringFromRating(int rating) {
-    // Master
-    if (rating >= 2250) return 'Master';
-
-    // Diamond
-    if (rating >= 2100) return 'Diamond I';
-    if (rating >= 1950) return 'Diamond II';
-    if (rating >= 1800) return 'Diamond III';
-
-    // Platinum
-    if (rating >= 1650) return 'Platinum I';
-    if (rating >= 1500) return 'Platinum II';
-    if (rating >= 1350) return 'Platinum III';
-
-    // Gold
-    if (rating >= 1200) return 'Gold I';
-    if (rating >= 1050) return 'Gold II';
-    if (rating >= 900) return 'Gold III';
-
-    // Silver
-    if (rating >= 750) return 'Silver I';
-    if (rating >= 600) return 'Silver II';
-    if (rating >= 450) return 'Silver III';
-
-    // Bronze
-    if (rating >= 300) return 'Bronze I';
-    if (rating >= 150) return 'Bronze II';
-    return 'Bronze III';
+    final int idx = _findStepIndex(rating);
+    return _stepDisplayNames[idx];
   }
 
   // 아이콘 (추후 티어 모양으로 변환예정)
