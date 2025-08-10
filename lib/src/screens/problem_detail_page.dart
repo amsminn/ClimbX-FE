@@ -40,11 +40,13 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     if (widget.gymId != null) {
       try {
         final gym = await GymApi.getGymById(widget.gymId!);
+        if (!mounted) return;
         setState(() {
           _gymName = gym.name;
         });
       } catch (e) {
         // 에러 처리 - 기본값 사용
+        if (!mounted) return;
         setState(() {
           _gymName = '클라이밍장';
         });
