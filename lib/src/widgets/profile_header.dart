@@ -430,7 +430,14 @@ class _TierCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _UserRatingLabel(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const _UserRatingLabel(),
+              _NextTierInfo(currentRating: rating),
+            ],
+          ),
           const SizedBox(height: 12),
           Text(
             tierName,
@@ -479,6 +486,33 @@ class _UserRatingLabel extends StatelessWidget {
           fontWeight: FontWeight.w600,
           letterSpacing: 0.5,
         ),
+      ),
+    );
+  }
+}
+
+/// 다음 티어까지 남은 점수 텍스트
+class _NextTierInfo extends StatelessWidget {
+  const _NextTierInfo({required this.currentRating});
+
+  final int currentRating;
+
+  @override
+  Widget build(BuildContext context) {
+    final int? nextStart = TierColors.getNextStepStart(currentRating);
+    if (nextStart == null) {
+      // Master면 표시 안 함
+      return const SizedBox.shrink();
+    }
+    final int remain = (nextStart - currentRating).clamp(0, nextStart);
+    final String nextTier = TierColors.getTierStringFromRating(nextStart);
+    return Text(
+      '$nextTier까지 ${remain}점',
+      style: const TextStyle(
+        fontSize: 10,
+        color: AppColorSchemes.backgroundPrimary,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.2,
       ),
     );
   }
