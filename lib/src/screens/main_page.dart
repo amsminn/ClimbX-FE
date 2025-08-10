@@ -69,8 +69,10 @@ class _MainPageState extends State<MainPage> {
     }
 
     // 유저 프로필이 로드된 경우
-    final userTier = _userProfile?.tier ?? 'Bronze III';
-    final TierType tierType = TierColors.getTierFromString(userTier);
+    // 색상 스킴은 rating 기반으로 계산
+    final TierType tierType = _userProfile != null
+        ? TierColors.getTierTypeFromRating(_userProfile!.rating)
+        : TierType.bronze;
     final TierColorScheme colorScheme = TierColors.getColorScheme(tierType);
 
     return TierProvider(

@@ -130,7 +130,7 @@ class TierWidget extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          userProfile.tier,
+                          userProfile.displayTier,
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 20 : 24,
                             fontWeight: FontWeight.w800,
@@ -179,7 +179,7 @@ class TierWidget extends StatelessWidget {
                     ],
                   ),
                   child: Icon(
-                    TierColors.getTierIcon(TierColors.getTierFromString(userProfile.tier)),
+                    TierColors.getTierIcon(userProfile.tierType),
                     color: AppColorSchemes.backgroundPrimary,
                     size: screenWidth * 0.07,
                   ),

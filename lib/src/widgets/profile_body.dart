@@ -51,7 +51,7 @@ class ProfileBody extends HookWidget {
 
     // 데이터 로드 성공 - 프로필 정보 사용
     final userProfile = userQuery.data!;
-    final currentTier = userProfile.tier;
+    final currentTier = userProfile.displayTier;
     final colorScheme = TierProvider.of(context);
     return DefaultTabController(
       length: 5,

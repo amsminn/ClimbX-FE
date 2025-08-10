@@ -1,4 +1,5 @@
-/// 사용자 프로필 정보를 담는 모델
+import '../utils/tier_colors.dart';
+
 class UserProfile {
   final String nickname;
   final String statusMessage;
@@ -29,6 +30,12 @@ class UserProfile {
     required this.contributionCount,
     required this.rivalCount,
   });
+
+  /// 표시용 티어 문자열
+  String get displayTier => TierColors.getTierStringFromRating(rating);
+
+  /// 색상/아이콘 계산을 위한 티어 타입
+  TierType get tierType => TierColors.getTierTypeFromRating(rating);
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
