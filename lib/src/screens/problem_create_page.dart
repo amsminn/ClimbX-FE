@@ -2,18 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../api/gym.dart';
+import '../api/problem.dart';
+import '../utils/color_codes.dart';
 import '../models/gym.dart';
 import '../utils/color_schemes.dart';
 import '../utils/image_compressor.dart';
 
 /// 문제 등록 페이지
-/// - 지점(Gym) 선택
-/// - AreaId (1~4)
-/// - 홀드색
-/// - 난이도색
-/// - 문제 이미지 업로드(5MB 이하로 압축)
-///
-/// API 연동은 추후 진행. 제출 시 TODO 위치에서 API 호출만 추가하면 되도록 구성.
 class ProblemCreatePage extends StatefulWidget {
   const ProblemCreatePage({
     super.key,
@@ -113,24 +108,21 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
       _isSubmitting = true;
     });
     try {
-      // TODO: API 연동 지점
-      // await ProblemApi.createProblem(
-      //   gymId: _selectedGym!.gymId,
-      //   areaId: _areaId!,
-      //   holdColor: _holdColor!,
-      //   localLevel: _localLevel!,
-      //   imageFile: _imageFile!,
-      // );
+      await ProblemApi.createProblem(
+        gymAreaId: _areaId!,
+        localLevelColor: ColorCodes.koreanLabelToServerCode(_localLevel),
+        holdColor: ColorCodes.koreanLabelToServerCode(_holdColor),
+        imageFile: _imageFile!,
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('문제 등록은 API 준비 중입니다'),
-          backgroundColor: AppColorSchemes.accentBlue,
+          content: Text('문제가 등록되었습니다.'),
+          backgroundColor: AppColorSchemes.accentGreen,
         ),
       );
 
-      // 등록 성공 시 true 반환하여 상위에서 새로고침 트리거 가능
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;

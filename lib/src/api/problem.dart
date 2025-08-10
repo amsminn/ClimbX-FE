@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 import '../models/problem.dart';
 import 'util/core/api_client.dart';
 
@@ -45,5 +49,58 @@ class ProblemApi {
       fromJson: (data) => Problem.fromJson(data as Map<String, dynamic>),
       logContext: 'ProblemApi',
     );
+  }
+
+  /// 문제 생성
+  static Future<void> createProblem({
+    required int gymAreaId,
+    required String localLevelColor, // 색상 문자열
+    required String holdColor, // 색상 문자열
+    required File imageFile,
+  }) async {
+    final dio = _client.dio;
+
+    final requestJson = {
+      'gymAreaId': gymAreaId,
+      'localLevel': localLevelColor,
+      'holdColor': holdColor,
+    };
+
+    // request를 application/json 파트로 전송
+    final requestPart = MultipartFile.fromString(
+      jsonEncode(requestJson),
+      filename: 'request.json',
+      contentType: MediaType('application', 'json'),
+    );
+
+    // 파일 Content-Type 결정 (png 또는 jpeg)
+    final lower = imageFile.path.toLowerCase();
+    String subtype = 'jpeg';
+    if (lower.endsWith('.png')) subtype = 'png';
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) subtype = 'jpeg';
+
+    final imagePart = await MultipartFile.fromFile(
+      imageFile.path,
+      filename: imageFile.uri.pathSegments.isNotEmpty
+          ? imageFile.uri.pathSegments.last
+          : 'problem.$subtype',
+      contentType: MediaType('image', subtype),
+    );
+
+    final formData = FormData.fromMap({
+      'request': requestPart,
+      'problemImage': imagePart,
+    });
+
+    try {
+      await dio.post(
+        '/api/problems',
+        data: formData,
+        options: Options(contentType: Headers.multipartFormDataContentType),
+      );
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      throw Exception('문제 등록 실패(${e.response?.statusCode}): ${body ?? e.message}');
+    }
   }
 } 
