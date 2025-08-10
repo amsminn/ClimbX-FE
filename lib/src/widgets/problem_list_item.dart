@@ -115,7 +115,7 @@ class ProblemListItem extends StatelessWidget {
   /// 색상 배지 위젯
   Widget _buildColorBadge(String color, String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: _getColorForOption(color).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
@@ -128,8 +128,8 @@ class ProblemListItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 8,
-            height: 8,
+            width: 10,
+            height: 10,
             decoration: BoxDecoration(
               color: _getColorForOption(color),
               shape: BoxShape.circle,
@@ -139,7 +139,7 @@ class ProblemListItem extends StatelessWidget {
           Text(
             '$label: $color',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: _getColorForOption(color),
             ),

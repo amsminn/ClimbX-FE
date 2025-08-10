@@ -104,8 +104,8 @@ class ProblemGridItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 7,
-            height: 7,
+            width: 9,
+            height: 9,
             decoration: BoxDecoration(
               color: _getColorForOption(color),
               shape: BoxShape.circle,
@@ -115,7 +115,7 @@ class ProblemGridItem extends StatelessWidget {
           Text(
             '$label: $color',
             style: TextStyle(
-              fontSize: 9,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
               color: _getColorForOption(color),
             ),

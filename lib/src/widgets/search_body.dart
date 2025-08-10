@@ -6,6 +6,7 @@ import '../models/gym.dart';
 import '../utils/color_schemes.dart';
 import 'problem_grid_item.dart';
 import 'search_filter_dropdown.dart';
+import '../screens/problem_create_page.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
@@ -182,6 +183,31 @@ class _SearchBodyState extends State<SearchBody> {
         // 검색 결과 오버레이
         if (_isSearching && _filteredGyms.isNotEmpty)
           _buildSearchOverlay(),
+
+        // 우하단 FAB - 문제 등록
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton(
+            onPressed: () async {
+              // 문제 등록 페이지로 이동
+              final created = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ProblemCreatePage(
+                    initialGymId: selectedGymId,
+                  ),
+                ),
+              );
+              if (created == true) {
+                // 등록 성공 시 목록 새로고침
+                _loadProblems();
+              }
+            },
+            backgroundColor: AppColorSchemes.accentBlue,
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.add),
+          ),
+        ),
       ],
     );
   }
@@ -332,6 +358,31 @@ class _SearchBodyState extends State<SearchBody> {
               style: const TextStyle(
                 color: AppColorSchemes.textSecondary,
                 fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () async {
+                final created = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ProblemCreatePage(
+                      initialGymId: selectedGymId,
+                    ),
+                  ),
+                );
+                if (created == true) {
+                  _loadProblems();
+                }
+              },
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text('문제 등록하기'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColorSchemes.accentBlue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],
