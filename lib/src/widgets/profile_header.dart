@@ -507,7 +507,7 @@ class _NextTierInfo extends StatelessWidget {
     final int remain = (nextStart - currentRating).clamp(0, nextStart);
     final String nextTier = TierColors.getTierStringFromRating(nextStart);
     return Text(
-      '$nextTier까지 ${remain}점',
+      '$nextTier까지 $remain점',
       style: const TextStyle(
         fontSize: 10,
         color: AppColorSchemes.backgroundPrimary,

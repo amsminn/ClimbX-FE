@@ -67,8 +67,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             onPressed: () async {
               try {
-                final nickname =
-                    await TokenStorage.getUserNickname() ?? 'alice';
+                final nickname = await TokenStorage.getUserNickname() ?? 'alice';
+                if (!context.mounted) return;
                 final controller = TextEditingController();
                 final rating = await showDialog<int>(
                   context: context,
@@ -119,15 +119,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 );
 
                 await dio.patch('/api/users/$nickname/rating', data: rating);
-                if (context.mounted) {
-                  _handleLogout(context);
-                }
+                if (!context.mounted) return;
+                _handleLogout(context);
               } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('레이팅 갱신 실패: $e')));
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('레이팅 갱신 실패: $e')),
+                );
                 return;
               }
             },
