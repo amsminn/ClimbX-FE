@@ -1,5 +1,10 @@
+import 'dart:io';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 import '../models/problem.dart';
 import 'util/core/api_client.dart';
+import '../utils/color_codes.dart';
 
 /// 클라이밍 문제 관련 API 호출 함수들
 class ProblemApi {
@@ -17,8 +22,10 @@ class ProblemApi {
     final queryParams = <String, dynamic>{
       if (gymId != null) 'gymId': gymId,
       if (gymAreaId != null) 'gymAreaId': gymAreaId,
-      if (localLevel != null) 'localLevel': localLevel,
-      if (holdColor != null) 'holdColor': holdColor,
+      if (localLevel != null)
+        'localLevel': ColorCodes.anyToServerCode(localLevel) ?? localLevel,
+      if (holdColor != null)
+        'holdColor': ColorCodes.anyToServerCode(holdColor) ?? holdColor,
       if (problemTier != null) 'problemTier': problemTier,
       if (activeStatus != null) 'activeStatus': activeStatus,
     };
@@ -45,5 +52,57 @@ class ProblemApi {
       fromJson: (data) => Problem.fromJson(data as Map<String, dynamic>),
       logContext: 'ProblemApi',
     );
+  }
+
+  /// 문제 생성
+  static Future<void> createProblem({
+    required int gymAreaId,
+    required String localLevelColor, // 색상 문자열
+    required String holdColor, // 색상 문자열
+    required File imageFile,
+  }) async {
+    final dio = _client.dio;
+
+    final requestJson = {
+      'gymAreaId': gymAreaId,
+      'localLevel':
+          ColorCodes.anyToServerCode(localLevelColor) ?? localLevelColor,
+      'holdColor': ColorCodes.anyToServerCode(holdColor) ?? holdColor,
+    };
+
+    // request를 application/json 파트로 전송
+    final requestPart = MultipartFile.fromString(
+      jsonEncode(requestJson),
+      filename: 'request.json',
+      contentType: MediaType('application', 'json'),
+    );
+
+    // 파일 Content-Type 결정 (png 또는 jpeg)
+    final lower = imageFile.path.toLowerCase();
+    final String subtype = lower.endsWith('.png') ? 'png' : 'jpeg';
+
+    final imagePart = await MultipartFile.fromFile(
+      imageFile.path,
+      filename: imageFile.uri.pathSegments.isNotEmpty
+          ? imageFile.uri.pathSegments.last
+          : 'problem.$subtype',
+      contentType: MediaType('image', subtype),
+    );
+
+    final formData = FormData.fromMap({
+      'request': requestPart,
+      'problemImage': imagePart,
+    });
+
+    try {
+      await dio.post(
+        '/api/problems',
+        data: formData,
+        options: Options(contentType: Headers.multipartFormDataContentType),
+      );
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      throw Exception('문제 등록 실패(${e.response?.statusCode}): ${body ?? e.message}');
+    }
   }
 } 

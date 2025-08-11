@@ -71,7 +71,7 @@ class _MainPageState extends State<MainPage> {
     // 유저 프로필이 로드된 경우
     // 색상 스킴은 rating 기반으로 계산
     final TierType tierType = _userProfile != null
-        ? TierColors.getTierTypeFromRating(_userProfile!.rating)
+        ? TierColors.getTierTypeFromRating(_userProfile!.rating.totalRating)
         : TierType.bronze;
     final TierColorScheme colorScheme = TierColors.getColorScheme(tierType);
 

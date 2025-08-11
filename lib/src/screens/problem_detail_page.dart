@@ -3,6 +3,7 @@ import '../models/problem.dart';
 import '../api/gym.dart';
 import '../utils/color_schemes.dart';
 import '../screens/problem_submit_page.dart';
+import '../utils/color_codes.dart';
 
 /// 문제 상세 정보 페이지
 class ProblemDetailPage extends StatefulWidget {
@@ -178,14 +179,18 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
 
   /// 정보 카드 위젯
   Widget _buildInfoCard(String label, String value) {
+    final normalized = ColorCodes.labelAndColorFromAny(value);
+    final displayLabel = normalized?.$1 ?? value;
+    final displayColor = normalized?.$2 ?? AppColorSchemes.accentBlue;
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: _getColorForOption(value).withValues(alpha: 0.1),
+          color: displayColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _getColorForOption(value).withValues(alpha: 0.3),
+            color: displayColor.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -207,17 +212,17 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: _getColorForOption(value),
+                    color: displayColor,
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  value,
+                  displayLabel,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: _getColorForOption(value),
+                    color: displayColor,
                   ),
                 ),
               ],
@@ -359,21 +364,5 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     _commentController.clear();
   }
 
-  /// 옵션에 따른 색상 반환
-  Color _getColorForOption(String option) {
-    switch (option) {
-      case '빨강':
-        return const Color(0xFFEF4444);
-      case '파랑':
-        return const Color(0xFF3B82F6);
-      case '초록':
-        return const Color(0xFF10B981);
-      case '노랑':
-        return const Color(0xFFF59E0B);
-      case '보라':
-        return const Color(0xFF8B5CF6);
-      default:
-        return AppColorSchemes.accentBlue;
-    }
-  }
+  // 색상 계산은 ColorCodes에서 처리함
 } 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/color_schemes.dart';
+import '../utils/color_codes.dart';
 
 /// 드롭다운 전역 레지스트리: 오버레이 전환과 헤더 hit-test를 지원
 class _DropdownRegistry {
@@ -229,8 +230,11 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
                   width: 10, // 동그라미 크기 축소
                   height: 10,
                   decoration: BoxDecoration(
-                    color: _getColorForOption(widget.selectedOption!),
+                    color: ColorCodes.toDisplayColorFromAny(widget.selectedOption!),
                     shape: BoxShape.circle,
+                    border: ColorCodes.needsBorderForLabel(widget.selectedOption!) 
+                        ? Border.all(color: Colors.grey, width: 0.5)
+                        : null,
                   ),
                 ),
               const SizedBox(width: 6), // 간격 축소
@@ -276,8 +280,11 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
                 width: 10, // 동그라미 크기 축소
                 height: 10,
                 decoration: BoxDecoration(
-                  color: _getColorForOption(option),
+                  color: ColorCodes.toDisplayColorFromAny(option),
                   shape: BoxShape.circle,
+                  border: ColorCodes.needsBorderForLabel(option) 
+                      ? Border.all(color: Colors.grey, width: 0.5)
+                      : null,
                 ),
               ),
               const SizedBox(width: 6), // 간격 축소
@@ -298,23 +305,5 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
         ),
       ),
     );
-  }
-
-  /// 옵션에 따른 색상 반환
-  Color _getColorForOption(String option) {
-    switch (option) {
-      case '빨강':
-        return const Color(0xFFEF4444);
-      case '파랑':
-        return const Color(0xFF3B82F6);
-      case '초록':
-        return const Color(0xFF10B981);
-      case '노랑':
-        return const Color(0xFFF59E0B);
-      case '보라':
-        return const Color(0xFF8B5CF6);
-      default:
-        return AppColorSchemes.accentBlue;
-    }
   }
 }

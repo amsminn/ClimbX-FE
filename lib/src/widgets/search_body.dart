@@ -6,6 +6,8 @@ import '../models/gym.dart';
 import '../utils/color_schemes.dart';
 import 'problem_grid_item.dart';
 import 'search_filter_dropdown.dart';
+import '../screens/problem_create_page.dart';
+import '../utils/color_codes.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
@@ -31,9 +33,9 @@ class _SearchBodyState extends State<SearchBody> {
   List<Problem> _problems = [];
   bool _isLoading = false;
 
-  // 사용 가능한 필터 옵션 (수정필요)
-  static const List<String> localLevelOptions = ['빨강', '파랑', '초록', '노랑', '보라'];
-  static const List<String> holdColorOptions = ['빨강', '파랑', '초록', '노랑', '보라'];
+  // 사용 가능한 필터 옵션 (서버의 HoldColorType과 동일)
+  static List<String> get localLevelOptions => ColorCodes.localLevelOptions;
+  static List<String> get holdColorOptions => ColorCodes.holdColorOptions;
 
   @override
   void initState() {
@@ -127,7 +129,9 @@ class _SearchBodyState extends State<SearchBody> {
       _searchController.clear();
       _isSearching = false;
       _filteredGyms = _gyms;
+      _selectedGym = null; // 선택된 클라이밍장도 초기화
     });
+    _loadProblems(); // X 버튼 클릭 시에도 문제 목록 다시 로드
   }
 
   /// 클라이밍장 선택 처리
@@ -143,17 +147,18 @@ class _SearchBodyState extends State<SearchBody> {
   /// 선택된 클라이밍장의 gymId 반환
   int? get selectedGymId => _selectedGym?.gymId;
 
-  /// 필터 변경 처리
-  void _onFilterChanged({String? localLevel, String? holdColor}) {
+  /// 난이도 필터 변경 처리
+  void _onLocalLevelChanged(String? localLevel) {
     setState(() {
-      if (localLevel != null) {
-        _selectedLocalLevel = _selectedLocalLevel == localLevel
-            ? null
-            : localLevel;
-      }
-      if (holdColor != null) {
-        _selectedHoldColor = _selectedHoldColor == holdColor ? null : holdColor;
-      }
+      _selectedLocalLevel = localLevel;
+    });
+    _loadProblems();
+  }
+
+  /// 홀드색 필터 변경 처리
+  void _onHoldColorChanged(String? holdColor) {
+    setState(() {
+      _selectedHoldColor = holdColor;
     });
     _loadProblems();
   }
@@ -182,6 +187,31 @@ class _SearchBodyState extends State<SearchBody> {
         // 검색 결과 오버레이
         if (_isSearching && _filteredGyms.isNotEmpty)
           _buildSearchOverlay(),
+
+        // 우하단 FAB - 문제 등록
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton(
+            onPressed: () async {
+              // 문제 등록 페이지로 이동
+              final created = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ProblemCreatePage(
+                    initialGymId: selectedGymId,
+                  ),
+                ),
+              );
+              if (created == true) {
+                // 등록 성공 시 목록 새로고침
+                _loadProblems();
+              }
+            },
+            backgroundColor: AppColorSchemes.accentBlue,
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.add),
+          ),
+        ),
       ],
     );
   }
@@ -294,7 +324,7 @@ class _SearchBodyState extends State<SearchBody> {
             title: '난이도색',
             options: localLevelOptions,
             selectedOption: _selectedLocalLevel,
-            onOptionSelected: (option) => _onFilterChanged(localLevel: option),
+            onOptionSelected: _onLocalLevelChanged,
           ),
 
           const SizedBox(width: 8), // 간격 축소
@@ -303,7 +333,7 @@ class _SearchBodyState extends State<SearchBody> {
             title: '홀드색',
             options: holdColorOptions,
             selectedOption: _selectedHoldColor,
-            onOptionSelected: (option) => _onFilterChanged(holdColor: option),
+            onOptionSelected: _onHoldColorChanged,
           ),
         ],
       ),
@@ -332,6 +362,31 @@ class _SearchBodyState extends State<SearchBody> {
               style: const TextStyle(
                 color: AppColorSchemes.textSecondary,
                 fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () async {
+                final created = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ProblemCreatePage(
+                      initialGymId: selectedGymId,
+                    ),
+                  ),
+                );
+                if (created == true) {
+                  _loadProblems();
+                }
+              },
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text('문제 등록하기'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColorSchemes.accentBlue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],
