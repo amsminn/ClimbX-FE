@@ -390,9 +390,9 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
                 border: Border.all(color: AppColorSchemes.borderPrimary),
               ),
               child: _imageFile == null
-                  ? Column(
+                  ? const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children: [
                         Icon(Icons.add_photo_alternate_outlined, size: 46, color: AppColorSchemes.textSecondary),
                         SizedBox(height: 8),
                         Text('문제 사진을 선택하세요', style: TextStyle(color: AppColorSchemes.textSecondary)),
@@ -471,13 +471,11 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         return AppColorSchemes.accentBlue;
     }
   }
-}
 
-extension on _ProblemCreatePageState {
   Future<void> _openGymPicker() async {
     if (_gyms.isEmpty) return;
 
-    Gym? result = await showModalBottomSheet<Gym>(
+    final Gym? result = await showModalBottomSheet<Gym>(
       context: context,
       backgroundColor: Colors.white,
       isScrollControlled: true,
