@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/color_schemes.dart';
+import '../utils/color_codes.dart';
 
 /// 드롭다운 전역 레지스트리: 오버레이 전환과 헤더 hit-test를 지원
 class _DropdownRegistry {
@@ -229,9 +230,9 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
                   width: 10, // 동그라미 크기 축소
                   height: 10,
                   decoration: BoxDecoration(
-                    color: _getColorForOption(widget.selectedOption!),
+                    color: ColorCodes.toDisplayColorFromAny(widget.selectedOption!),
                     shape: BoxShape.circle,
-                    border: _needsBorder(widget.selectedOption!) 
+                    border: ColorCodes.needsBorderForLabel(widget.selectedOption!) 
                         ? Border.all(color: Colors.grey, width: 0.5)
                         : null,
                   ),
@@ -279,9 +280,9 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
                 width: 10, // 동그라미 크기 축소
                 height: 10,
                 decoration: BoxDecoration(
-                  color: _getColorForOption(option),
+                  color: ColorCodes.toDisplayColorFromAny(option),
                   shape: BoxShape.circle,
-                  border: _needsBorder(option) 
+                  border: ColorCodes.needsBorderForLabel(option) 
                       ? Border.all(color: Colors.grey, width: 0.5)
                       : null,
                 ),
@@ -304,38 +305,5 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
         ),
       ),
     );
-  }
-
-  /// 옵션에 따른 색상 반환
-  Color _getColorForOption(String option) {
-    switch (option) {
-      case '흰색':
-        return const Color(0xFFFFFFFF);
-      case '노랑':
-        return const Color(0xFFF59E0B);
-      case '주황':
-        return const Color(0xFFF97316);
-      case '초록':
-        return const Color(0xFF10B981);
-      case '파랑':
-        return const Color(0xFF3B82F6);
-      case '빨강':
-        return const Color(0xFFEF4444);
-      case '보라':
-        return const Color(0xFF8B5CF6);
-      case '회색':
-        return const Color(0xFF6B7280);
-      case '갈색':
-        return const Color(0xFF92400E);
-      case '검정':
-        return const Color(0xFF000000);
-      default:
-        return AppColorSchemes.accentBlue;
-    }
-  }
-
-  /// 흰색, 회색 등 테두리가 필요한 색상 체크
-  bool _needsBorder(String option) {
-    return option == '흰색' || option == '회색';
   }
 }

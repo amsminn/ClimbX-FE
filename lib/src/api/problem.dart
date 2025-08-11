@@ -79,9 +79,7 @@ class ProblemApi {
 
     // 파일 Content-Type 결정 (png 또는 jpeg)
     final lower = imageFile.path.toLowerCase();
-    String subtype = 'jpeg';
-    if (lower.endsWith('.png')) subtype = 'png';
-    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) subtype = 'jpeg';
+    final String subtype = lower.endsWith('.png') ? 'png' : 'jpeg';
 
     final imagePart = await MultipartFile.fromFile(
       imageFile.path,

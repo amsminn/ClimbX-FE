@@ -7,6 +7,7 @@ import '../utils/color_schemes.dart';
 import 'problem_grid_item.dart';
 import 'search_filter_dropdown.dart';
 import '../screens/problem_create_page.dart';
+import '../utils/color_codes.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
@@ -33,14 +34,8 @@ class _SearchBodyState extends State<SearchBody> {
   bool _isLoading = false;
 
   // 사용 가능한 필터 옵션 (서버의 HoldColorType과 동일)
-  static const List<String> localLevelOptions = [
-    '흰색', '노랑', '주황', '초록', '파랑', 
-    '빨강', '보라', '회색', '갈색', '검정'
-  ];
-  static const List<String> holdColorOptions = [
-    '흰색', '노랑', '주황', '초록', '파랑', 
-    '빨강', '보라', '회색', '갈색', '검정'
-  ];
+  static List<String> get localLevelOptions => ColorCodes.localLevelOptions;
+  static List<String> get holdColorOptions => ColorCodes.holdColorOptions;
 
   @override
   void initState() {

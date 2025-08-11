@@ -4,6 +4,17 @@ import 'package:flutter/material.dart';
 enum ProblemColorCode { white, yellow, orange, green, blue, red, purple, gray, brown, black }
 
 class ColorCodes {
+  /// 한국어 라벨(흰색 포함 10색) - UI에서 사용
+  static const List<String> koreanColorLabels = <String>[
+    '흰색', '노랑', '주황', '초록', '파랑',
+    '빨강', '보라', '회색', '갈색', '검정',
+  ];
+
+  /// 난이도 필터 옵션 (현재는 홀드색과 동일 세트 사용)
+  static List<String> get localLevelOptions => koreanColorLabels;
+
+  /// 홀드색 필터 옵션
+  static List<String> get holdColorOptions => koreanColorLabels;
   static ProblemColorCode? fromKoreanLabel(String? label) {
     switch (label) {
       case '흰색':
@@ -158,6 +169,19 @@ class ColorCodes {
   static String? anyToServerCode(String? value) {
     final c = fromAny(value);
     return c != null ? toServerCode(c) : null;
+  }
+
+  /// 임의 문자열(한글/영문 코드) -> 표시용 Color 반환
+  /// 매핑 실패 시 기본 블루 계열 반환
+  static Color toDisplayColorFromAny(String? value) {
+    final c = fromAny(value);
+    return c != null ? toDisplayColor(c) : const Color(0xFF3B82F6);
+  }
+
+  /// 흰색/회색 등 배경색과 대비를 위해 보더가 필요한지 판단
+  static bool needsBorderForLabel(String? value) {
+    final c = fromAny(value);
+    return c == ProblemColorCode.white || c == ProblemColorCode.gray;
   }
 }
 

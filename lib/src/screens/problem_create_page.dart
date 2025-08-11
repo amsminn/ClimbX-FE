@@ -345,7 +345,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         runSpacing: 10,
         children: options.map((opt) {
           final bool isSel = selected == opt;
-          final color = _getColorForOption(opt);
+          final color = ColorCodes.toDisplayColorFromAny(opt);
           return ChoiceChip(
             label: Row(
               mainAxisSize: MainAxisSize.min,
@@ -356,7 +356,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
                   decoration: BoxDecoration(
                     color: color, 
                     shape: BoxShape.circle,
-                    border: _needsBorder(opt) 
+                    border: ColorCodes.needsBorderForLabel(opt) 
                         ? Border.all(color: Colors.grey, width: 0.5)
                         : null,
                   ),
@@ -464,126 +464,93 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
     );
   }
 
-  Color _getColorForOption(String option) {
-    switch (option) {
-      case '흰색':
-        return const Color(0xFFFFFFFF);
-      case '노랑':
-        return const Color(0xFFF59E0B);
-      case '주황':
-        return const Color(0xFFF97316);
-      case '초록':
-        return const Color(0xFF10B981);
-      case '파랑':
-        return const Color(0xFF3B82F6);
-      case '빨강':
-        return const Color(0xFFEF4444);
-      case '보라':
-        return const Color(0xFF8B5CF6);
-      case '회색':
-        return const Color(0xFF6B7280);
-      case '갈색':
-        return const Color(0xFF92400E);
-      case '검정':
-        return const Color(0xFF000000);
-      default:
-        return AppColorSchemes.accentBlue;
-    }
-  }
-
-  /// 흰색, 회색 등 테두리가 필요한 색상 체크
-  bool _needsBorder(String option) {
-    return option == '흰색' || option == '회색';
-  }
-
   Future<void> _openGymPicker() async {
     if (_gyms.isEmpty) return;
 
-    final Gym? result = await showModalBottomSheet<Gym>(
-      context: context,
-      backgroundColor: Colors.white,
-      isScrollControlled: true,
-      useSafeArea: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) {
-        List<Gym> filtered = List.of(_gyms);
-        final controller = TextEditingController();
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            void onSearch(String q) {
-              setModalState(() {
-                filtered = _gyms
-                    .where((g) => g.name.toLowerCase().contains(q.toLowerCase()))
-                    .toList();
-              });
-            }
+    Gym? result;
+    result = await showModalBottomSheet<Gym>(
+        context: context,
+        backgroundColor: Colors.white,
+        isScrollControlled: true,
+        useSafeArea: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        builder: (ctx) {
+          List<Gym> filtered = List.of(_gyms);
+          return StatefulBuilder(
+            builder: (context, setModalState) {
+              void onSearch(String q) {
+                setModalState(() {
+                  filtered = _gyms
+                      .where((g) => g.name.toLowerCase().contains(q.toLowerCase()))
+                      .toList();
+                });
+              }
 
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-                top: 16,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  TextField(
-                    controller: controller,
-                    onChanged: onSearch,
-                    decoration: const InputDecoration(
-                      hintText: '지점 검색',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                  top: 16,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Flexible(
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        final gym = filtered[index];
-                        final isSelected = gym.gymId == _selectedGym?.gymId;
-                        return ListTile(
-                          title: Text(
-                            gym.name,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          subtitle: Text(
-                            gym.address,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          trailing: isSelected
-                              ? const Icon(Icons.check, color: AppColorSchemes.accentBlue)
-                              : null,
-                          onTap: () => Navigator.of(context).pop(gym),
-                        );
-                      },
+                    TextField(
+                      onChanged: onSearch,
+                      decoration: const InputDecoration(
+                        hintText: '지점 검색',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
+                    const SizedBox(height: 12),
+                    Flexible(
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final gym = filtered[index];
+                          final isSelected = gym.gymId == _selectedGym?.gymId;
+                          return ListTile(
+                            title: Text(
+                              gym.name,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            subtitle: Text(
+                              gym.address,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: isSelected
+                                ? const Icon(Icons.check, color: AppColorSchemes.accentBlue)
+                                : null,
+                            onTap: () => Navigator.of(context).pop(gym),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
 
     if (!mounted) return;
     if (result != null) {
