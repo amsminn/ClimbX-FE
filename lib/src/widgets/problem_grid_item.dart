@@ -39,7 +39,7 @@ class ProblemGridItem extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => ProblemDetailPage(
               problem: problem,
-              gymId: gymId,
+              gymId: gymId ?? problem.gymId, // gymId가 null이면 problem의 gymId 사용
             ),
           ),
         );
