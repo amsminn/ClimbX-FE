@@ -19,8 +19,8 @@ class ProblemGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // MediaQuery 기반 반응형 크기 계산
     final screenWidth = MediaQuery.of(context).size.width;
-    final estimatedItemWidth = screenWidth / 2.3; // 2.5열 그리드 가정
-    final infoAreaHeight = estimatedItemWidth * 0.25; // flex 1:3 비율
+    final estimatedItemWidth = screenWidth / 2.3;
+    final infoAreaHeight = estimatedItemWidth * 0.25;
     
     // 비율 기반 크기 계산
     final fontSize = (infoAreaHeight * 0.22).clamp(8.0, 12.0);
@@ -39,7 +39,7 @@ class ProblemGridItem extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => ProblemDetailPage(
               problem: problem,
-              gymId: gymId ?? problem.gymId, // gymId가 null이면 problem의 gymId 사용
+              gymId: gymId ?? problem.gymId,
             ),
           ),
         );

@@ -152,17 +152,18 @@ class _SearchBodyState extends State<SearchBody> {
   /// 선택된 클라이밍장의 gymId 반환
   int? get selectedGymId => _selectedGym?.gymId;
 
-  /// 필터 변경 처리
-  void _onFilterChanged({String? localLevel, String? holdColor}) {
+  /// 난이도 필터 변경 처리
+  void _onLocalLevelChanged(String? localLevel) {
     setState(() {
-      if (localLevel != null) {
-        _selectedLocalLevel = _selectedLocalLevel == localLevel
-            ? null
-            : localLevel;
-      }
-      if (holdColor != null) {
-        _selectedHoldColor = _selectedHoldColor == holdColor ? null : holdColor;
-      }
+      _selectedLocalLevel = localLevel;
+    });
+    _loadProblems();
+  }
+
+  /// 홀드색 필터 변경 처리
+  void _onHoldColorChanged(String? holdColor) {
+    setState(() {
+      _selectedHoldColor = holdColor;
     });
     _loadProblems();
   }
@@ -328,7 +329,7 @@ class _SearchBodyState extends State<SearchBody> {
             title: '난이도색',
             options: localLevelOptions,
             selectedOption: _selectedLocalLevel,
-            onOptionSelected: (option) => _onFilterChanged(localLevel: option),
+            onOptionSelected: _onLocalLevelChanged,
           ),
 
           const SizedBox(width: 8), // 간격 축소
@@ -337,7 +338,7 @@ class _SearchBodyState extends State<SearchBody> {
             title: '홀드색',
             options: holdColorOptions,
             selectedOption: _selectedHoldColor,
-            onOptionSelected: (option) => _onFilterChanged(holdColor: option),
+            onOptionSelected: _onHoldColorChanged,
           ),
         ],
       ),
