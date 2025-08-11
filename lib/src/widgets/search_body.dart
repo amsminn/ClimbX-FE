@@ -128,7 +128,9 @@ class _SearchBodyState extends State<SearchBody> {
       _searchController.clear();
       _isSearching = false;
       _filteredGyms = _gyms;
+      _selectedGym = null; // 선택된 클라이밍장도 초기화
     });
+    _loadProblems(); // X 버튼 클릭 시에도 문제 목록 다시 로드
   }
 
   /// 클라이밍장 선택 처리

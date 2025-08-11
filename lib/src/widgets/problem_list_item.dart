@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/problem.dart';
 import '../utils/color_schemes.dart';
+import '../utils/color_codes.dart';
 
 /// 클라이밍 문제 리스트 아이템 위젯
 class ProblemListItem extends StatelessWidget {
@@ -113,14 +114,17 @@ class ProblemListItem extends StatelessWidget {
   }
 
   /// 색상 배지 위젯
-  Widget _buildColorBadge(String color, String label) {
+  Widget _buildColorBadge(String raw, String label) {
+    final normalized = ColorCodes.labelAndColorFromAny(raw);
+    final displayLabel = normalized?.$1 ?? raw;
+    final displayColor = normalized?.$2 ?? AppColorSchemes.accentBlue;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: _getColorForOption(color).withValues(alpha: 0.1),
+        color: displayColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getColorForOption(color).withValues(alpha: 0.3),
+          color: displayColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -131,17 +135,17 @@ class ProblemListItem extends StatelessWidget {
             width: 10,
             height: 10,
             decoration: BoxDecoration(
-              color: _getColorForOption(color),
+              color: displayColor,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 4),
           Text(
-            '$label: $color',
+            '$label: $displayLabel',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: _getColorForOption(color),
+              color: displayColor,
             ),
           ),
         ],
@@ -186,21 +190,5 @@ class ProblemListItem extends StatelessWidget {
     );
   }
 
-  /// 옵션에 따른 색상 반환
-  Color _getColorForOption(String option) {
-    switch (option) {
-      case '빨강':
-        return const Color(0xFFEF4444);
-      case '파랑':
-        return const Color(0xFF3B82F6);
-      case '초록':
-        return const Color(0xFF10B981);
-      case '노랑':
-        return const Color(0xFFF59E0B);
-      case '보라':
-        return const Color(0xFF8B5CF6);
-      default:
-        return AppColorSchemes.accentBlue;
-    }
-  }
+  // 색상 계산은 ColorCodes에서 처리함
 }
