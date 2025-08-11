@@ -122,7 +122,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     },
                   ),
                 );
-                print('PATCH_TOKEN: ${dotenv.env['PATCH_TOKEN']}');
 
                 await dio.patch('/api/admin/users/$nickname/rating', data: rating);
                 if (!context.mounted) return;
