@@ -32,9 +32,15 @@ class _SearchBodyState extends State<SearchBody> {
   List<Problem> _problems = [];
   bool _isLoading = false;
 
-  // 사용 가능한 필터 옵션 (수정필요)
-  static const List<String> localLevelOptions = ['빨강', '파랑', '초록', '노랑', '보라'];
-  static const List<String> holdColorOptions = ['빨강', '파랑', '초록', '노랑', '보라'];
+  // 사용 가능한 필터 옵션 (서버의 HoldColorType과 동일)
+  static const List<String> localLevelOptions = [
+    '흰색', '노랑', '주황', '초록', '파랑', 
+    '빨강', '보라', '회색', '갈색', '검정'
+  ];
+  static const List<String> holdColorOptions = [
+    '흰색', '노랑', '주황', '초록', '파랑', 
+    '빨강', '보라', '회색', '갈색', '검정'
+  ];
 
   @override
   void initState() {

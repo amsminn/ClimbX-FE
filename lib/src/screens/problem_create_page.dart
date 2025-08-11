@@ -34,8 +34,11 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
   bool _isLoadingGyms = false;
   bool _isSubmitting = false;
 
-  // 색상 옵션 (검색 필터와 동일하게 유지)
-  static const List<String> _colorOptions = ['빨강', '파랑', '초록', '노랑', '보라'];
+  // 색상 옵션
+  static const List<String> _colorOptions = [
+    '흰색', '노랑', '주황', '초록', '파랑', 
+    '빨강', '보라', '회색', '갈색', '검정'
+  ];
 
   @override
   void initState() {
@@ -350,7 +353,13 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
                 Container(
                   width: 10,
                   height: 10,
-                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: color, 
+                    shape: BoxShape.circle,
+                    border: _needsBorder(opt) 
+                        ? Border.all(color: Colors.grey, width: 0.5)
+                        : null,
+                  ),
                 ),
                 const SizedBox(width: 6),
                 Text(opt),
@@ -457,19 +466,34 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
 
   Color _getColorForOption(String option) {
     switch (option) {
-      case '빨강':
-        return const Color(0xFFEF4444);
-      case '파랑':
-        return const Color(0xFF3B82F6);
-      case '초록':
-        return const Color(0xFF10B981);
+      case '흰색':
+        return const Color(0xFFFFFFFF);
       case '노랑':
         return const Color(0xFFF59E0B);
+      case '주황':
+        return const Color(0xFFF97316);
+      case '초록':
+        return const Color(0xFF10B981);
+      case '파랑':
+        return const Color(0xFF3B82F6);
+      case '빨강':
+        return const Color(0xFFEF4444);
       case '보라':
         return const Color(0xFF8B5CF6);
+      case '회색':
+        return const Color(0xFF6B7280);
+      case '갈색':
+        return const Color(0xFF92400E);
+      case '검정':
+        return const Color(0xFF000000);
       default:
         return AppColorSchemes.accentBlue;
     }
+  }
+
+  /// 흰색, 회색 등 테두리가 필요한 색상 체크
+  bool _needsBorder(String option) {
+    return option == '흰색' || option == '회색';
   }
 
   Future<void> _openGymPicker() async {

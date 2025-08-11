@@ -17,6 +17,21 @@ class ProblemGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // MediaQuery 기반 반응형 크기 계산
+    final screenWidth = MediaQuery.of(context).size.width;
+    final estimatedItemWidth = screenWidth / 2.3; // 2.5열 그리드 가정
+    final infoAreaHeight = estimatedItemWidth * 0.25; // flex 1:3 비율
+    
+    // 비율 기반 크기 계산
+    final fontSize = (infoAreaHeight * 0.22).clamp(8.0, 12.0);
+    final iconSize = fontSize * 0.8;
+    final containerPadding = screenWidth * 0.02;           // 컨테이너 전체 패딩
+    final badgeHorizontalPadding = screenWidth * 0.012;     // 배지 좌우 패딩
+    final badgeVerticalPadding = screenWidth * 0.008;       // 배지 상하 패딩
+    final badgeSpacing = screenWidth * 0.02;
+    final iconTextSpacing = screenWidth * 0.008;
+    final maxBadgeWidth = (estimatedItemWidth - containerPadding * 2 - badgeSpacing) / 2;
+    
     return GestureDetector(
       onTap: () {
         // 문제 상세 페이지로 이동
@@ -63,20 +78,46 @@ class ProblemGridItem extends StatelessWidget {
               ),
             ),
 
-            // 문제 정보 (하단)
+            // 문제 정보
             Expanded(
               flex: 1,
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(containerPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 난이도 정보
                     Row(
                       children: [
-                        _buildColorBadge(problem.localLevel, '난이도'),
-                        const SizedBox(width: 6),
-                        _buildColorBadge(problem.holdColor, '홀드'),
+                        Flexible(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: maxBadgeWidth),
+                            child: _buildColorBadge(
+                              problem.localLevel, 
+                              '난이도',
+                              fontSize: fontSize,
+                              iconSize: iconSize,
+                              horizontalPadding: badgeHorizontalPadding,
+                              verticalPadding: badgeVerticalPadding,
+                              iconTextSpacing: iconTextSpacing,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: badgeSpacing),
+                        Flexible(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: maxBadgeWidth),
+                            child: _buildColorBadge(
+                              problem.holdColor, 
+                              '홀드',
+                              fontSize: fontSize,
+                              iconSize: iconSize,
+                              horizontalPadding: badgeHorizontalPadding,
+                              verticalPadding: badgeVerticalPadding,
+                              iconTextSpacing: iconTextSpacing,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -89,16 +130,28 @@ class ProblemGridItem extends StatelessWidget {
     );
   }
 
-  /// 색상 배지 위젯
-  Widget _buildColorBadge(String raw, String label) {
+    /// 색상 배지 위젯
+  Widget _buildColorBadge(
+    String raw, 
+    String label, {
+    required double fontSize,
+    required double iconSize,
+    required double horizontalPadding,
+    required double verticalPadding,
+    required double iconTextSpacing,
+  }) {
     final normalized = ColorCodes.labelAndColorFromAny(raw);
     final displayLabel = normalized?.$1 ?? raw;
     final displayColor = normalized?.$2 ?? AppColorSchemes.accentBlue;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3), // 패딩 축소
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding, 
+        vertical: verticalPadding,
+      ),
       decoration: BoxDecoration(
         color: displayColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8), // 둥근 모서리 축소
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: displayColor.withValues(alpha: 0.3),
           width: 1,
@@ -108,20 +161,22 @@ class ProblemGridItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 9,
-            height: 9,
+            width: iconSize,
+            height: iconSize,
             decoration: BoxDecoration(
               color: displayColor,
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 3),
-          Text(
-            '$label: $displayLabel',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: displayColor,
+          SizedBox(width: iconTextSpacing),
+          Flexible(
+            child: Text(
+              '$label: $displayLabel',
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w500,
+                color: displayColor,
+              ),
             ),
           ),
         ],
