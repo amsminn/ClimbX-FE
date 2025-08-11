@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import '../models/problem.dart';
 import 'util/core/api_client.dart';
+import '../utils/color_codes.dart';
 
 /// 클라이밍 문제 관련 API 호출 함수들
 class ProblemApi {
@@ -21,8 +22,10 @@ class ProblemApi {
     final queryParams = <String, dynamic>{
       if (gymId != null) 'gymId': gymId,
       if (gymAreaId != null) 'gymAreaId': gymAreaId,
-      if (localLevel != null) 'localLevel': localLevel,
-      if (holdColor != null) 'holdColor': holdColor,
+      if (localLevel != null)
+        'localLevel': ColorCodes.anyToServerCode(localLevel) ?? localLevel,
+      if (holdColor != null)
+        'holdColor': ColorCodes.anyToServerCode(holdColor) ?? holdColor,
       if (problemTier != null) 'problemTier': problemTier,
       if (activeStatus != null) 'activeStatus': activeStatus,
     };
@@ -62,8 +65,9 @@ class ProblemApi {
 
     final requestJson = {
       'gymAreaId': gymAreaId,
-      'localLevel': localLevelColor,
-      'holdColor': holdColor,
+      'localLevel':
+          ColorCodes.anyToServerCode(localLevelColor) ?? localLevelColor,
+      'holdColor': ColorCodes.anyToServerCode(holdColor) ?? holdColor,
     };
 
     // request를 application/json 파트로 전송

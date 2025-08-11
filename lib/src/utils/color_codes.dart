@@ -152,5 +152,12 @@ class ColorCodes {
     if (c == null) return null;
     return (toKoreanLabel(c), toDisplayColor(c));
   }
+
+  /// 임의 문자열(한글/영문 코드) -> 서버 전송용 영문 코드로 변환
+  /// 매핑에 실패하면 null 반환
+  static String? anyToServerCode(String? value) {
+    final c = fromAny(value);
+    return c != null ? toServerCode(c) : null;
+  }
 }
 
