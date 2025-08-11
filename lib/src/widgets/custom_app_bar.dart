@@ -8,12 +8,14 @@ import 'package:flutter/services.dart'; // TEMP: input formatter
 import '../api/util/auth/token_storage.dart'; // TEMP: get current nickname
 import '../api/util/core/api_client.dart'; // TEMP: BASE_URL 사용
 import 'package:flutter/foundation.dart'; // kDebugMode
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return AppBar(
       backgroundColor: AppColorSchemes.backgroundPrimary,
       elevation: 0,
@@ -116,11 +118,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     headers: {
                       'Content-Type': 'application/json',
                       'Accept': 'application/json',
+                      'Authorization': 'Bearer ${dotenv.env['PATCH_TOKEN']}',
                     },
                   ),
                 );
 
-                await dio.patch('/api/users/$nickname/rating', data: rating);
+                await dio.patch('/api/admin/users/$nickname/rating', data: rating);
                 if (!context.mounted) return;
                 _handleLogout(context);
               } catch (e) {
