@@ -388,7 +388,7 @@ class ProfileHeader extends HookWidget {
             _TierCard(
               colorScheme: colorScheme,
               tierName: userProfile.displayTier,
-              rating: u.rating,
+              rating: u.rating.totalRating,
             ),
             const SizedBox(height: 12),
             _StatsRow(colorScheme: colorScheme, userProfile: userProfile),

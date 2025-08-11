@@ -144,7 +144,7 @@ class TierWidget extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          '${userProfile.rating}',
+                          '${userProfile.rating.totalRating}',
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 28 : 32,
                             fontWeight: FontWeight.w900,

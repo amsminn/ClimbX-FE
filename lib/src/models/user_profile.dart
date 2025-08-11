@@ -5,7 +5,7 @@ class UserProfile {
   final String statusMessage;
   final String? profileImageCdnUrl;
   final int ranking;
-  final int rating;
+  final UserRating rating;
   final String tier;
   final List<CategoryRating> categoryRatings;
   final int currentStreak;
@@ -32,10 +32,10 @@ class UserProfile {
   });
 
   /// 표시용 티어 문자열
-  String get displayTier => TierColors.getTierStringFromRating(rating);
+  String get displayTier => TierColors.getTierStringFromRating(rating.totalRating);
 
   /// 색상/아이콘 계산을 위한 티어 타입
-  TierType get tierType => TierColors.getTierTypeFromRating(rating);
+  TierType get tierType => TierColors.getTierTypeFromRating(rating.totalRating);
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
@@ -43,7 +43,7 @@ class UserProfile {
       statusMessage: json['statusMessage'] ?? '',
       profileImageCdnUrl: json['profileImageCdnUrl'],
       ranking: json['ranking'] ?? 0,
-      rating: json['rating'] ?? 0,
+      rating: UserRating.fromJson(json['rating'] as Map<String, dynamic>? ?? const {}),
       tier: json['tier'] ?? '',
       categoryRatings: (json['categoryRatings'] as List<dynamic>?)
           ?.map((item) => CategoryRating.fromJson(item as Map<String, dynamic>))
@@ -63,7 +63,7 @@ class UserProfile {
       'statusMessage': statusMessage,
       'profileImageCdnUrl': profileImageCdnUrl,
       'ranking': ranking,
-      'rating': rating,
+      'rating': rating.toJson(),
       'tier': tier,
       'categoryRatings': categoryRatings.map((item) => item.toJson()).toList(),
       'currentStreak': currentStreak,
@@ -79,6 +79,41 @@ class UserProfile {
   String toString() {
     return 'UserProfile(nickname: $nickname, ranking: $ranking, rating: $rating, tier: $tier, streak: $currentStreak)';
   }
+}
+
+/// 유저의 다양한 레이팅 값들을 담는 모델
+class UserRating {
+  final int totalRating;
+  final int topProblemRating;
+  final int solvedRating;
+  final int submissionRating;
+  final int contributionRating;
+
+  const UserRating({
+    required this.totalRating,
+    required this.topProblemRating,
+    required this.solvedRating,
+    required this.submissionRating,
+    required this.contributionRating,
+  });
+
+  factory UserRating.fromJson(Map<String, dynamic> json) {
+    return UserRating(
+      totalRating: (json['totalRating'] ?? 0) as int,
+      topProblemRating: (json['topProblemRating'] ?? 0) as int,
+      solvedRating: (json['solvedRating'] ?? 0) as int,
+      submissionRating: (json['submissionRating'] ?? 0) as int,
+      contributionRating: (json['contributionRating'] ?? 0) as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'totalRating': totalRating,
+        'topProblemRating': topProblemRating,
+        'solvedRating': solvedRating,
+        'submissionRating': submissionRating,
+        'contributionRating': contributionRating,
+      };
 }
 
 /// 카테고리별 레이팅 정보를 담는 모델
@@ -109,4 +144,4 @@ class CategoryRating {
   String toString() {
     return 'CategoryRating(category: $category, rating: $rating)';
   }
-} 
+}
