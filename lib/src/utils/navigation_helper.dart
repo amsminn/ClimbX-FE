@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/main_page.dart';
 import '../screens/login_page.dart';
+import '../utils/bottom_nav_tab.dart';
 
 /// 공통 네비게이션 처리 헬퍼
 class NavigationHelper {
@@ -18,6 +19,19 @@ class NavigationHelper {
       context,
       _createPageRoute(const LoginPage()),
       (route) => false, // 모든 이전 페이지 제거
+    );
+  }
+
+  /// 지도에서 검색 탭으로 이동하며 특정 지점을 프리필
+  static void navigateToSearchWithGym(BuildContext context, int gymId) {
+    Navigator.pushReplacement(
+      context,
+      _createPageRoute(
+        MainPage(
+          initialTab: BottomNavTab.search,
+          initialGymIdForSearch: gymId,
+        ),
+      ),
     );
   }
 

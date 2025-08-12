@@ -11,7 +11,9 @@ import '../utils/color_codes.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
-  const SearchBody({super.key});
+  const SearchBody({super.key, this.initialGymId});
+
+  final int? initialGymId;
 
   @override
   State<SearchBody> createState() => _SearchBodyState();
@@ -41,7 +43,6 @@ class _SearchBodyState extends State<SearchBody> {
   void initState() {
     super.initState();
     _loadGyms();
-    _loadProblems();
   }
 
   @override
@@ -59,6 +60,28 @@ class _SearchBodyState extends State<SearchBody> {
         _gyms = gyms;
         _filteredGyms = gyms;
       });
+      
+      // 초기 지점 프리필 처리 (있을 때만 반영)
+      final int? initialId = widget.initialGymId;
+      if (initialId != null) {
+        Gym? preselected;
+        for (final g in gyms) {
+          if (g.gymId == initialId) {
+            preselected = g;
+            break;
+          }
+        }
+        if (preselected != null) {
+          setState(() {
+            _selectedGym = preselected;
+            _searchController.text = preselected!.name;
+            _isSearching = false;
+          });
+        }
+      }
+
+      // 초기 문제 목록 로드 (선택 반영 이후 한 번만)
+      await _loadProblems();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

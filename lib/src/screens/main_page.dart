@@ -15,8 +15,13 @@ import 'dart:developer' as developer;
 
 class MainPage extends StatefulWidget {
   final BottomNavTab? initialTab;
+  final int? initialGymIdForSearch;
 
-  const MainPage({super.key, this.initialTab});
+  const MainPage({
+    super.key,
+    this.initialTab,
+    this.initialGymIdForSearch,
+  });
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -85,15 +90,15 @@ class _MainPageState extends State<MainPage> {
       // Body - Indexed Stack으로 화면 전환
       body: IndexedStack(
         index: _currentTab.index,
-        children: const [
+        children: [
           // 0: 프로필
-          ProfileBody(),
+          const ProfileBody(),
           // 1: 리더보드
-          LeaderboardBody(),
+          const LeaderboardBody(),
           // 2: 검색
-          SearchBody(),
+          SearchBody(initialGymId: widget.initialGymIdForSearch),
           // 3: 지도
-          MapBody(),
+          const MapBody(),
         ],
       ),
 
