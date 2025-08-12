@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
 import '../models/submission.dart';
-import 'util/auth/token_storage.dart';
+import 'util/auth/user_identity.dart';
 
 /// 제출 관련 API 호출 함수들
 class SubmissionApi {
@@ -29,20 +29,9 @@ class SubmissionApi {
     int size = 20,
     String? nickname,
   }) async {
-    // nickname 필수: 없으면 TokenStorage 또는 /api/auth/me 로 획득
-    String? finalNickname = nickname ?? await TokenStorage.getUserNickname();
-    if (finalNickname == null || finalNickname.isEmpty) {
-      final me = await _client.get<Map<String, dynamic>>(
-        '/api/auth/me',
-        logContext: 'SubmissionApi',
-      );
-      final fetchedNickname = me['nickname'] as String?;
-      if (fetchedNickname == null || fetchedNickname.isEmpty) {
-        throw Exception('현재 사용자의 nickname을 찾을 수 없습니다');
-      }
-      await TokenStorage.saveUserNickname(fetchedNickname);
-      finalNickname = fetchedNickname;
-    }
+    // nickname 우선 사용, 없으면 헬퍼로 조회
+    final String finalNickname =
+        nickname ?? await UserIdentity.getOrFetchNickname(logContext: 'SubmissionApi');
 
     final query = <String, dynamic>{
       'nickname': finalNickname,

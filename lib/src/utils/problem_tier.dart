@@ -23,12 +23,13 @@ class ProblemTierHelper {
   ];
 
   static ({String code, String display, TierType type}) getTier(int rating) {
-    for (final b in _bounds) {
-      if (rating >= b.start && rating < b.end) {
+    // 상위 티어부터 확인하여 상한 없는 티어(Master 등)도 정확히 매핑
+    for (final b in _bounds.reversed) {
+      if (rating >= b.start) {
         return (code: b.code, display: b.display, type: b.type);
       }
     }
-    // fallback
+    // 안전망
     final b = _bounds.first;
     return (code: b.code, display: b.display, type: b.type);
   }

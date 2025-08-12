@@ -4,6 +4,7 @@ import '../models/user_profile.dart';
 import '../models/history_data.dart';
 import '../models/streak_data.dart';
 import 'util/auth/token_storage.dart';
+import 'util/auth/user_identity.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
@@ -15,27 +16,9 @@ class UserApi {
   /// 현재 사용자 프로필 조회 (JWT 토큰 기반)
   static Future<UserProfile> getCurrentUserProfile() async {
     try {
-      // 저장된 닉네임 확인
-      String? nickname = await TokenStorage.getUserNickname();
-
-      // 저장된 닉네임이 없으면 /api/auth/me로 조회 후 저장
-      if (nickname == null || nickname.isEmpty) {
-        developer.log('저장된 닉네임이 없음 - /api/auth/me 호출', name: 'UserApi');
-
-        final authResponse = await _apiClient.get<Map<String, dynamic>>(
-          '/api/auth/me',
-          logContext: 'UserApi',
-        );
-
-        nickname = authResponse['nickname'] as String?;
-        if (nickname == null || nickname.isEmpty) {
-          throw Exception('현재 사용자의 nickname을 찾을 수 없습니다');
-        }
-
-        // 닉네임 저장 (다음번에는 바로 사용)
-        await TokenStorage.saveUserNickname(nickname);
-        developer.log('닉네임 저장 완료: $nickname', name: 'UserApi');
-      }
+      // 닉네임을 캐시에서 가져오거나 서버에서 조회
+      final String nickname =
+          await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
 
       developer.log('사용자 프로필 조회 - nickname: $nickname', name: 'UserApi');
 
@@ -79,27 +62,8 @@ class UserApi {
     String criteria = 'RATING',
   }) async {
     try {
-      // 저장된 닉네임 확인
-      String? nickname = await TokenStorage.getUserNickname();
-
-      // 저장된 닉네임이 없으면 /api/auth/me로 조회 후 저장
-      if (nickname == null || nickname.isEmpty) {
-        developer.log('저장된 닉네임이 없음 - /api/auth/me 호출', name: 'UserApi');
-
-        final authResponse = await _apiClient.get<Map<String, dynamic>>(
-          '/api/auth/me',
-          logContext: 'UserApi',
-        );
-
-        nickname = authResponse['nickname'] as String?;
-        if (nickname == null || nickname.isEmpty) {
-          throw Exception('현재 사용자의 nickname을 찾을 수 없습니다');
-        }
-
-        // 닉네임 저장 (다음번에는 바로 사용)
-        await TokenStorage.saveUserNickname(nickname);
-        developer.log('닉네임 저장 완료: $nickname', name: 'UserApi');
-      }
+      final String nickname =
+          await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
 
       developer.log('사용자 히스토리 조회 - nickname: $nickname', name: 'UserApi');
 
@@ -153,27 +117,8 @@ class UserApi {
     String? to,
   }) async {
     try {
-      // 저장된 닉네임 확인
-      String? nickname = await TokenStorage.getUserNickname();
-
-      // 저장된 닉네임이 없으면 /api/auth/me로 조회 후 저장
-      if (nickname == null || nickname.isEmpty) {
-        developer.log('저장된 닉네임이 없음 - /api/auth/me 호출', name: 'UserApi');
-
-        final authResponse = await _apiClient.get<Map<String, dynamic>>(
-          '/api/auth/me',
-          logContext: 'UserApi',
-        );
-
-        nickname = authResponse['nickname'] as String?;
-        if (nickname == null || nickname.isEmpty) {
-          throw Exception('현재 사용자의 nickname을 찾을 수 없습니다');
-        }
-
-        // 닉네임 저장 (다음번에는 바로 사용)
-        await TokenStorage.saveUserNickname(nickname);
-        developer.log('닉네임 저장 완료: $nickname', name: 'UserApi');
-      }
+      final String nickname =
+          await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
 
       developer.log('사용자 스트릭 조회 - nickname: $nickname', name: 'UserApi');
 
