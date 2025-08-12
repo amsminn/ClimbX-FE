@@ -18,7 +18,7 @@ class SubmissionListWidget extends HookWidget {
     final nextCursor = useState<String?>(null);
     final hasNext = useState<bool>(true);
 
-    Future<void> _fetchSubmissions() async {
+    Future<void> fetchSubmissions() async {
       final page = await SubmissionApi.getSubmissions();
       submissionsState.value = page.submissions;
       nextCursor.value = page.nextCursor;
@@ -28,7 +28,7 @@ class SubmissionListWidget extends HookWidget {
     Future<void> loadInitial() async {
       isLoading.value = true;
       try {
-        await _fetchSubmissions();
+        await fetchSubmissions();
       } catch (e) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(
@@ -42,7 +42,7 @@ class SubmissionListWidget extends HookWidget {
     Future<void> refresh() async {
       isRefreshing.value = true;
       try {
-        await _fetchSubmissions();
+        await fetchSubmissions();
       } catch (e) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(
