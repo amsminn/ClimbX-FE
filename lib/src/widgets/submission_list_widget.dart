@@ -11,7 +11,6 @@ class SubmissionListWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Submission> submissions = useState<List<Submission>>([]).value;
     final submissionsState = useState<List<Submission>>([]);
     final isLoading = useState(false);
     final isRefreshing = useState(false);
