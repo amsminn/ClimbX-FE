@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/main_page.dart';
 import '../screens/login_page.dart';
+import '../utils/bottom_nav_tab.dart';
 
 /// 공통 네비게이션 처리 헬퍼
 class NavigationHelper {
@@ -18,6 +19,15 @@ class NavigationHelper {
       context,
       _createPageRoute(const LoginPage()),
       (route) => false, // 모든 이전 페이지 제거
+    );
+  }
+
+  /// 메인에서 특정 탭으로 이동 (검색 탭 등)
+  static void navigateToMainWithTab(BuildContext context, BottomNavTab tab) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      _createPageRoute(MainPage(initialTab: tab)),
+      (route) => false,
     );
   }
 

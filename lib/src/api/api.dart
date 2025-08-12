@@ -14,3 +14,4 @@ export 'gym.dart';
 export 'leaderboard.dart';
 export 'problem.dart';
 export 'video.dart'; 
+export 'submission.dart';

@@ -10,6 +10,9 @@ import '../api/video.dart';
 import '../utils/color_schemes.dart';
 import '../utils/color_codes.dart';
 import '../widgets/video_overlay_player.dart';
+import '../api/submission.dart';
+import '../utils/navigation_helper.dart';
+import '../utils/bottom_nav_tab.dart';
 
 /// 문제 제출 페이지
 class ProblemSubmitPage extends HookWidget {
@@ -810,23 +813,88 @@ class ProblemSubmitPage extends HookWidget {
     ValueNotifier<bool> isSubmitting,
     ValueNotifier<Set<String>> selectedVideoIds,
   ) async {
+    if (selectedVideoIds.value.isEmpty) return;
+
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColorSchemes.backgroundPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        title: Row(
+          children: const [
+            Icon(Icons.outbox_rounded, color: AppColorSchemes.accentBlue),
+            SizedBox(width: 8),
+            Text(
+              '제출하시겠습니까?',
+              style: TextStyle(
+                color: AppColorSchemes.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        content: const Padding(
+          padding: EdgeInsets.only(bottom: 8),
+          child: Text(
+            '선택한 영상으로 문제를 제출합니다.',
+            style: TextStyle(
+              color: AppColorSchemes.textSecondary,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColorSchemes.textSecondary,
+              side: const BorderSide(color: AppColorSchemes.borderPrimary),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            ),
+            child: const Text('아니요'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColorSchemes.accentBlue,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            ),
+            child: const Text('네'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
     isSubmitting.value = true;
-    
+
     try {
-      // TODO: 실제 제출 API 호출
-      await Future.delayed(const Duration(seconds: 2)); // 임시 딜레이
-      
+      final String videoId = selectedVideoIds.value.first;
+      await SubmissionApi.submit(
+        videoId: videoId,
+        // 서버 스펙에 따라 problemId가 정수형일 경우 변환 필요
+        problemId: problem.problemId,
+      );
+
       if (context.mounted) {
-        // 성공 메시지 표시
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('제출이 완료되었습니다!'),
             backgroundColor: AppColorSchemes.accentGreen,
           ),
         );
-        
-        // 이전 페이지로 돌아가기
-        Navigator.of(context).pop();
+
+        // 검색 탭으로 이동
+        NavigationHelper.navigateToMainWithTab(context, BottomNavTab.search);
       }
     } catch (e) {
       if (context.mounted) {
