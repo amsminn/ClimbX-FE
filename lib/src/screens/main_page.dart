@@ -15,24 +15,31 @@ import 'dart:developer' as developer;
 
 class MainPage extends StatefulWidget {
   final BottomNavTab? initialTab;
+  final int? initialGymIdForSearch;
 
-  const MainPage({super.key, this.initialTab});
+  const MainPage({
+    super.key,
+    this.initialTab,
+    this.initialGymIdForSearch,
+  });
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MainPage> createState() => MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class MainPageState extends State<MainPage> {
   late BottomNavTab _currentTab;
   UserProfile? _userProfile;
   bool _isLoading = true;
   String? _error;
+  int? _gymIdForSearch;
 
   @override
   void initState() {
     super.initState();
     // 초기 탭 설정 - 프로필이 첫 번째 탭이므로 기본값으로 설정
     _currentTab = widget.initialTab ?? BottomNavTab.profile;
+    _gymIdForSearch = widget.initialGymIdForSearch;
 
     // 유저 프로필 로드
     _loadUserProfile();
@@ -85,15 +92,15 @@ class _MainPageState extends State<MainPage> {
       // Body - Indexed Stack으로 화면 전환
       body: IndexedStack(
         index: _currentTab.index,
-        children: const [
+        children: [
           // 0: 프로필
-          ProfileBody(),
+          const ProfileBody(),
           // 1: 리더보드
-          LeaderboardBody(),
+          const LeaderboardBody(),
           // 2: 검색
-          SearchBody(),
+          SearchBody(initialGymId: _gymIdForSearch),
           // 3: 지도
-          MapBody(),
+          const MapBody(),
         ],
       ),
 
@@ -138,5 +145,13 @@ class _MainPageState extends State<MainPage> {
         });
       }
     }
+  }
+
+  /// 외부에서 검색 탭으로 전환하면서 지점 프리필을 전달하기 위한 메서드
+  void switchToSearchWithGym(int gymId) {
+    setState(() {
+      _currentTab = BottomNavTab.search;
+      _gymIdForSearch = gymId;
+    });
   }
 }

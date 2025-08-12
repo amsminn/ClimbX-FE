@@ -27,6 +27,17 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
   bool _showControls = true;
   Timer? _hideControlsTimer;
 
+  String _formatDuration(Duration duration) {
+    if (duration.inMilliseconds < 0) return '00:00';
+    final int hours = duration.inHours;
+    final int minutes = duration.inMinutes.remainder(60);
+    final int seconds = duration.inSeconds.remainder(60);
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -95,9 +106,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    // 전달받은 색상을 사용하거나, 기본 색상 사용
-    final TierColorScheme colorScheme = widget.tierColors ?? 
-      TierColors.getColorScheme(TierColors.getTierFromString('Bronze III'));
+    final TierColorScheme? colorScheme = widget.tierColors;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -162,6 +171,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
   }
 
   Widget _buildControls() {
+    final TierColorScheme? colorScheme = widget.tierColors;
     return Container(
       color: Colors.black.withValues(alpha: 0.2),
       child: Stack(
@@ -203,12 +213,18 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
               ),
             ),
           ),
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 12,
+            child: _buildBottomBar(colorScheme),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSubmitButton(TierColorScheme tierColors) {
+  Widget _buildSubmitButton(TierColorScheme? tierColors) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -219,7 +235,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
           ).showSnackBar(const SnackBar(content: Text('영상 제출 기능은 준비 중입니다')));
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: tierColors.primary,
+          backgroundColor: tierColors?.primary ?? Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
@@ -238,6 +254,67 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildBottomBar(TierColorScheme? tierColors) {
+    return ValueListenableBuilder(
+      valueListenable: _controller,
+      builder: (context, VideoPlayerValue value, child) {
+        final Duration position = value.position;
+        final Duration total = value.duration;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Progress bar with scrubbing enabled
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Listener(
+                    onPointerDown: (_) => _resetHideControlsTimer(),
+                    child: VideoProgressIndicator(
+                      _controller,
+                      allowScrubbing: true,
+                      colors: VideoProgressColors(
+                      playedColor: tierColors?.primary ?? Theme.of(context).colorScheme.primary,
+                        bufferedColor: Colors.white.withValues(alpha: 0.4),
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _formatDuration(position),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        _formatDuration(total),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
