@@ -33,6 +33,10 @@ class VideoGalleryWidget extends HookWidget {
     // 통합 영상 목록 (로컬, 서버) - getter 함수로 정의
     List<Video> getAllVideos() => [...localVideos.value, ...serverVideos.value];
 
+    // 업로드 중 영상이 하나라도 있는지 여부
+    final bool isAnyUploading =
+        localVideos.value.any((video) => video.isUploading);
+
     // 서버에서 영상 목록 로드
     Future<void> loadServerVideos() async {
       if (!isActive) return;
@@ -362,7 +366,7 @@ class VideoGalleryWidget extends HookWidget {
                 ),
                 // 새로고침 버튼
                 IconButton(
-                  onPressed: isLoading.value ? null : refreshVideos,
+                  onPressed: (isLoading.value || isAnyUploading) ? null : refreshVideos,
                   icon: isLoading.value
                       ? const SizedBox(
                           width: 16,
@@ -504,9 +508,9 @@ class VideoGalleryWidget extends HookWidget {
           borderRadius: BorderRadius.circular(12),
           child: Stack(
             children: [
-              // 썸네일 (비디오 처리중이면 로딩 아니면 그냥 썸네일)
+              // 썸네일/상태 표시 (업로드 중/서버 처리중/정상 썸네일)
               Positioned.fill(
-                child: video.isPending
+                child: video.isUploading
                     ? Container(
                         color: AppColorSchemes.backgroundSecondary,
                         child: Center(
@@ -525,7 +529,7 @@ class VideoGalleryWidget extends HookWidget {
                               ),
                               const SizedBox(height: 8),
                               const Text(
-                                '처리중',
+                                '업로드중',
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -536,7 +540,38 @@ class VideoGalleryWidget extends HookWidget {
                           ),
                         ),
                       )
-                    : video.getThumbnailWidget(fit: BoxFit.cover),
+                    : (video.isPending || video.isProcessing)
+                        ? Container(
+                            color: AppColorSchemes.backgroundSecondary,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(
+                                        TierProvider.of(context).primary,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    '서버 처리중',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColorSchemes.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : video.getThumbnailWidget(fit: BoxFit.cover),
               ),
 
               // 재생 시간 (좌측 하단)
