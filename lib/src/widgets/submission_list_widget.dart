@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fquery/fquery.dart';
 import '../api/submission.dart';
 import '../models/submission.dart';
 import '../utils/color_schemes.dart';
-import '../utils/tier_provider.dart';
+import '../utils/tier_colors.dart';
+import '../utils/problem_tier.dart';
 
 class SubmissionListWidget extends HookWidget {
   const SubmissionListWidget({super.key});
@@ -28,9 +28,9 @@ class SubmissionListWidget extends HookWidget {
         hasNext.value = page.hasNext;
       } catch (e) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('제출 내역을 불러오지 못했습니다: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('제출 내역을 불러오지 못했습니다: $e')));
       } finally {
         isLoading.value = false;
       }
@@ -45,9 +45,9 @@ class SubmissionListWidget extends HookWidget {
         hasNext.value = page.hasNext;
       } catch (e) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('새로고침 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('새로고침 실패: $e')));
       } finally {
         isRefreshing.value = false;
       }
@@ -57,15 +57,20 @@ class SubmissionListWidget extends HookWidget {
       if (isLoadingMore.value || !hasNext.value) return;
       isLoadingMore.value = true;
       try {
-        final page = await SubmissionApi.getSubmissions(cursor: nextCursor.value);
-        submissionsState.value = [...submissionsState.value, ...page.submissions];
+        final page = await SubmissionApi.getSubmissions(
+          cursor: nextCursor.value,
+        );
+        submissionsState.value = [
+          ...submissionsState.value,
+          ...page.submissions,
+        ];
         nextCursor.value = page.nextCursor;
         hasNext.value = page.hasNext;
       } catch (e) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('더 불러오기 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('더 불러오기 실패: $e')));
       } finally {
         isLoadingMore.value = false;
       }
@@ -79,46 +84,48 @@ class SubmissionListWidget extends HookWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         return RefreshIndicator(
-        onRefresh: refresh,
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification.metrics.pixels >=
-                notification.metrics.maxScrollExtent - 200) {
-              loadMore();
-            }
-            return false;
-          },
+          onRefresh: refresh,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification.metrics.pixels >=
+                  notification.metrics.maxScrollExtent - 200) {
+                loadMore();
+              }
+              return false;
+            },
             child: isLoading.value
                 ? const Center(
                     child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator()))
+                      padding: EdgeInsets.all(24),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
                 : submissionsState.value.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          const SizedBox(height: 120),
-                          _buildEmptyState(),
-                          const SizedBox(height: 120),
-                        ],
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.all(16),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount:
-                            submissionsState.value.length + (hasNext.value ? 1 : 0),
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          if (index >= submissionsState.value.length) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
-                          }
-                          final item = submissionsState.value[index];
-                          return _SubmissionListItem(item: item);
-                        },
-                      ),
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 120),
+                      _buildEmptyState(),
+                      const SizedBox(height: 120),
+                    ],
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount:
+                        submissionsState.value.length + (hasNext.value ? 1 : 0),
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      if (index >= submissionsState.value.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final item = submissionsState.value[index];
+                      return _SubmissionListItem(item: item);
+                    },
+                  ),
           ),
         );
       },
@@ -126,11 +133,15 @@ class SubmissionListWidget extends HookWidget {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.outbox_outlined, size: 64, color: AppColorSchemes.textTertiary),
+        children: [
+          Icon(
+            Icons.outbox_outlined,
+            size: 64,
+            color: AppColorSchemes.textTertiary,
+          ),
           SizedBox(height: 12),
           Text(
             '아직 제출 내역이 없어요',
@@ -143,10 +154,7 @@ class SubmissionListWidget extends HookWidget {
           SizedBox(height: 6),
           Text(
             '문제를 제출하면 이곳에서 확인할 수 있어요',
-            style: TextStyle(
-              color: AppColorSchemes.textTertiary,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: AppColorSchemes.textTertiary, fontSize: 14),
           ),
         ],
       ),
@@ -156,6 +164,7 @@ class SubmissionListWidget extends HookWidget {
 
 class _SubmissionListItem extends StatelessWidget {
   final Submission item;
+
   const _SubmissionListItem({required this.item});
 
   Color _statusColor(SubmissionStatus status) {
@@ -208,22 +217,31 @@ class _SubmissionListItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // 썸네일
+            // 썸네일 (고정 크기)
             Container(
               width: 80,
-              height: 60,
+              height: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColorSchemes.borderPrimary, width: 1),
+                border: Border.all(
+                  color: AppColorSchemes.borderPrimary,
+                  width: 1,
+                ),
                 color: AppColorSchemes.backgroundSecondary,
               ),
               clipBehavior: Clip.antiAlias,
               child: item.thumbnailUrl == null || item.thumbnailUrl!.isEmpty
-                  ? const Icon(Icons.video_file_outlined, color: AppColorSchemes.textTertiary)
+                  ? const Icon(
+                      Icons.video_file_outlined,
+                      color: AppColorSchemes.textTertiary,
+                    )
                   : Image.network(
                       item.thumbnailUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.video_file_outlined, color: AppColorSchemes.textTertiary),
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.video_file_outlined,
+                        color: AppColorSchemes.textTertiary,
+                      ),
                     ),
             ),
             const SizedBox(width: 12),
@@ -244,19 +262,14 @@ class _SubmissionListItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
+                  // 티어 배지 (지점명 아래, 난이도/홀드색 위)
+                  _ProblemTierBadge(rating: item.problemRating),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
-                      _buildBadge(levelLabel, levelColor),
+                      _buildBadge('난이도: $levelLabel', levelColor),
                       const SizedBox(width: 8),
-                      _buildBadge(holdLabel, holdColor),
-                      const SizedBox(width: 8),
-                      Text(
-                        item.formattedDuration,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColorSchemes.textSecondary,
-                        ),
-                      ),
+                      _buildBadge('홀드색: $holdLabel', holdColor),
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -276,7 +289,10 @@ class _SubmissionListItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: _statusColor(item.status).withValues(alpha: 0.1),
-                border: Border.all(color: _statusColor(item.status).withValues(alpha: 0.3), width: 1),
+                border: Border.all(
+                  color: _statusColor(item.status).withValues(alpha: 0.3),
+                  width: 1,
+                ),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
@@ -314,3 +330,49 @@ class _SubmissionListItem extends StatelessWidget {
   }
 }
 
+class _ProblemTierBadge extends StatelessWidget {
+  final int rating;
+
+  const _ProblemTierBadge({required this.rating});
+
+  @override
+  Widget build(BuildContext context) {
+    final tierType = ProblemTierHelper.getType(rating);
+    final display = ProblemTierHelper.getDisplayName(rating);
+    final scheme = TierColors.getColorScheme(tierType);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: scheme.gradient,
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            TierColors.getTierIcon(tierType),
+            size: 14,
+            color: AppColorSchemes.backgroundPrimary,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            display,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: AppColorSchemes.backgroundPrimary,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
