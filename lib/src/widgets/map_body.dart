@@ -102,8 +102,10 @@ class MapBody extends HookWidget {
           // 이미지+이름(주소)+전화까지만 보이도록 조정
           return DraggableScrollableSheet(
             initialChildSize: _computeInitialSheetSize(sheetContext),
-            minChildSize:
-                (_computeInitialSheetSize(sheetContext) - 0.05).clamp(0.25, 0.8),
+            minChildSize: (_computeInitialSheetSize(sheetContext) - 0.05).clamp(
+              0.25,
+              0.8,
+            ),
             maxChildSize: 0.9,
             expand: false,
             builder: (draggableContext, scrollController) {
@@ -265,14 +267,23 @@ class MapBody extends HookWidget {
                                           gym.gymId,
                                         );
                                       },
-                                      icon: const Icon(Icons.assignment_turned_in, color: Colors.white),
+                                      icon: const Icon(
+                                        Icons.assignment_turned_in,
+                                        color: Colors.white,
+                                      ),
                                       label: const Text('이 지점 문제 제출하기'),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColorSchemes.accentBlue,
+                                        backgroundColor:
+                                            AppColorSchemes.accentBlue,
                                         foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 14,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -336,21 +347,23 @@ class MapBody extends HookWidget {
     // 위치 권한 요청 함수
     Future<void> requestLocationPermission() async {
       final currentContext = context;
-      
+
       try {
         final status = await Permission.location.status;
         if (status.isDenied) {
           await Permission.location.request();
         } else if (status.isPermanentlyDenied) {
           if (!currentContext.mounted) return;
-          
+
           // 사용자에게 권한이 영구적으로 거부되었음을 알리고 설정으로 이동하도록 안내
           await showDialog(
             context: currentContext,
             builder: (BuildContext dialogContext) {
               return AlertDialog(
                 title: const Text('위치 권한 필요'),
-                content: const Text('지도 기능을 사용하려면 위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.'),
+                content: const Text(
+                  '지도 기능을 사용하려면 위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.',
+                ),
                 actions: <Widget>[
                   TextButton(
                     child: const Text('설정으로 이동'),
@@ -496,14 +509,27 @@ class MapBody extends HookWidget {
   // 바텀시트 초기 높이 계산: 이미지(200) + 여백/텍스트들을 고려한 고정 픽셀을 비율로 환산
   double _computeInitialSheetSize(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
-    // 구성 요소 높이 추정치: 핸들(24) + 이미지(200+마진 32) + 이름(28) + 간격(12)
-    // + 주소(22) + 간격(8) + 전화(22) + 섹션 하단 마진(24)
-    const double estimatedContentHeight = 24 + 232 + 28 + 12 + 22 + 8 + 22 + 24;
-    // 추가 여유(안전 여백)
-    const double safetyPadding = 8;
-    const double targetHeight = estimatedContentHeight + safetyPadding;
+
+    // UI 구성 요소 높이 추정치 (레이아웃 변경 시 함께 수정 필요)
+    const double handleHeight = 24;
+    const double imageHeightWithMargin = 200 + 32; // 이미지 높이 + 상하 마진
+    const double nameHeight = 28;
+    const double addressHeight = 22;
+    const double phoneHeight = 22;
+    const double contentSpacing = 12 + 8 + 24; // 이름-주소, 주소-전화, 전화-하단 간격
+    const double safetyPadding = 8; // 추가 여유 공간
+
+    const double estimatedContentHeight =
+        handleHeight +
+        imageHeightWithMargin +
+        nameHeight +
+        addressHeight +
+        phoneHeight +
+        contentSpacing +
+        safetyPadding;
+
     // 화면 대비 비율로 환산 (최소/최대 범위 클램프)
-    return (targetHeight / screenHeight).clamp(0.3, 0.6);
+    return (estimatedContentHeight / screenHeight).clamp(0.3, 0.6);
   }
 
   /// 난이도 분포 차트 빌드

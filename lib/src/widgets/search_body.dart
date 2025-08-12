@@ -61,26 +61,25 @@ class _SearchBodyState extends State<SearchBody> {
         _filteredGyms = gyms;
       });
       
-      // 초기 지점 프리필 처리 (있을 때만 반영)
+      // 초기 지점 프리필 처리
       final int? initialId = widget.initialGymId;
       if (initialId != null) {
         Gym? preselected;
-        for (final g in gyms) {
-          if (g.gymId == initialId) {
-            preselected = g;
-            break;
-          }
+        try {
+          preselected = gyms.firstWhere((g) => g.gymId == initialId);
+        } catch (_) {
+          // 해당 gym이 없으면 null 유지
         }
         if (preselected != null) {
           setState(() {
             _selectedGym = preselected;
-            _searchController.text = preselected!.name;
+            _searchController.text = preselected.name;
             _isSearching = false;
           });
         }
       }
 
-      // 초기 문제 목록 로드 (선택 반영 이후 한 번만)
+      // 초기 문제 목록 로드
       await _loadProblems();
     } catch (e) {
       if (mounted) {
