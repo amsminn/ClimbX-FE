@@ -101,6 +101,27 @@ class NavigationHelper {
     );
   }
 
+  /// 지도에서 검색 탭으로 이동하며 특정 지점을 프리필
+  static void navigateToSearchWithGym(BuildContext context, int gymId) {
+    // 현재 트리에서 MainPageState를 찾아 탭만 전환
+    final mainState = context.findAncestorStateOfType<MainPageState>();
+    if (mainState != null) {
+      mainState.switchToSearchWithGym(gymId);
+      return;
+    }
+
+    // 예외적 상황(컨텍스트에 MainPage가 없을 때)만 대체 내비게이션 수행
+    Navigator.pushReplacement(
+      context,
+      _createPageRoute(
+        MainPage(
+          initialTab: BottomNavTab.search,
+          initialGymIdForSearch: gymId,
+        ),
+      ),
+    );
+  }
+
   /// 공통 페이지 라우트 생성 (애니메이션 없음)
   static PageRouteBuilder<T> _createPageRoute<T extends Widget>(T page) {
     return PageRouteBuilder<T>(
