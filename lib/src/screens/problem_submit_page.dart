@@ -91,11 +91,9 @@ class ProblemSubmitPage extends HookWidget {
                 isUploading: true,
                 uploadProgress: progress,
               );
-              localVideos.value = [
-                ...localVideos.value.take(index),
-                uploadingVideo,
-                ...localVideos.value.skip(index + 1),
-              ];
+              final newList = List.of(localVideos.value);
+              newList[index] = uploadingVideo;
+              localVideos.value = newList;
             }
           },
         );
@@ -109,23 +107,6 @@ class ProblemSubmitPage extends HookWidget {
               backgroundColor: AppColorSchemes.accentGreen,
             ),
           );
-        }
-
-        // 업로드 완료 표시 (로컬 항목 상태 해제)
-        final completeIndex = localVideos.value.indexWhere(
-          (v) => v.localPath == pickedFile.path,
-        );
-        if (completeIndex != -1) {
-          final completedLocal = localVideos.value[completeIndex].copyWith(
-            isUploading: false,
-            uploadProgress: 1.0,
-            videoId: videoId,
-          );
-          localVideos.value = [
-            ...localVideos.value.take(completeIndex),
-            completedLocal,
-            ...localVideos.value.skip(completeIndex + 1),
-          ];
         }
 
         // 영상 목록 새로고침 (서버 처리중 항목 반영) - 로컬 항목 정리 포함
