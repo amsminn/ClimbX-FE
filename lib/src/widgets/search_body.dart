@@ -73,7 +73,7 @@ class _SearchBodyState extends State<SearchBody> {
         if (preselected != null) {
           setState(() {
             _selectedGym = preselected;
-            _searchController.text = preselected.name;
+            _searchController.text = preselected!.name;
             _isSearching = false;
           });
         }
