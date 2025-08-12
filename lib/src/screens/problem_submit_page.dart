@@ -884,8 +884,8 @@ class ProblemSubmitPage extends HookWidget {
         titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
         contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        title: Row(
-          children: const [
+        title: const Row(
+          children: [
             Icon(Icons.outbox_rounded, color: AppColorSchemes.accentBlue),
             SizedBox(width: 8),
             Text(

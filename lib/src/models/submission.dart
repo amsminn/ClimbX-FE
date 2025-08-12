@@ -82,7 +82,7 @@ class Submission {
   (String, int) get localLevelLabelAndColor {
     final pair = ColorCodes.labelAndColorFromAny(problemLocalLevel);
     if (pair != null) {
-      return (pair.$1, pair.$2.value);
+      return (pair.$1, pair.$2.toARGB32());
     }
     return (problemLocalLevel, 0xFF3B82F6);
   }
@@ -90,7 +90,7 @@ class Submission {
   (String, int) get holdColorLabelAndColor {
     final pair = ColorCodes.labelAndColorFromAny(problemHoldColor);
     if (pair != null) {
-      return (pair.$1, pair.$2.value);
+      return (pair.$1, pair.$2.toARGB32());
     }
     return (problemHoldColor, 0xFF3B82F6);
   }
