@@ -46,6 +46,24 @@ class _SearchBodyState extends State<SearchBody> {
   }
 
   @override
+  void didUpdateWidget(covariant SearchBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // MainPage에서 initialGymId가 변경되어 전달되면 프리필 반영
+    if (widget.initialGymId != null && widget.initialGymId != oldWidget.initialGymId) {
+      final targetGymId = widget.initialGymId!;
+      final maybeGym = _gyms.where((g) => g.gymId == targetGymId).toList();
+      if (maybeGym.isNotEmpty) {
+        setState(() {
+          _selectedGym = maybeGym.first;
+          _searchController.text = maybeGym.first.name;
+          _isSearching = false;
+        });
+        _loadProblems();
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();

@@ -24,20 +24,22 @@ class MainPage extends StatefulWidget {
   });
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MainPage> createState() => MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class MainPageState extends State<MainPage> {
   late BottomNavTab _currentTab;
   UserProfile? _userProfile;
   bool _isLoading = true;
   String? _error;
+  int? _gymIdForSearch;
 
   @override
   void initState() {
     super.initState();
     // 초기 탭 설정 - 프로필이 첫 번째 탭이므로 기본값으로 설정
     _currentTab = widget.initialTab ?? BottomNavTab.profile;
+    _gymIdForSearch = widget.initialGymIdForSearch;
 
     // 유저 프로필 로드
     _loadUserProfile();
@@ -96,7 +98,7 @@ class _MainPageState extends State<MainPage> {
           // 1: 리더보드
           const LeaderboardBody(),
           // 2: 검색
-          SearchBody(initialGymId: widget.initialGymIdForSearch),
+          SearchBody(initialGymId: _gymIdForSearch),
           // 3: 지도
           const MapBody(),
         ],
@@ -143,5 +145,13 @@ class _MainPageState extends State<MainPage> {
         });
       }
     }
+  }
+
+  /// 외부에서 검색 탭으로 전환하면서 지점 프리필을 전달하기 위한 메서드
+  void switchToSearchWithGym(int gymId) {
+    setState(() {
+      _currentTab = BottomNavTab.search;
+      _gymIdForSearch = gymId;
+    });
   }
 }
