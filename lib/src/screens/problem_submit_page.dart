@@ -42,11 +42,15 @@ class ProblemSubmitPage extends HookWidget {
       VideoApi.getCurrentUserVideos,
     );
 
-    // 완료된 영상들만 필터링
-    final completedVideos = videosQuery.data?.where((video) => 
-      video.isCompleted && video.hasValidUrl
-    ).toList() ?? [];
+    // 로컬 업로드 중 영상들 (서버에 아직 반영되지 않은 항목)
+    final localVideos = useState<List<Video>>([]);
 
+    // 새로고침: 로컬 업로드 항목 초기화 후 서버 목록 요청
+    void refreshVideos() {
+      localVideos.value = [];
+      videosQuery.refetch();
+    }
+    
     // 제출 버튼 활성화 여부
     final canSubmit = selectedVideoIds.value.isNotEmpty && !isSubmitting.value;
 
@@ -57,6 +61,10 @@ class ProblemSubmitPage extends HookWidget {
 
       try {
         isUploading.value = true;
+
+        // 로컬 Video 항목 생성 및 목록에 추가 (업로드 전)
+        final localVideo = Video.fromLocalFile(pickedFile.path);
+        localVideos.value = [localVideo, ...localVideos.value];
         
         // 성공 메시지 표시
         if (context.mounted) {
@@ -74,7 +82,21 @@ class ProblemSubmitPage extends HookWidget {
         final videoId = await VideoApi.uploadVideo(
           filePath: pickedFile.path,
           onProgress: (progress) {
-            // 진행률 업데이트 (필요시)
+            // 로컬 항목의 진행률 업데이트
+            final index = localVideos.value.indexWhere(
+              (v) => v.localPath == pickedFile.path,
+            );
+            if (index != -1) {
+              final uploadingVideo = localVideos.value[index].copyWith(
+                isUploading: true,
+                uploadProgress: progress,
+              );
+              localVideos.value = [
+                ...localVideos.value.take(index),
+                uploadingVideo,
+                ...localVideos.value.skip(index + 1),
+              ];
+            }
           },
         );
 
@@ -89,8 +111,25 @@ class ProblemSubmitPage extends HookWidget {
           );
         }
 
-        // 영상 목록 새로고침
-        videosQuery.refetch();
+        // 업로드 완료 표시 (로컬 항목 상태 해제)
+        final completeIndex = localVideos.value.indexWhere(
+          (v) => v.localPath == pickedFile.path,
+        );
+        if (completeIndex != -1) {
+          final completedLocal = localVideos.value[completeIndex].copyWith(
+            isUploading: false,
+            uploadProgress: 1.0,
+            videoId: videoId,
+          );
+          localVideos.value = [
+            ...localVideos.value.take(completeIndex),
+            completedLocal,
+            ...localVideos.value.skip(completeIndex + 1),
+          ];
+        }
+
+        // 영상 목록 새로고침 (서버 처리중 항목 반영) - 로컬 항목 정리 포함
+        refreshVideos();
       } catch (e) {
         developer.log('영상 업로드 실패: $e', name: 'ProblemSubmitPage', error: e);
 
@@ -103,6 +142,10 @@ class ProblemSubmitPage extends HookWidget {
             ),
           );
         }
+        // 실패한 로컬 항목 제거
+        localVideos.value = localVideos.value
+            .where((v) => v.localPath != pickedFile.path)
+            .toList();
       } finally {
         isUploading.value = false;
       }
@@ -205,16 +248,17 @@ class ProblemSubmitPage extends HookWidget {
                   _buildProblemInfo(),
                   
                   // 중간: 영상 업로드 버튼 + 영상 목록
-                  _buildVideoSection(
+          _buildVideoSection(
                     context,
-                    completedVideos,
+                    videosQuery.data ?? [],
+                    localVideos.value,
                     selectedVideoIds,
                     videosQuery.isLoading,
                     videosQuery.isError,
                     isUploading,
                     recordVideo,
                     selectFromGallery,
-                    () => videosQuery.refetch(), // 콜백 함수로 전달
+                    () => refreshVideos(), // 콜백 함수로 전달
                   ),
                 ],
               ),
@@ -370,7 +414,8 @@ class ProblemSubmitPage extends HookWidget {
   /// 영상 섹션 위젯 (업로드 버튼 + 영상 목록)
   Widget _buildVideoSection(
     BuildContext context,
-    List<Video> videos,
+    List<Video> serverVideos,
+    List<Video> localVideos,
     ValueNotifier<Set<String>> selectedVideoIds,
     bool isLoading,
     bool isError,
@@ -407,14 +452,9 @@ class ProblemSubmitPage extends HookWidget {
                     ),
                     // 새로고침 버튼
                     IconButton(
-                      onPressed: isLoading ? null : onRefresh, // 콜백 함수 사용
-                      icon: isLoading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.refresh, size: 20),
+                      onPressed:
+                          (isLoading || isUploading.value) ? null : onRefresh,
+                      icon: const Icon(Icons.refresh, size: 20),
                       tooltip: '목록 새로고침',
                     ),
                   ],
@@ -428,7 +468,7 @@ class ProblemSubmitPage extends HookWidget {
                         icon: Icons.videocam_outlined,
                         label: '촬영하기',
                         onTap: isUploading.value ? null : onRecordVideo,
-                        isLoading: isUploading.value,
+                        isLoading: false,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -438,7 +478,7 @@ class ProblemSubmitPage extends HookWidget {
                         icon: Icons.photo_library_outlined,
                         label: '갤러리에서 선택',
                         onTap: isUploading.value ? null : onSelectFromGallery,
-                        isLoading: isUploading.value,
+                        isLoading: false,
                       ),
                     ),
                   ],
@@ -452,7 +492,8 @@ class ProblemSubmitPage extends HookWidget {
           // 영상 목록
           _buildVideoList(
             context,
-            videos,
+            serverVideos,
+            localVideos,
             selectedVideoIds,
             isLoading,
             isError,
@@ -474,35 +515,25 @@ class ProblemSubmitPage extends HookWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
-          color: onTap != null 
-            ? AppColorSchemes.accentBlue 
-            : AppColorSchemes.textTertiary,
+          color: onTap != null
+              ? AppColorSchemes.accentBlue
+              : AppColorSchemes.textTertiary,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: onTap != null 
-              ? AppColorSchemes.accentBlue 
-              : AppColorSchemes.borderPrimary,
+            color: onTap != null
+                ? AppColorSchemes.accentBlue
+                : AppColorSchemes.borderPrimary,
             width: 1,
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (isLoading)
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            else
-              Icon(
-                icon,
-                color: Colors.white,
-                size: 20,
-              ),
+            Icon(
+              icon,
+              color: Colors.white,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Text(
               label,
@@ -521,7 +552,8 @@ class ProblemSubmitPage extends HookWidget {
   /// 영상 목록 위젯
   Widget _buildVideoList(
     BuildContext context,
-    List<Video> videos,
+    List<Video> serverVideos,
+    List<Video> localVideos,
     ValueNotifier<Set<String>> selectedVideoIds,
     bool isLoading,
     bool isError,
@@ -550,7 +582,13 @@ class ProblemSubmitPage extends HookWidget {
       );
     }
 
-    if (videos.isEmpty) {
+    // 서버+로컬 목록을 병합(로컬이 먼저)
+    final allVideos = [
+      ...localVideos,
+      ...serverVideos,
+    ];
+
+    if (allVideos.isEmpty) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -584,7 +622,7 @@ class ProblemSubmitPage extends HookWidget {
     }
 
     return Column(
-      children: videos.asMap().entries.map((entry) {
+      children: allVideos.asMap().entries.map((entry) {
         final video = entry.value;
         final isSelected = selectedVideoIds.value.contains(video.videoId);
         
@@ -616,8 +654,10 @@ class ProblemSubmitPage extends HookWidget {
     bool isSelected,
     Function(bool) onSelectionChanged,
   ) {
+    final bool isSelectable = video.isCompleted && video.hasValidUrl && !video.isUploading;
+
     return GestureDetector(
-      onTap: () => onSelectionChanged(!isSelected),
+      onTap: isSelectable ? () => onSelectionChanged(!isSelected) : null,
       child: Container(
         decoration: BoxDecoration(
           color: AppColorSchemes.backgroundPrimary,
@@ -641,8 +681,10 @@ class ProblemSubmitPage extends HookWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected
-                        ? AppColorSchemes.accentBlue
+                    color: isSelectable
+                        ? (isSelected
+                            ? AppColorSchemes.accentBlue
+                            : AppColorSchemes.borderPrimary)
                         : AppColorSchemes.borderPrimary,
                     width: 2,
                   ),
@@ -663,7 +705,7 @@ class ProblemSubmitPage extends HookWidget {
               
               const SizedBox(width: 12),
               
-              // 썸네일
+              // 썸네일/상태 (업로드중/서버 처리중/썸네일)
               Container(
                 width: 80,
                 height: 60,
@@ -676,11 +718,15 @@ class ProblemSubmitPage extends HookWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(7),
-                  child: video.getThumbnailWidget(
-                    width: 80,
-                    height: 60,
-                    fit: BoxFit.cover,
-                  ),
+                  child: video.isUploading
+                      ? _buildStatusCell(context, '업로드중')
+                      : (video.isPending || video.isProcessing)
+                          ? _buildStatusCell(context, '서버 처리중')
+                          : video.getThumbnailWidget(
+                              width: 80,
+                              height: 60,
+                              fit: BoxFit.cover,
+                            ),
                 ),
               ),
               
@@ -713,9 +759,11 @@ class ProblemSubmitPage extends HookWidget {
                 ),
               ),
               
-              // 재생 버튼
+              // 재생 버튼 (업로드중/처리중일 때는 disabled)
               IconButton(
-                onPressed: () => _onVideoTap(context, video),
+                onPressed: (video.isUploading || video.isPending || video.isProcessing)
+                    ? null
+                    : () => _onVideoTap(context, video),
                 icon: const Icon(
                   Icons.play_circle_outline,
                   color: AppColorSchemes.accentBlue,
@@ -724,6 +772,37 @@ class ProblemSubmitPage extends HookWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatusCell(BuildContext context, String label) {
+    return Container(
+      color: AppColorSchemes.backgroundSecondary,
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColorSchemes.accentBlue,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColorSchemes.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }
