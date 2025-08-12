@@ -8,6 +8,7 @@ import '../api/gym.dart';
 import '../models/gym.dart';
 import '../utils/color_schemes.dart';
 import '../utils/tier_colors.dart';
+import '../utils/navigation_helper.dart';
 
 class MapBody extends HookWidget {
   const MapBody({super.key});
@@ -91,17 +92,23 @@ class MapBody extends HookWidget {
 
     // 바텀시트 표시 함수
     final showGymDetailBottomSheet = useCallback((Gym gym) {
+      final rootContext = context;
       showModalBottomSheet(
-        context: context,
+        context: rootContext,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) {
+        builder: (sheetContext) {
+          // 화면 높이를 기준으로 초기 바텀시트 높이를 계산하여
+          // 이미지+이름(주소)+전화까지만 보이도록 조정
           return DraggableScrollableSheet(
-            initialChildSize: 0.7,
-            minChildSize: 0.5,
+            initialChildSize: _computeInitialSheetSize(sheetContext),
+            minChildSize: (_computeInitialSheetSize(sheetContext) - 0.05).clamp(
+              0.25,
+              0.8,
+            ),
             maxChildSize: 0.9,
             expand: false,
-            builder: (context, scrollController) {
+            builder: (draggableContext, scrollController) {
               return Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -158,7 +165,7 @@ class MapBody extends HookWidget {
                               ),
                             ),
 
-                            // 클라이밍장 정보 영역
+                            // 클라이밍장 정보 영역 주소/전화만 표시
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -196,34 +203,6 @@ class MapBody extends HookWidget {
                                             color:
                                                 AppColorSchemes.textSecondary,
                                           ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-
-                                  // 운영시간 (임시 데이터)
-                                  const Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time,
-                                        size: 18,
-                                        color: AppColorSchemes.textSecondary,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        '영업 중',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: AppColorSchemes.accentGreen,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Text(
-                                        ', 24:00에 영업 종료',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: AppColorSchemes.textSecondary,
                                         ),
                                       ),
                                     ],
@@ -272,7 +251,44 @@ class MapBody extends HookWidget {
                                     ),
                                     child: _buildDifficultyChart(),
                                   ),
-                                  const SizedBox(height: 32),
+                                  const SizedBox(height: 16),
+
+                                  // 문제 제출 버튼 (표준 난이도 분포 아래)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton.icon(
+                                      onPressed: () {
+                                        // 바텀시트 닫기
+                                        Navigator.of(sheetContext).pop();
+                                        // MapBody 컨텍스트로 네비게이션 실행
+                                        if (!rootContext.mounted) return;
+                                        NavigationHelper.navigateToSearchWithGym(
+                                          rootContext,
+                                          gym.gymId,
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.assignment_turned_in,
+                                        color: Colors.white,
+                                      ),
+                                      label: const Text('이 지점 문제 제출하기'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            AppColorSchemes.accentBlue,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 14,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
                                 ],
                               ),
                             ),
@@ -331,21 +347,23 @@ class MapBody extends HookWidget {
     // 위치 권한 요청 함수
     Future<void> requestLocationPermission() async {
       final currentContext = context;
-      
+
       try {
         final status = await Permission.location.status;
         if (status.isDenied) {
           await Permission.location.request();
         } else if (status.isPermanentlyDenied) {
           if (!currentContext.mounted) return;
-          
+
           // 사용자에게 권한이 영구적으로 거부되었음을 알리고 설정으로 이동하도록 안내
           await showDialog(
             context: currentContext,
             builder: (BuildContext dialogContext) {
               return AlertDialog(
                 title: const Text('위치 권한 필요'),
-                content: const Text('지도 기능을 사용하려면 위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.'),
+                content: const Text(
+                  '지도 기능을 사용하려면 위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.',
+                ),
                 actions: <Widget>[
                   TextButton(
                     child: const Text('설정으로 이동'),
@@ -486,6 +504,32 @@ class MapBody extends HookWidget {
         ),
       ],
     );
+  }
+
+  // 바텀시트 초기 높이 계산: 이미지(200) + 여백/텍스트들을 고려한 고정 픽셀을 비율로 환산
+  double _computeInitialSheetSize(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+    // UI 구성 요소 높이 추정치 (레이아웃 변경 시 함께 수정 필요)
+    const double handleHeight = 24;
+    const double imageHeightWithMargin = 200 + 32; // 이미지 높이 + 상하 마진
+    const double nameHeight = 28;
+    const double addressHeight = 22;
+    const double phoneHeight = 22;
+    const double contentSpacing = 12 + 8 + 24; // 이름-주소, 주소-전화, 전화-하단 간격
+    const double safetyPadding = 8; // 추가 여유 공간
+
+    const double estimatedContentHeight =
+        handleHeight +
+        imageHeightWithMargin +
+        nameHeight +
+        addressHeight +
+        phoneHeight +
+        contentSpacing +
+        safetyPadding;
+
+    // 화면 대비 비율로 환산 (최소/최대 범위 클램프)
+    return (estimatedContentHeight / screenHeight).clamp(0.3, 0.6);
   }
 
   /// 난이도 분포 차트 빌드

@@ -11,7 +11,9 @@ import '../utils/color_codes.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
-  const SearchBody({super.key});
+  const SearchBody({super.key, this.initialGymId});
+
+  final int? initialGymId;
 
   @override
   State<SearchBody> createState() => _SearchBodyState();
@@ -41,7 +43,24 @@ class _SearchBodyState extends State<SearchBody> {
   void initState() {
     super.initState();
     _loadGyms();
-    _loadProblems();
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // MainPage에서 initialGymId가 변경되어 전달되면 프리필 반영
+    if (widget.initialGymId != null && widget.initialGymId != oldWidget.initialGymId) {
+      final targetGymId = widget.initialGymId!;
+      final maybeGym = _gyms.where((g) => g.gymId == targetGymId).toList();
+      if (maybeGym.isNotEmpty) {
+        setState(() {
+          _selectedGym = maybeGym.first;
+          _searchController.text = maybeGym.first.name;
+          _isSearching = false;
+        });
+        _loadProblems();
+      }
+    }
   }
 
   @override
@@ -59,6 +78,27 @@ class _SearchBodyState extends State<SearchBody> {
         _gyms = gyms;
         _filteredGyms = gyms;
       });
+      
+      // 초기 지점 프리필 처리
+      final int? initialId = widget.initialGymId;
+      if (initialId != null) {
+        Gym? preselected;
+        try {
+          preselected = gyms.firstWhere((g) => g.gymId == initialId);
+        } catch (_) {
+          // 해당 gym이 없으면 null 유지
+        }
+        if (preselected != null) {
+          setState(() {
+            _selectedGym = preselected;
+            _searchController.text = preselected!.name;
+            _isSearching = false;
+          });
+        }
+      }
+
+      // 초기 문제 목록 로드
+      await _loadProblems();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
