@@ -5,6 +5,7 @@ import '../utils/bottom_nav_tab.dart';
 import '../screens/settings_page.dart';
 import '../screens/markdown_viewer_page.dart';
 import '../screens/email_compose_page.dart';
+import '../utils/bottom_nav_tab.dart';
 
 /// 공통 네비게이션 처리 헬퍼
 class NavigationHelper {
@@ -88,6 +89,15 @@ class NavigationHelper {
           contentId: contentId,
         ),
       ),
+    );
+  }
+
+  /// 메인에서 특정 탭으로 이동 (검색 탭 등)
+  static void navigateToMainWithTab(BuildContext context, BottomNavTab tab) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      _createPageRoute(MainPage(initialTab: tab)),
+      (route) => false,
     );
   }
 
