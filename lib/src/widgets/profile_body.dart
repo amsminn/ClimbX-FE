@@ -55,7 +55,7 @@ class ProfileBody extends HookWidget {
     final currentTier = userProfile.displayTier;
     final colorScheme = TierProvider.of(context);
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
@@ -110,6 +110,12 @@ class ProfileBody extends HookWidget {
             // _buildTabContent(
             //   child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
             // ),
+            // 제출 내역은 내부에서 자체 스크롤(ListView)을 사용하므로
+            // 외부 SingleChildScrollView로 감싸지 않도록 직접 배치
+            Container(
+              color: AppColorSchemes.backgroundSecondary,
+              child: const SubmissionListWidget(),
+            ),
             // 제출 내역은 내부에서 자체 스크롤(ListView)을 사용하므로
             // 외부 SingleChildScrollView로 감싸지 않도록 직접 배치
             Container(
