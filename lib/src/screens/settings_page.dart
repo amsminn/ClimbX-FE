@@ -164,7 +164,7 @@ class SettingsPage extends StatelessWidget {
               NavigationHelper.navigateToEmailCompose(
                 context,
                 title: '문의하기',
-                toEmail: 'support@climbx.com',
+                toEmail: 'dlrkdals23444@gmail.com',
                 subject: '[문의] ClimbX 문의',
                 hint: '문의 유형, 상세 내용을 적어주세요',
               );
@@ -177,7 +177,7 @@ class SettingsPage extends StatelessWidget {
               NavigationHelper.navigateToEmailCompose(
                 context,
                 title: '콘텐츠 신고',
-                toEmail: 'support@climbx.com',
+                toEmail: 'dlrkdals23444@gmail.com',
                 subject: '[신고] 부적절한 콘텐츠 신고',
                 hint: '콘텐츠 ID/링크, 신고 유형(저작권/명예훼손/음란/스팸 등), 상세 설명을 적어주세요',
               );
@@ -190,7 +190,7 @@ class SettingsPage extends StatelessWidget {
               NavigationHelper.navigateToEmailCompose(
                 context,
                 title: '계정 삭제 요청',
-                toEmail: 'privacy@climbx.com',
+                toEmail: 'dlrkdals23444@gmail.com',
                 subject: '[계정삭제요청] ClimbX',
                 hint: '닉네임, 연락 가능한 이메일(선택), 삭제 사유(선택)를 적어주세요',
               );
