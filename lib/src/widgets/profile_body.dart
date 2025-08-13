@@ -142,6 +142,7 @@ class ProfileBody extends HookWidget {
   }
 
   // 출시 예정 탭바
+  // ignore: unused_element
   Widget _buildComingSoon(
     String title,
     IconData icon,

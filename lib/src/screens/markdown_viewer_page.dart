@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/color_schemes.dart';
 
@@ -74,7 +73,7 @@ class _MarkdownViewerPageState extends State<MarkdownViewerPage> {
                   child: Markdown(
                     data: _content!,
                     selectable: true,
-                    extensionSet: md.ExtensionSet.gitHubFlavored,
+                    // flutter_markdown 기본 파서(GFM 상당 부분 지원)
                     onTapLink: (text, href, title) async {
                       if (href == null) return;
                       final uri = Uri.tryParse(href);

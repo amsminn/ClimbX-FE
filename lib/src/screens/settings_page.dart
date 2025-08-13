@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../utils/color_schemes.dart';
 import '../utils/navigation_helper.dart';
 import '../api/auth.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -27,7 +26,7 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
-          _SectionHeader(title: '계정'),
+          const _SectionHeader(title: '계정'),
           _SettingTile(
             icon: Icons.logout,
             title: '로그아웃',
@@ -132,7 +131,7 @@ class SettingsPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-          _SectionHeader(title: '개인정보/법적 고지'),
+          const _SectionHeader(title: '개인정보/법적 고지'),
           _SettingTile(
             icon: Icons.privacy_tip_outlined,
             title: '개인정보처리방침',
@@ -157,7 +156,7 @@ class SettingsPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-          _SectionHeader(title: '지원'),
+          const _SectionHeader(title: '지원'),
           _SettingTile(
             icon: Icons.email_outlined,
             title: '문의하기',
@@ -199,7 +198,7 @@ class SettingsPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-          _SectionHeader(title: '앱 정보'),
+          const _SectionHeader(title: '앱 정보'),
           _SettingTile(
             icon: Icons.info_outline,
             title: '버전',
@@ -228,7 +227,7 @@ class SettingsPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          '버전: '+pkg.version+' ('+pkg.buildNumber+')',
+                          '버전: ${pkg.version} (${pkg.buildNumber})',
                           style: const TextStyle(color: AppColorSchemes.textSecondary),
                         ),
                         const SizedBox(height: 12),
@@ -254,28 +253,6 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  static Future<void> _launchEmail({
-    required String to,
-    required String subject,
-    required String body,
-    required BuildContext context,
-  }) async {
-    final uri = Uri(
-      scheme: 'mailto',
-      path: to,
-      queryParameters: {
-        'subject': subject,
-        'body': body,
-      },
-    );
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('메일 앱을 열 수 없습니다. 기기에 메일 앱이 설치되어 있는지 확인하세요.')),
-        );
-      }
-    }
-  }
 }
 
 class _SectionHeader extends StatelessWidget {

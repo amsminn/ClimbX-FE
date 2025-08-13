@@ -103,9 +103,10 @@ class _EmailComposePageState extends State<EmailComposePage> {
                       IconButton(
                         tooltip: '메일 주소 복사',
                         onPressed: () async {
+                          final messenger = ScaffoldMessenger.of(context);
                           await Clipboard.setData(ClipboardData(text: widget.toEmail));
                           if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          messenger.showSnackBar(
                             const SnackBar(content: Text('메일 주소를 복사했습니다.')),
                           );
                         },
@@ -155,12 +156,13 @@ class _EmailComposePageState extends State<EmailComposePage> {
                 IconButton(
                   tooltip: '내용 복사',
                   onPressed: () async {
+                    final messenger = ScaffoldMessenger.of(context);
                     await Clipboard.setData(ClipboardData(
                       text: _composeFullBodyForCopyOnly(),
                     ));
                     if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('내용을 클립보드에 복사했습니다')), 
+                    messenger.showSnackBar(
+                      const SnackBar(content: Text('내용을 클립보드에 복사했습니다')),
                     );
                   },
                   icon: const Icon(Icons.copy, color: AppColorSchemes.textSecondary),
@@ -188,23 +190,25 @@ class _EmailComposePageState extends State<EmailComposePage> {
       path: widget.toEmail,
       queryParameters: {
         'subject': _subjectController.text.trim(),
-        'body': (_bodyController.text.trim() + '\n' + footer),
+        'body': '${_bodyController.text.trim()}\n$footer',
       },
     );
 
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!ok && mounted) {
+    if (!ok) {
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
       await Clipboard.setData(ClipboardData(
-        text: 'To: '+widget.toEmail+'\nSubject: '+_subjectController.text.trim()+'\n\n'+_bodyController.text.trim()+'\n'+footer,
+        text: 'To: ${widget.toEmail}\nSubject: ${_subjectController.text.trim()}\n\n${_bodyController.text.trim()}\n$footer',
       ));
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text('메일 앱을 열 수 없습니다. 내용을 복사했습니다. 메일 앱에서 붙여넣기 해 주세요.')),
       );
     }
   }
 
   String _composeFullBodyForCopyOnly() {
-    return 'Subject: '+_subjectController.text.trim()+'\n\n'+_bodyController.text.trim();
+    return 'Subject: ${_subjectController.text.trim()}\n\n${_bodyController.text.trim()}';
   }
 }
 
