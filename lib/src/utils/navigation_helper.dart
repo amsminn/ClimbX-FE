@@ -122,6 +122,51 @@ class NavigationHelper {
     );
   }
 
+  /// 설정 페이지로 이동
+  static void navigateToSettings(BuildContext context) {
+    Navigator.push(
+      context,
+      _createPageRoute(const SettingsPage()),
+    );
+  }
+
+  /// 마크다운 문서 뷰어로 이동
+  static void navigateToMarkdown(
+    BuildContext context, {
+    required String title,
+    required String assetPath,
+  }) {
+    Navigator.push(
+      context,
+      _createPageRoute(
+        MarkdownViewerPage(title: title, assetPath: assetPath),
+      ),
+    );
+  }
+
+  /// 이메일 작성 화면으로 이동
+  static void navigateToEmailCompose(
+    BuildContext context, {
+    required String title,
+    required String toEmail,
+    required String subject,
+    String? hint,
+    String? contentId,
+  }) {
+    Navigator.push(
+      context,
+      _createPageRoute(
+        EmailComposePage(
+          title: title,
+          toEmail: toEmail,
+          defaultSubject: subject,
+          hint: hint,
+          contentId: contentId,
+        ),
+      ),
+    );
+  }
+
   /// 공통 페이지 라우트 생성 (애니메이션 없음)
   static PageRouteBuilder<T> _createPageRoute<T extends Widget>(T page) {
     return PageRouteBuilder<T>(
