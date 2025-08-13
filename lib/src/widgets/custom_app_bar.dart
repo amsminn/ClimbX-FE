@@ -36,24 +36,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
       // 액션들
       actions: [
-        // 로그아웃 버튼 (임시, 나중에 제거 예정)
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppColorSchemes.backgroundSecondary,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            icon: const Icon(
-              Icons.logout,
-              color: AppColorSchemes.textSecondary,
-              size: 22,
-            ),
-            onPressed: () {
-              _handleLogout(context);
-            },
-          ),
-        ),
 
         // TEMP: 디버그 - 현재 닉네임의 레이팅 PATCH 후 즉시 로그아웃 
         if (kDebugMode)
@@ -153,7 +135,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             onPressed: () {},
           ),
         ),
-        // 메뉴
+        // 설정
         Container(
           margin: const EdgeInsets.only(right: 16),
           decoration: BoxDecoration(
@@ -162,11 +144,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           child: IconButton(
             icon: const Icon(
-              Icons.menu_rounded,
+              Icons.settings,
               color: AppColorSchemes.textSecondary,
               size: 22,
             ),
-            onPressed: () {},
+            onPressed: () {
+              NavigationHelper.navigateToSettings(context);
+            },
           ),
         ),
       ],

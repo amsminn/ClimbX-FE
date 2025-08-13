@@ -5,7 +5,6 @@ import 'profile_header.dart';
 import 'tier_widget.dart';
 import 'history_widget.dart';
 import 'streak_widget.dart';
-import '../utils/tier_colors.dart';
 import '../utils/color_schemes.dart';
 import '../models/user_profile.dart';
 import '../api/user.dart';
@@ -55,7 +54,7 @@ class ProfileBody extends HookWidget {
     final currentTier = userProfile.displayTier;
     final colorScheme = TierProvider.of(context);
     return DefaultTabController(
-      length: 6,
+      length: 5,
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
@@ -87,7 +86,7 @@ class ProfileBody extends HookWidget {
                     _buildTab('히스토리'),
                     _buildTab('스트릭'),
                     _buildTab('내 영상'),
-                    _buildTab('분야별 티어'),
+                    // _buildTab('분야별 티어'), // 임시 비노출
                     _buildTab('제출 내역'),
                   ],
                 ),
@@ -107,9 +106,9 @@ class ProfileBody extends HookWidget {
               ),
             ),
             _buildTabContent(child: const VideoGalleryWidget()),
-            _buildTabContent(
-              child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
-            ),
+            // _buildTabContent(
+            //   child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
+            // ),
             // 제출 내역은 내부에서 자체 스크롤(ListView)을 사용하므로
             // 외부 SingleChildScrollView로 감싸지 않도록 직접 배치
             Container(
@@ -137,65 +136,6 @@ class ProfileBody extends HookWidget {
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 20),
         child: child,
-      ),
-    );
-  }
-
-  // 출시 예정 탭바
-  Widget _buildComingSoon(
-    String title,
-    IconData icon,
-    TierColorScheme colorScheme,
-  ) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: AppColorSchemes.backgroundPrimary,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 20,
-            offset: Offset(0, 4),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: colorScheme.gradient,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              icon,
-              color: AppColorSchemes.backgroundPrimary,
-              size: 32,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColorSchemes.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '곧 출시 예정입니다',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColorSchemes.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }

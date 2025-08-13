@@ -65,6 +65,9 @@ dependencies:
   path_provider: ^2.0.15
   path: ^1.9.0
   http_parser: ^4.0.2
+  flutter_markdown: ^0.7.3+1
+  package_info_plus: ^8.0.2
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
@@ -92,6 +95,8 @@ flutter:
   assets:
     - assets/images/
     - .env
+    - privacy-policy-ko.md
+    - terms-of-service-ko.md
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
