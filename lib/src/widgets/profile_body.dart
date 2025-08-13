@@ -87,7 +87,7 @@ class ProfileBody extends HookWidget {
                     _buildTab('히스토리'),
                     _buildTab('스트릭'),
                     _buildTab('내 영상'),
-                    // _buildTab('분야별 티어'),
+                    // _buildTab('분야별 티어'), // 임시 비노출
                     _buildTab('제출 내역'),
                   ],
                 ),
