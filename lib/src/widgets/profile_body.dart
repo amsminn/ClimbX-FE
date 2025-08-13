@@ -5,7 +5,6 @@ import 'profile_header.dart';
 import 'tier_widget.dart';
 import 'history_widget.dart';
 import 'streak_widget.dart';
-import '../utils/tier_colors.dart';
 import '../utils/color_schemes.dart';
 import '../models/user_profile.dart';
 import '../api/user.dart';
