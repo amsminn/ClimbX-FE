@@ -22,6 +22,16 @@ class NavigationHelper {
     );
   }
 
+  /// 메인에서 특정 탭으로 이동 (검색 탭 등)
+  static void navigateToMainWithTab(BuildContext context, BottomNavTab tab) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      _createPageRoute(MainPage(initialTab: tab)),
+      (route) => false,
+
+    );
+  }
+
   /// 지도에서 검색 탭으로 이동하며 특정 지점을 프리필
   static void navigateToSearchWithGym(BuildContext context, int gymId) {
     // 현재 트리에서 MainPageState를 찾아 탭만 전환

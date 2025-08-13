@@ -11,6 +11,7 @@ import '../models/user_profile.dart';
 import '../api/user.dart';
 import 'video_gallery_widget.dart';
 import '../utils/tier_provider.dart';
+import 'submission_list_widget.dart';
 
 /// 프로필 화면의 메인 바디 위젯
 /// 로딩/에러 상태 처리 및 탭 구조 관리
@@ -54,7 +55,7 @@ class ProfileBody extends HookWidget {
     final currentTier = userProfile.displayTier;
     final colorScheme = TierProvider.of(context);
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
@@ -87,6 +88,7 @@ class ProfileBody extends HookWidget {
                     _buildTab('스트릭'),
                     _buildTab('내 영상'),
                     _buildTab('분야별 티어'),
+                    _buildTab('제출 내역'),
                   ],
                 ),
               ),
@@ -107,6 +109,12 @@ class ProfileBody extends HookWidget {
             _buildTabContent(child: const VideoGalleryWidget()),
             _buildTabContent(
               child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
+            ),
+            // 제출 내역은 내부에서 자체 스크롤(ListView)을 사용하므로
+            // 외부 SingleChildScrollView로 감싸지 않도록 직접 배치
+            Container(
+              color: AppColorSchemes.backgroundSecondary,
+              child: const SubmissionListWidget(),
             ),
           ],
         ),

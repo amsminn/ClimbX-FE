@@ -2,6 +2,7 @@
 export 'util/core/api_client.dart';
 export 'util/error/error_handler.dart';
 export 'util/auth/token_storage.dart';
+export 'util/auth/user_identity.dart';
 export 'util/auth/auth_interceptor.dart';
 export 'util/error/error_interceptor.dart';
 export 'util/core/response_interceptor.dart';
@@ -14,3 +15,4 @@ export 'gym.dart';
 export 'leaderboard.dart';
 export 'problem.dart';
 export 'video.dart'; 
+export 'submission.dart';

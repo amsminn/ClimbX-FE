@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:video_compress/video_compress.dart';
 import 'util/core/api_client.dart';
-import 'util/auth/token_storage.dart';
+import 'util/auth/user_identity.dart';
 import '../models/video.dart';
 
 /// 업로드 응답 모델
@@ -31,27 +31,8 @@ class VideoApi {
   /// 현재 사용자의 영상 목록 조회
   static Future<List<Video>> getCurrentUserVideos() async {
     try {
-      // 사용자 닉네임 가져오기 (기존 TokenStorage 활용)
-      String? finalNickname = await TokenStorage.getUserNickname();
-
-      if (finalNickname == null || finalNickname.isEmpty) {
-        developer.log('저장된 닉네임이 없음 - /api/auth/me 호출', name: 'VideoApi');
-
-        final authResponse = await _apiClient.get<Map<String, dynamic>>(
-          '/api/auth/me',
-          logContext: 'VideoApi',
-        );
-
-        final fetchedNickname = authResponse['nickname'] as String?;
-        if (fetchedNickname == null || fetchedNickname.isEmpty) {
-          throw Exception('현재 사용자의 nickname을 찾을 수 없습니다');
-        }
-
-        // 닉네임 저장 및 사용할 변수 업데이트
-        await TokenStorage.saveUserNickname(fetchedNickname);
-        finalNickname = fetchedNickname;
-        developer.log('닉네임 저장 완료: $fetchedNickname', name: 'VideoApi');
-      }
+      final String finalNickname =
+          await UserIdentity.getOrFetchNickname(logContext: 'VideoApi');
       developer.log(
         '사용자 영상 목록 조회 - nickname: $finalNickname',
         name: 'VideoApi',
