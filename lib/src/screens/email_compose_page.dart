@@ -199,7 +199,7 @@ class _EmailComposePageState extends State<EmailComposePage> {
       if (!mounted) return;
       final messenger = ScaffoldMessenger.of(context);
       await Clipboard.setData(ClipboardData(
-        text: 'To: ${widget.toEmail}\nSubject: ${_subjectController.text.trim()}\n\n${_bodyController.text.trim()}\n$footer',
+        text: 'To: ${widget.toEmail}\n${_composeFullBodyForCopyOnly()}\n$footer',
       ));
       messenger.showSnackBar(
         const SnackBar(content: Text('메일 앱을 열 수 없습니다. 내용을 복사했습니다. 메일 앱에서 붙여넣기 해 주세요.')),
