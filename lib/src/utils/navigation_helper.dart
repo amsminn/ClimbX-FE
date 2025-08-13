@@ -102,15 +102,6 @@ class NavigationHelper {
     );
   }
 
-  /// 메인에서 특정 탭으로 이동 (검색 탭 등)
-  static void navigateToMainWithTab(BuildContext context, BottomNavTab tab) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      _createPageRoute(MainPage(initialTab: tab)),
-      (route) => false,
-    );
-  }
-
   /// 공통 페이지 라우트 생성 (애니메이션 없음)
   static PageRouteBuilder<T> _createPageRoute<T extends Widget>(T page) {
     return PageRouteBuilder<T>(
