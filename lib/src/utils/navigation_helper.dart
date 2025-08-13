@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../screens/main_page.dart';
 import '../screens/login_page.dart';
 import '../utils/bottom_nav_tab.dart';
+import '../screens/settings_page.dart';
+import '../screens/markdown_viewer_page.dart';
+import '../screens/email_compose_page.dart';
 
 /// 공통 네비게이션 처리 헬퍼
 class NavigationHelper {
@@ -38,6 +41,51 @@ class NavigationHelper {
         MainPage(
           initialTab: BottomNavTab.search,
           initialGymIdForSearch: gymId,
+        ),
+      ),
+    );
+  }
+
+  /// 설정 페이지로 이동
+  static void navigateToSettings(BuildContext context) {
+    Navigator.push(
+      context,
+      _createPageRoute(const SettingsPage()),
+    );
+  }
+
+  /// 마크다운 문서 뷰어로 이동
+  static void navigateToMarkdown(
+    BuildContext context, {
+    required String title,
+    required String assetPath,
+  }) {
+    Navigator.push(
+      context,
+      _createPageRoute(
+        MarkdownViewerPage(title: title, assetPath: assetPath),
+      ),
+    );
+  }
+
+  /// 이메일 작성 화면으로 이동
+  static void navigateToEmailCompose(
+    BuildContext context, {
+    required String title,
+    required String toEmail,
+    required String subject,
+    String? hint,
+    String? contentId,
+  }) {
+    Navigator.push(
+      context,
+      _createPageRoute(
+        EmailComposePage(
+          title: title,
+          toEmail: toEmail,
+          defaultSubject: subject,
+          hint: hint,
+          contentId: contentId,
         ),
       ),
     );

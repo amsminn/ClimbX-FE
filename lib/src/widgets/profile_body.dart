@@ -54,7 +54,7 @@ class ProfileBody extends HookWidget {
     final currentTier = userProfile.displayTier;
     final colorScheme = TierProvider.of(context);
     return DefaultTabController(
-      length: 5,
+      length: 4,
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
@@ -86,7 +86,6 @@ class ProfileBody extends HookWidget {
                     _buildTab('히스토리'),
                     _buildTab('스트릭'),
                     _buildTab('내 영상'),
-                    _buildTab('분야별 티어'),
                   ],
                 ),
               ),
@@ -105,9 +104,6 @@ class ProfileBody extends HookWidget {
               ),
             ),
             _buildTabContent(child: const VideoGalleryWidget()),
-            _buildTabContent(
-              child: _buildComingSoon('분야별 티어', Icons.category, colorScheme),
-            ),
           ],
         ),
       ),
