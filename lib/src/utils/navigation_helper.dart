@@ -6,9 +6,27 @@ import '../screens/settings_page.dart';
 import '../screens/markdown_viewer_page.dart';
 import '../screens/email_compose_page.dart';
 import '../utils/bottom_nav_tab.dart';
+import '../models/video.dart';
+import '../screens/video_submission_flow_page.dart';
 
 /// 공통 네비게이션 처리 헬퍼
 class NavigationHelper {
+  /// 영상 제출 플로우 시작: 검색 탭을 제출 모드로 열어 videoId를 싣고 들어감
+  static Future<void> startVideoSubmissionFlow(
+    BuildContext context, {
+    required String? videoId,
+    int? gymId,
+  }) async {
+    Navigator.push(
+      context,
+      _createPageRoute(
+        VideoSubmissionFlowPage(
+          videoId: videoId,
+          initialGymId: gymId,
+        ),
+      ),
+    );
+  }
   /// 로그인 성공 후 MainPage로 이동
   static void navigateToMainAfterLogin(BuildContext context) {
     Navigator.pushReplacement(
@@ -38,14 +56,11 @@ class NavigationHelper {
 
   /// 지도에서 검색 탭으로 이동하며 특정 지점을 프리필
   static void navigateToSearchWithGym(BuildContext context, int gymId) {
-    // 현재 트리에서 MainPageState를 찾아 탭만 전환
     final mainState = context.findAncestorStateOfType<MainPageState>();
     if (mainState != null) {
       mainState.switchToSearchWithGym(gymId);
       return;
     }
-
-    // 예외적 상황(컨텍스트에 MainPage가 없을 때)만 대체 내비게이션 수행
     Navigator.pushReplacement(
       context,
       _createPageRoute(

@@ -9,6 +9,7 @@ import '../utils/color_schemes.dart';
 import '../utils/tier_provider.dart';
 import '../utils/tier_colors.dart';
 import 'video_overlay_player.dart';
+import '../utils/navigation_helper.dart';
 
 class VideoGalleryWidget extends HookWidget {
   final bool isActive;
@@ -295,7 +296,16 @@ class VideoGalleryWidget extends HookWidget {
           barrierDismissible: true,
           barrierColor: Colors.black.withValues(alpha: 0.8),
           builder: (BuildContext context) {
-            return VideoOverlayPlayer(video: video, tierColors: colorScheme);
+            return VideoOverlayPlayer(
+              video: video,
+              tierColors: colorScheme,
+              onSubmitPressed: () {
+                NavigationHelper.startVideoSubmissionFlow(
+                  context,
+                  videoId: video.videoId,
+                );
+              },
+            );
           },
         );
       } else if (video.isPending || video.isProcessing) {
