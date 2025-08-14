@@ -291,17 +291,18 @@ class VideoGalleryWidget extends HookWidget {
 
     void onVideoTap(BuildContext context, Video video) {
       if (video.isCompleted && video.hasValidUrl) {
+        final BuildContext parentContext = context;
         showDialog(
-          context: context,
+          context: parentContext,
           barrierDismissible: true,
           barrierColor: Colors.black.withValues(alpha: 0.8),
-          builder: (BuildContext context) {
+          builder: (BuildContext dialogContext) {
             return VideoOverlayPlayer(
               video: video,
               tierColors: colorScheme,
               onSubmitPressed: () {
                 NavigationHelper.startVideoSubmissionFlow(
-                  context,
+                  parentContext,
                   videoId: video.videoId,
                 );
               },
