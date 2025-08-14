@@ -13,10 +13,13 @@ class ProblemCreatePage extends StatefulWidget {
   const ProblemCreatePage({
     super.key,
     this.initialGymId,
+    this.pendingVideoId,
   });
 
   /// 진입 시 선택되어 있던 지점이 있다면 초기값으로 사용
   final int? initialGymId;
+  /// 영상에서 넘어온 videoId (등록 성공 시 제출 페이지로 이어붙이기 위함)
+  final String? pendingVideoId;
 
   @override
   State<ProblemCreatePage> createState() => _ProblemCreatePageState();
@@ -126,6 +129,8 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         ),
       );
 
+      // 생성된 문제 정보를 반환하도록 백엔드가 지원하면 해당 Problem을 pop으로 반환
+      // 현재는 true만 반환. 호출자(SearchBody)에서 후속 라우팅 처리
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;

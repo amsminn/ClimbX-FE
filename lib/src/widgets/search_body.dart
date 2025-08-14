@@ -7,13 +7,15 @@ import '../utils/color_schemes.dart';
 import 'problem_grid_item.dart';
 import 'search_filter_dropdown.dart';
 import '../screens/problem_create_page.dart';
+import '../screens/problem_submit_page.dart';
 import '../utils/color_codes.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
-  const SearchBody({super.key, this.initialGymId});
+  const SearchBody({super.key, this.initialGymId, this.submissionVideoId});
 
   final int? initialGymId;
+  final String? submissionVideoId; // 제출 모드: 영상 id 전달받으면 활성화
 
   @override
   State<SearchBody> createState() => _SearchBodyState();
@@ -234,16 +236,16 @@ class _SearchBodyState extends State<SearchBody> {
           bottom: 16,
           child: FloatingActionButton(
             onPressed: () async {
-              // 문제 등록 페이지로 이동
+              // 문제 등록 페이지로 이동 (제출 모드면 videoId도 전달)
               final created = await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ProblemCreatePage(
                     initialGymId: selectedGymId,
+                    pendingVideoId: widget.submissionVideoId,
                   ),
                 ),
               );
               if (created == true) {
-                // 등록 성공 시 목록 새로고침
                 _loadProblems();
               }
             },
@@ -445,9 +447,23 @@ class _SearchBodyState extends State<SearchBody> {
         ),
         itemCount: _problems.length,
         itemBuilder: (context, index) {
+          final p = _problems[index];
           return ProblemGridItem(
-            problem: _problems[index],
+            problem: p,
             gymId: selectedGymId,
+            onTapOverride: widget.submissionVideoId != null
+                ? () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ProblemSubmitPage(
+                          problem: p,
+                          gymId: selectedGymId,
+                          initialSelectedVideoId: widget.submissionVideoId,
+                        ),
+                      ),
+                    );
+                  }
+                : null,
           );
         },
       ),

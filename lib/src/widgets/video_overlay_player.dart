@@ -9,12 +9,14 @@ class VideoOverlayPlayer extends StatefulWidget {
   final Video video;
   final bool showSubmitButton; // 제출 버튼 표시 여부
   final TierColorScheme? tierColors;
+  final VoidCallback? onSubmitPressed; // 제출 버튼 콜백
 
   const VideoOverlayPlayer({
     super.key,
     required this.video,
     this.showSubmitButton = true, // 기본값은 true
     this.tierColors,
+    this.onSubmitPressed,
   });
 
   @override
@@ -230,9 +232,11 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ElevatedButton(
         onPressed: () {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('영상 제출 기능은 준비 중입니다')));
+          final VoidCallback? callback = widget.onSubmitPressed;
+          Navigator.of(context, rootNavigator: true).pop();
+          if (callback != null) {
+            Future.microtask(callback);
+          }
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: tierColors?.primary ?? Theme.of(context).colorScheme.primary,

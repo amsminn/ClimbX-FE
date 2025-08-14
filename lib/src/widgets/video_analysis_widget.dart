@@ -6,6 +6,7 @@ import 'dart:developer' as developer;
 import '../models/video.dart';
 import '../api/video.dart';
 import '../utils/color_schemes.dart';
+import '../utils/navigation_helper.dart';
 import '../utils/tier_provider.dart';
 import '../utils/tier_colors.dart';
 import 'video_overlay_player.dart';
@@ -286,12 +287,23 @@ class VideoGalleryWidget extends HookWidget {
 
     void onVideoTap(BuildContext context, Video video) {
       if (video.isCompleted && video.hasValidUrl) {
-        showDialog(
-          context: context,
+        final BuildContext parentContext = context; // 루트 내비게이터 컨텍스트 고정
+        showDialog<bool>(
+          context: parentContext,
           barrierDismissible: true,
           barrierColor: Colors.black.withValues(alpha: 0.8),
-          builder: (BuildContext context) {
-            return VideoOverlayPlayer(video: video, tierColors: colorScheme);
+          builder: (BuildContext dialogContext) {
+            return VideoOverlayPlayer(
+              video: video,
+              tierColors: colorScheme,
+              onSubmitPressed: () {
+                // 반드시 부모(루트) 컨텍스트로 내비게이션 실행
+                NavigationHelper.startVideoSubmissionFlow(
+                  parentContext,
+                  videoId: video.videoId,
+                );
+              },
+            );
           },
         );
       } else if (video.isPending || video.isProcessing) {

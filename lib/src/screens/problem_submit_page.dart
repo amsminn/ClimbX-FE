@@ -18,17 +18,23 @@ import '../utils/bottom_nav_tab.dart';
 class ProblemSubmitPage extends HookWidget {
   final Problem problem;
   final int? gymId;
+  final String? initialSelectedVideoId;
 
   const ProblemSubmitPage({
     super.key,
     required this.problem,
     this.gymId,
+    this.initialSelectedVideoId,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 선택된 영상 ID들 관리
-    final selectedVideoIds = useState<Set<String>>({});
+    // 선택된 영상 ID들 관리 (초기 선택 지원)
+    final selectedVideoIds = useState<Set<String>>(
+      initialSelectedVideoId != null && initialSelectedVideoId!.isNotEmpty
+          ? {initialSelectedVideoId!}
+          : {},
+    );
     
     // 제출 중 상태 관리
     final isSubmitting = useState(false);

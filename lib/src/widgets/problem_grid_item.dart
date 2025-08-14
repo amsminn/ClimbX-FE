@@ -8,11 +8,13 @@ import '../utils/color_codes.dart';
 class ProblemGridItem extends StatelessWidget {
   final Problem problem;
   final int? gymId; // 클라이밍장 ID 추가
+  final VoidCallback? onTapOverride;
 
   const ProblemGridItem({
     super.key, 
     required this.problem,
     this.gymId,
+    this.onTapOverride,
   });
 
   @override
@@ -34,6 +36,10 @@ class ProblemGridItem extends StatelessWidget {
     
     return GestureDetector(
       onTap: () {
+        if (onTapOverride != null) {
+          onTapOverride!();
+          return;
+        }
         // 문제 상세 페이지로 이동
         Navigator.of(context).push(
           MaterialPageRoute(
