@@ -214,7 +214,7 @@ class TierWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '+2714',
+                    '+${userProfile.rating.topProblemRating}',
                     style: TextStyle(
                       fontSize: screenWidth < 360 ? 14 : 15,
                       fontWeight: FontWeight.w700,
