@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:video_compress/video_compress.dart';
+import 'package:light_compressor/light_compressor.dart' as compressor;
 import 'util/core/api_client.dart';
 import 'util/auth/user_identity.dart';
 import '../models/video.dart';
@@ -185,25 +185,35 @@ class VideoApi {
         compressedFilePath = filePath;
         compressedFileSize = originalFileSize;
       } else {
-        developer.log('비디오 압축 시작', name: 'VideoApi');
-        final compressedMediaInfo = await VideoCompress.compressVideo(
-          filePath,
-          quality: VideoQuality.Res1920x1080Quality,
-          deleteOrigin: false,
-          includeAudio: true,
+        developer.log('비디오 압축 시작 (종횡비 완전 보존)', name: 'VideoApi');
+        
+        final lightCompressor = compressor.LightCompressor();
+        final String videoName = 'compressed_${DateTime.now().millisecondsSinceEpoch}.mp4';
+        
+        final result = await lightCompressor.compressVideo(
+          path: filePath,
+          videoQuality: compressor.VideoQuality.medium,
+          video: compressor.Video(
+            videoName: videoName,
+            keepOriginalResolution: true, // 종횡비 완전 보존
+          ),
+          android: compressor.AndroidConfig(isSharedStorage: false),
+          ios: compressor.IOSConfig(saveInGallery: false),
         );
 
-        if (compressedMediaInfo?.path == null) {
-          throw Exception('비디오 압축 실패');
+        if (result is compressor.OnSuccess) {
+          compressedFilePath = result.destinationPath;
+          compressedFileSize = await File(compressedFilePath).length();
+          
+          developer.log(
+            '비디오 압축 완료 - 압축된 파일: $compressedFilePath, 크기: ${compressedFileSize}bytes (원본: ${originalFileSize}bytes)',
+            name: 'VideoApi',
+          );
+        } else if (result is compressor.OnFailure) {
+          throw Exception('비디오 압축 실패: ${result.message}');
+        } else {
+          throw Exception('비디오 압축이 취소되었습니다');
         }
-
-        compressedFilePath = compressedMediaInfo!.path!;
-        compressedFileSize = await File(compressedFilePath).length();
-
-        developer.log(
-          '비디오 압축 완료 - 압축된 파일: $compressedFilePath, 크기: ${compressedFileSize}bytes (원본: ${originalFileSize}bytes)',
-          name: 'VideoApi',
-        );
       }
 
       // 4. 압축된 파일 크기 제한 검증
