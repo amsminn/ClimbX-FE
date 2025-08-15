@@ -160,7 +160,7 @@ class LoginPage extends HookWidget {
               height: 60, // 가이드라인 준수: 최소 30pt (60px @2x)
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(4), // Google 표준: 4px
+                borderRadius: BorderRadius.circular(8), // 다른 버튼들과 일관성 유지
                 border: Border.all(color: const Color(0xFFDADCE0), width: 1), // Google 공식 테두리 색상
                 boxShadow: const [
                   BoxShadow(
@@ -174,7 +174,7 @@ class LoginPage extends HookWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(8),
                   onTap: signInGoogleMutation.isPending
                       ? null
                       : () => signInGoogleMutation.mutate(null),
