@@ -52,8 +52,8 @@ dependencies:
   permission_handler: ^11.3.0
   # 갤러리 미디어 접근
   photo_manager: ^3.0.0
-  # 비디오 압축
-  video_compress: ^3.1.4
+  # 비디오 압축 (종횡비 보존)
+  light_compressor: ^2.2.0
   # 비디오 재생
   video_player: ^2.10.0
   # Apple Sign In
