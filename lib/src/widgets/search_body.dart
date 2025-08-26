@@ -32,6 +32,8 @@ class _SearchBodyState extends State<SearchBody> {
   // 필터 관련 상태
   String? _selectedLocalLevel;
   String? _selectedHoldColor;
+  List<GymArea> _gymAreas = [];
+  int? _selectedAreaId;
 
   // 문제 리스트 상태
   List<Problem> _problems = [];
@@ -96,6 +98,7 @@ class _SearchBodyState extends State<SearchBody> {
             _searchController.text = preselected!.name;
             _isSearching = false;
           });
+          await _loadGymAreas(preselected.gymId);
         }
       }
 
@@ -125,6 +128,7 @@ class _SearchBodyState extends State<SearchBody> {
     try {
       final problems = await ProblemApi.getProblems(
         gymId: _selectedGym?.gymId,
+        gymAreaId: _selectedAreaId,
         localLevel: _selectedLocalLevel,
         holdColor: _selectedHoldColor,
       );
@@ -172,6 +176,8 @@ class _SearchBodyState extends State<SearchBody> {
       _isSearching = false;
       _filteredGyms = _gyms;
       _selectedGym = null; // 선택된 클라이밍장도 초기화
+      _gymAreas = [];
+      _selectedAreaId = null;
     });
     _loadProblems(); // X 버튼 클릭 시에도 문제 목록 다시 로드
   }
@@ -182,7 +188,10 @@ class _SearchBodyState extends State<SearchBody> {
       _selectedGym = gym;
       _searchController.text = gym.name;
       _isSearching = false;
+      _gymAreas = [];
+      _selectedAreaId = null;
     });
+    _loadGymAreas(gym.gymId);
     _loadProblems();
   }
 
@@ -358,28 +367,100 @@ class _SearchBodyState extends State<SearchBody> {
   Widget _buildFilterSection() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 난이도색 필터
-          SearchFilterDropdown(
-            title: '난이도색',
-            options: localLevelOptions,
-            selectedOption: _selectedLocalLevel,
-            onOptionSelected: _onLocalLevelChanged,
-          ),
+          if (_selectedGym != null) ...[
+            _buildAreaButtons(),
+            const SizedBox(height: 8),
+          ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              // 난이도색 필터
+              SearchFilterDropdown(
+                title: '난이도색',
+                options: localLevelOptions,
+                selectedOption: _selectedLocalLevel,
+                onOptionSelected: _onLocalLevelChanged,
+              ),
 
-          const SizedBox(width: 8), // 간격 축소
-          // 홀드색 필터
-          SearchFilterDropdown(
-            title: '홀드색',
-            options: holdColorOptions,
-            selectedOption: _selectedHoldColor,
-            onOptionSelected: _onHoldColorChanged,
+              const SizedBox(width: 8), // 간격 축소
+              // 홀드색 필터
+              SearchFilterDropdown(
+                title: '홀드색',
+                options: holdColorOptions,
+                selectedOption: _selectedHoldColor,
+                onOptionSelected: _onHoldColorChanged,
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  /// 영역 버튼 위젯 (간단한 버튼 리스트)
+  Widget _buildAreaButtons() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildAreaChip(null, '전체'),
+          const SizedBox(width: 6),
+          ..._gymAreas.map((a) => Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: _buildAreaChip(a.areaId, a.areaName),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAreaChip(int? areaId, String label) {
+    final bool selected = _selectedAreaId == areaId || (_selectedAreaId == null && areaId == null);
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) {
+        setState(() {
+          _selectedAreaId = areaId;
+        });
+        _loadProblems();
+      },
+      backgroundColor: Colors.white,
+      selectedColor: AppColorSchemes.accentBlue.withValues(alpha: 0.12),
+      side: BorderSide(
+        color: selected ? AppColorSchemes.accentBlue : AppColorSchemes.borderPrimary,
+      ),
+      labelStyle: TextStyle(
+        color: selected ? AppColorSchemes.accentBlue : AppColorSchemes.textPrimary,
+        fontWeight: FontWeight.w600,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+  }
+
+  /// 영역 목록 로드
+  Future<void> _loadGymAreas(int gymId) async {
+    try {
+      final detail = await GymApi.getGymById(gymId);
+      if (!mounted) return;
+      setState(() {
+        _gymAreas = detail.gymAreas;
+        if (_gymAreas.where((a) => a.areaId == _selectedAreaId).isEmpty) {
+          _selectedAreaId = null;
+        }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _gymAreas = [];
+        _selectedAreaId = null;
+      });
+    }
   }
 
   /// 문제 리스트 위젯
