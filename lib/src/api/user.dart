@@ -13,6 +13,11 @@ import 'package:http_parser/http_parser.dart';
 class UserApi {
   static final _apiClient = ApiClient.instance;
 
+  /// 닉네임이 null이면 현재 사용자 닉네임을 조회하여 반환
+  static Future<String> _resolveNickname(String? nickname) async {
+    return nickname ?? await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
+  }
+
   /// 현재 사용자 프로필 조회 (JWT 토큰 기반)
   static Future<UserProfile> getCurrentUserProfile() async {
     try {
@@ -61,28 +66,7 @@ class UserApi {
     String? to,
     String criteria = 'RATING',
   }) async {
-    try {
-      final String nickname =
-          await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
-
-      developer.log('사용자 히스토리 조회 - nickname: $nickname', name: 'UserApi');
-
-      // /api/users/{nickname}/history로 히스토리 조회
-      final queryParams = <String, String>{'criteria': criteria};
-      if (from != null) queryParams['from'] = from;
-      if (to != null) queryParams['to'] = to;
-
-      return await _apiClient.get<HistoryData>(
-        '/api/users/$nickname/history',
-        queryParameters: queryParams,
-        fromJson: (data) => HistoryData.fromJson(data as List<dynamic>),
-        logContext: 'UserApi',
-      );
-    } catch (e) {
-      // 디버깅용 상세 로그 남기기
-      developer.log('히스토리 데이터 조회 실패: $e', name: 'UserApi', error: e);
-      throw Exception('히스토리 데이터를 불러올 수 없습니다');
-    }
+    return await getUserHistory(from: from, to: to, criteria: criteria);
   }
 
   /// 특정 사용자 히스토리 조회 (queryParameters 방식 사용)
@@ -94,8 +78,7 @@ class UserApi {
   }) async {
     try {
       // 닉네임이 주어지지 않으면 현재 사용자 닉네임 사용
-      final String finalNickname =
-          nickname ?? await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
+      final String finalNickname = await _resolveNickname(nickname);
       // 쿼리 파라미터 구성
       final queryParams = <String, String>{'criteria': criteria};
       if (from != null) queryParams['from'] = from;
@@ -119,28 +102,7 @@ class UserApi {
     String? from,
     String? to,
   }) async {
-    try {
-      final String nickname =
-          await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
-
-      developer.log('사용자 스트릭 조회 - nickname: $nickname', name: 'UserApi');
-
-      // /api/users/{nickname}/streak으로 스트릭 조회
-      final queryParams = <String, String>{};
-      if (from != null) queryParams['from'] = from;
-      if (to != null) queryParams['to'] = to;
-
-      return await _apiClient.get<StreakData>(
-        '/api/users/$nickname/streak',
-        queryParameters: queryParams,
-        fromJson: (data) => StreakData.fromJson(data as List<dynamic>),
-        logContext: 'UserApi',
-      );
-    } catch (e) {
-      // 디버깅용 상세 로그 남기기
-      developer.log('스트릭 데이터 조회 실패: $e', name: 'UserApi', error: e);
-      throw Exception('스트릭 데이터를 불러올 수 없습니다');
-    }
+    return await getUserStreak(from: from, to: to);
   }
 
   /// 특정 사용자 스트릭 조회 (queryParameters 방식 사용)
@@ -151,8 +113,7 @@ class UserApi {
   }) async {
     try {
       // 닉네임이 주어지지 않으면 현재 사용자 닉네임 사용
-      final String finalNickname =
-          nickname ?? await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
+      final String finalNickname = await _resolveNickname(nickname);
       // 쿼리 파라미터 구성
       final queryParams = <String, String>{};
       if (from != null) queryParams['from'] = from;

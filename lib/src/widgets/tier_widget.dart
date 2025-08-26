@@ -198,15 +198,22 @@ class TierWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColorSchemes.borderPrimary, width: 1),
               ),
-              child: Column(
-                children: [
-                  Row(
+              child: Builder(builder: (context) {
+                final ratingItems = [
+                  (icon: Icons.trending_up, label: '상위 50문제 난이도 합', value: userProfile.rating.topProblemRating),
+                  (icon: Icons.check_circle_outline, label: '해결한 문제 수', value: userProfile.rating.solvedRating),
+                  (icon: Icons.outbox, label: '제출한 문제 수', value: userProfile.rating.submissionRating),
+                  (icon: Icons.volunteer_activism, label: '기여한 문제 수', value: userProfile.rating.contributionRating),
+                ];
+
+                Widget buildRatingRow({required IconData icon, required String label, required int value}) {
+                  return Row(
                     children: [
-                      Icon(Icons.trending_up, color: colorScheme.primary, size: 20),
+                      Icon(icon, color: colorScheme.primary, size: 20),
                       SizedBox(width: screenWidth * 0.02),
                       Expanded(
                         child: Text(
-                          '상위 50문제 난이도 합',
+                          label,
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 12 : 13,
                             color: AppColorSchemes.textSecondary,
@@ -216,7 +223,7 @@ class TierWidget extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '+${userProfile.rating.topProblemRating}',
+                        '+$value',
                         style: TextStyle(
                           fontSize: screenWidth < 360 ? 14 : 15,
                           fontWeight: FontWeight.w700,
@@ -224,87 +231,22 @@ class TierWidget extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
-                  SizedBox(height: screenWidth * 0.02),
-                  Row(
-                    children: [
-                      Icon(Icons.check_circle_outline, color: colorScheme.primary, size: 20),
-                      SizedBox(width: screenWidth * 0.02),
-                      Expanded(
-                        child: Text(
-                          '해결한 문제 수',
-                          style: TextStyle(
-                            fontSize: screenWidth < 360 ? 12 : 13,
-                            color: AppColorSchemes.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                  );
+                }
+
+                return Column(
+                  children: [
+                    for (int i = 0; i < ratingItems.length; i++) ...[
+                      buildRatingRow(
+                        icon: ratingItems[i].icon,
+                        label: ratingItems[i].label,
+                        value: ratingItems[i].value,
                       ),
-                      Text(
-                        '+${userProfile.rating.solvedRating}',
-                        style: TextStyle(
-                          fontSize: screenWidth < 360 ? 14 : 15,
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.primary,
-                        ),
-                      ),
+                      if (i < ratingItems.length - 1) SizedBox(height: screenWidth * 0.02),
                     ],
-                  ),
-                  SizedBox(height: screenWidth * 0.02),
-                  Row(
-                    children: [
-                      Icon(Icons.outbox, color: colorScheme.primary, size: 20),
-                      SizedBox(width: screenWidth * 0.02),
-                      Expanded(
-                        child: Text(
-                          '제출한 문제 수',
-                          style: TextStyle(
-                            fontSize: screenWidth < 360 ? 12 : 13,
-                            color: AppColorSchemes.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        '+${userProfile.rating.submissionRating}',
-                        style: TextStyle(
-                          fontSize: screenWidth < 360 ? 14 : 15,
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: screenWidth * 0.02),
-                  Row(
-                    children: [
-                      Icon(Icons.volunteer_activism, color: colorScheme.primary, size: 20),
-                      SizedBox(width: screenWidth * 0.02),
-                      Expanded(
-                        child: Text(
-                          '기여한 문제 수',
-                          style: TextStyle(
-                            fontSize: screenWidth < 360 ? 12 : 13,
-                            color: AppColorSchemes.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        '+${userProfile.rating.contributionRating}',
-                        style: TextStyle(
-                          fontSize: screenWidth < 360 ? 14 : 15,
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                  ],
+                );
+              }),
             ),
           ],
         ),
