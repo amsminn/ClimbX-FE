@@ -3,7 +3,7 @@ import '../utils/color_codes.dart';
 enum SubmissionStatus {
   pending('PENDING'),
   processing('PROCESSING'),
-  completed('COMPLETED'),
+  accepted('ACCEPTED'),
   failed('FAILED');
 
   const SubmissionStatus(this.value);
@@ -15,8 +15,8 @@ enum SubmissionStatus {
         return SubmissionStatus.pending;
       case 'PROCESSING':
         return SubmissionStatus.processing;
-      case 'COMPLETED':
-        return SubmissionStatus.completed;
+      case 'ACCEPTED':
+        return SubmissionStatus.accepted;
       case 'FAILED':
         return SubmissionStatus.failed;
       default:
