@@ -128,7 +128,7 @@ class UserApi {
       if (to != null) queryParams['to'] = to;
 
       return await _apiClient.get<StreakData>(
-        '/api/users/$nickname/streak',
+        '/api/users/alice/streak',
         queryParameters: queryParams,
         fromJson: (data) => StreakData.fromJson(data as List<dynamic>),
         logContext: 'UserApi',

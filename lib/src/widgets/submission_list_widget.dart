@@ -172,7 +172,7 @@ class _SubmissionListItem extends StatelessWidget {
       case SubmissionStatus.pending:
       case SubmissionStatus.processing:
         return AppColorSchemes.accentOrange;
-      case SubmissionStatus.completed:
+      case SubmissionStatus.accepted:
         return AppColorSchemes.accentGreen;
       case SubmissionStatus.failed:
         return AppColorSchemes.accentRed;
@@ -185,7 +185,7 @@ class _SubmissionListItem extends StatelessWidget {
         return '대기중';
       case SubmissionStatus.processing:
         return '처리중';
-      case SubmissionStatus.completed:
+      case SubmissionStatus.accepted:
         return '완료';
       case SubmissionStatus.failed:
         return '실패';
