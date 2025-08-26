@@ -87,19 +87,22 @@ class UserApi {
 
   /// 특정 사용자 히스토리 조회 (queryParameters 방식 사용)
   static Future<HistoryData> getUserHistory({
-    String nickname = 'alice', // 테스트용 기본값
+    String? nickname,
     String? from,
     String? to,
     String criteria = 'RATING',
   }) async {
     try {
+      // 닉네임이 주어지지 않으면 현재 사용자 닉네임 사용
+      final String finalNickname =
+          nickname ?? await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
       // 쿼리 파라미터 구성
       final queryParams = <String, String>{'criteria': criteria};
       if (from != null) queryParams['from'] = from;
       if (to != null) queryParams['to'] = to;
 
       return await _apiClient.get<HistoryData>(
-        '/api/users/$nickname/history',
+        '/api/users/$finalNickname/history',
         queryParameters: queryParams,
         fromJson: (data) => HistoryData.fromJson(data as List<dynamic>),
         logContext: 'UserApi',
@@ -142,18 +145,21 @@ class UserApi {
 
   /// 특정 사용자 스트릭 조회 (queryParameters 방식 사용)
   static Future<StreakData> getUserStreak({
-    String nickname = 'alice', // 테스트용 기본값
+    String? nickname,
     String? from,
     String? to,
   }) async {
     try {
+      // 닉네임이 주어지지 않으면 현재 사용자 닉네임 사용
+      final String finalNickname =
+          nickname ?? await UserIdentity.getOrFetchNickname(logContext: 'UserApi');
       // 쿼리 파라미터 구성
       final queryParams = <String, String>{};
       if (from != null) queryParams['from'] = from;
       if (to != null) queryParams['to'] = to;
 
       return await _apiClient.get<StreakData>(
-        '/api/users/$nickname/streak',
+        '/api/users/$finalNickname/streak',
         queryParameters: queryParams,
         fromJson: (data) => StreakData.fromJson(data as List<dynamic>),
         logContext: 'UserApi',
