@@ -198,28 +198,110 @@ class TierWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColorSchemes.borderPrimary, width: 1),
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  Icon(Icons.trending_up, color: colorScheme.primary, size: 20),
-                  SizedBox(width: screenWidth * 0.02),
-                  Expanded(
-                    child: Text(
-                      '상위 50문제 난이도 합',
-                      style: TextStyle(
-                        fontSize: screenWidth < 360 ? 12 : 13,
-                        color: AppColorSchemes.textSecondary,
-                        fontWeight: FontWeight.w500,
+                  Row(
+                    children: [
+                      Icon(Icons.trending_up, color: colorScheme.primary, size: 20),
+                      SizedBox(width: screenWidth * 0.02),
+                      Expanded(
+                        child: Text(
+                          '상위 50문제 난이도 합',
+                          style: TextStyle(
+                            fontSize: screenWidth < 360 ? 12 : 13,
+                            color: AppColorSchemes.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      Text(
+                        '+${userProfile.rating.topProblemRating}',
+                        style: TextStyle(
+                          fontSize: screenWidth < 360 ? 14 : 15,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    '+2714',
-                    style: TextStyle(
-                      fontSize: screenWidth < 360 ? 14 : 15,
-                      fontWeight: FontWeight.w700,
-                      color: colorScheme.primary,
-                    ),
+                  SizedBox(height: screenWidth * 0.02),
+                  Row(
+                    children: [
+                      Icon(Icons.check_circle_outline, color: colorScheme.primary, size: 20),
+                      SizedBox(width: screenWidth * 0.02),
+                      Expanded(
+                        child: Text(
+                          '해결한 문제 수',
+                          style: TextStyle(
+                            fontSize: screenWidth < 360 ? 12 : 13,
+                            color: AppColorSchemes.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        '+${userProfile.rating.solvedRating}',
+                        style: TextStyle(
+                          fontSize: screenWidth < 360 ? 14 : 15,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: screenWidth * 0.02),
+                  Row(
+                    children: [
+                      Icon(Icons.outbox, color: colorScheme.primary, size: 20),
+                      SizedBox(width: screenWidth * 0.02),
+                      Expanded(
+                        child: Text(
+                          '제출한 문제 수',
+                          style: TextStyle(
+                            fontSize: screenWidth < 360 ? 12 : 13,
+                            color: AppColorSchemes.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        '+${userProfile.rating.submissionRating}',
+                        style: TextStyle(
+                          fontSize: screenWidth < 360 ? 14 : 15,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: screenWidth * 0.02),
+                  Row(
+                    children: [
+                      Icon(Icons.volunteer_activism, color: colorScheme.primary, size: 20),
+                      SizedBox(width: screenWidth * 0.02),
+                      Expanded(
+                        child: Text(
+                          '기여한 문제 수',
+                          style: TextStyle(
+                            fontSize: screenWidth < 360 ? 12 : 13,
+                            color: AppColorSchemes.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        '+${userProfile.rating.contributionRating}',
+                        style: TextStyle(
+                          fontSize: screenWidth < 360 ? 14 : 15,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
