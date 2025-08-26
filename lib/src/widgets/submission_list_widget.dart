@@ -186,7 +186,7 @@ class _SubmissionListItem extends StatelessWidget {
       case SubmissionStatus.processing:
         return '처리중';
       case SubmissionStatus.accepted:
-        return '완료';
+        return '승인';
       case SubmissionStatus.failed:
         return '실패';
     }
