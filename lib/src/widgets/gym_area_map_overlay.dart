@@ -237,11 +237,6 @@ class _SvgAreaGeometry {
   }
 }
 
-extension _FirstOrNull<T> on Iterable<T> {
-  T? get firstOrNull => isEmpty ? null : first;
-}
-
-
 extension _SelectedSvg on _GymAreaMapOverlayState {
     Widget _buildSelectedSvgLayer() {
     final int? id = widget.selectedAreaId;
