@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
 import 'package:path_drawing/path_drawing.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:collection/collection.dart';
 import '../models/gym.dart';
-import '../utils/color_schemes.dart';
 
 /// 지도 PNG 위에 영역 SVG를 오버레이하여 path 단위로 클릭 가능한 위젯
 class GymAreaMapOverlay extends StatefulWidget {
@@ -32,14 +32,13 @@ class GymAreaMapOverlay extends StatefulWidget {
 class _GymAreaMapOverlayState extends State<GymAreaMapOverlay> {
   /// areaId -> Raw SVG path 집합 및 viewBox
   final Map<int, _SvgAreaGeometry> _rawGeometries = {};
-  Future<void>? _loading;
   Size? _baseSize; // 렌더 기준 크기 (SVG viewBox 기반)
   double? _pngAspect; // PNG 가로/세로 비율
 
   @override
   void initState() {
     super.initState();
-    _loading = _loadAllSvgGeometries();
+    _loadAllSvgGeometries();
     _resolvePngAspect();
   }
 
@@ -47,7 +46,7 @@ class _GymAreaMapOverlayState extends State<GymAreaMapOverlay> {
   void didUpdateWidget(covariant GymAreaMapOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.areas != widget.areas) {
-      _loading = _loadAllSvgGeometries();
+      _loadAllSvgGeometries();
     }
     if (oldWidget.mapImageUrl != widget.mapImageUrl) {
       _resolvePngAspect();
@@ -68,10 +67,22 @@ class _GymAreaMapOverlayState extends State<GymAreaMapOverlay> {
         });
         stream.removeListener(listener);
       }, onError: (error, stackTrace) {
-        // ignore
+        developer.log(
+          'PNG aspect resolve error for ${widget.mapImageUrl}: $error',
+          name: 'GymAreaMapOverlay',
+          error: error,
+          stackTrace: stackTrace,
+        );
       });
       stream.addListener(listener);
-    } catch (_) {}
+    } catch (e, s) {
+      developer.log(
+        'Failed to resolve PNG aspect ratio: $e',
+        name: 'GymAreaMapOverlay',
+        error: e,
+        stackTrace: s,
+      );
+    }
   }
 
   Future<void> _loadAllSvgGeometries() async {
@@ -137,8 +148,13 @@ class _GymAreaMapOverlayState extends State<GymAreaMapOverlay> {
           rawSvg: resp.body,
         );
         _baseSize ??= Size(viewBox.width, viewBox.height);
-      } catch (_) {
-        // skip
+      } catch (e, s) {
+        developer.log(
+          'Failed to load SVG geometry for area ${area.areaId}: $e',
+          name: 'GymAreaMapOverlay',
+          error: e,
+          stackTrace: s,
+        );
       }
     }
     if (mounted) setState(() {});
@@ -209,7 +225,7 @@ class _SvgAreaGeometry {
   _SvgAreaGeometry({required this.viewBox, required this.rawPath, required this.rawSvg});
   final Rect viewBox;
   final Path rawPath; // SVG 좌표계 경로
-  final String rawSvg; // 원본 SVG 문자열 (색상 포함 렌더용)
+  final String rawSvg; // 원본 SVG 문자열
 
   Path scaledPath(Size toSize) {
     final double sx = toSize.width / viewBox.width;

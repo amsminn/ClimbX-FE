@@ -32,7 +32,7 @@ class Gym {
       address: json['address'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
       description: json['description'] ?? '',
-      map2DUrl: (json['map2dImageCdnUrl'] ?? json['map2DUrl'] ?? '') as String,
+      map2DUrl: json['map2dImageCdnUrl'] ?? json['map2DUrl'] ?? '',
       gymAreas: areas
           .map((e) => GymArea.fromJson(e as Map<String, dynamic>))
           .toList(),
