@@ -9,6 +9,7 @@ import 'search_filter_dropdown.dart';
 import '../screens/problem_create_page.dart';
 import '../screens/problem_submit_page.dart';
 import '../utils/color_codes.dart';
+import 'gym_area_map_overlay.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
@@ -224,6 +225,24 @@ class _SearchBodyState extends State<SearchBody> {
             // 검색바
             _buildSearchBar(),
 
+            // 지도 오버레이 (지점 선택 시 표시)
+            if (_selectedGym != null && _selectedGym!.map2DUrl.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                child: GymAreaMapOverlay(
+                  mapImageUrl: _selectedGym!.map2DUrl,
+                  areas: _gymAreas,
+                  selectedAreaId: _selectedAreaId,
+                  onSelected: (id) {
+                    setState(() => _selectedAreaId = id);
+                    _loadProblems();
+                  },
+                  selectedOpacity: 0.35,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
             // 필터 토글
             _buildFilterSection(),
 
@@ -422,6 +441,7 @@ class _SearchBodyState extends State<SearchBody> {
     return ChoiceChip(
       label: Text(label),
       selected: selected,
+      showCheckmark: false,
       onSelected: (_) {
         setState(() {
           _selectedAreaId = areaId;
