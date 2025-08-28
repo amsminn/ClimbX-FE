@@ -6,6 +6,7 @@ import 'package:path_drawing/path_drawing.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:collection/collection.dart';
+import 'package:vector_math/vector_math_64.dart' as vmath;
 import '../models/gym.dart';
 
 /// 지도 PNG 위에 영역 SVG를 오버레이하여 path 단위로 클릭 가능한 위젯
@@ -230,9 +231,9 @@ class _SvgAreaGeometry {
   Path scaledPath(Size toSize) {
     final double sx = toSize.width / viewBox.width;
     final double sy = toSize.height / viewBox.height;
-    final Matrix4 m = Matrix4.identity()
-      ..translate(-viewBox.left, -viewBox.top)
-      ..scale(sx, sy);
+    // 버전 중립적인 구성: translationValues + multiply(diagonal3Values)
+    final vmath.Matrix4 m = vmath.Matrix4.translationValues(-viewBox.left, -viewBox.top, 0.0)
+      ..multiply(vmath.Matrix4.diagonal3Values(sx, sy, 1.0));
     return rawPath.transform(m.storage);
   }
 }
