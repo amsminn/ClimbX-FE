@@ -16,7 +16,9 @@ import 'submission_list_widget.dart';
 /// 로딩/에러 상태 처리 및 탭 구조 관리
 
 class ProfileBody extends HookWidget {
-  const ProfileBody({super.key});
+  const ProfileBody({super.key, this.refreshSignal = 0});
+
+  final int refreshSignal;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +26,17 @@ class ProfileBody extends HookWidget {
     final userQuery = useQuery<UserProfile, Exception>([
       'user_profile',
     ], UserApi.getUserProfile);
+
+    // 포커스/탭 재진입 시 자동 리로드
+    final didInitRef = useRef(false);
+    useEffect(() {
+      if (didInitRef.value) {
+        userQuery.refetch();
+      } else {
+        didInitRef.value = true;
+      }
+      return null;
+    }, [refreshSignal]);
 
     // 로딩 중 표시
     if (userQuery.isLoading) {
@@ -86,7 +99,6 @@ class ProfileBody extends HookWidget {
                     _buildTab('히스토리'),
                     _buildTab('스트릭'),
                     _buildTab('내 영상'),
-                    // _buildTab('분야별 티어'), // 임시 비노출
                     _buildTab('제출 내역'),
                   ],
                 ),

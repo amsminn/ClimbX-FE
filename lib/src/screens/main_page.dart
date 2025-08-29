@@ -33,6 +33,7 @@ class MainPageState extends State<MainPage> {
   bool _isLoading = true;
   String? _error;
   int? _gymIdForSearch;
+  int _profileRefreshSignal = 0;
 
   @override
   void initState() {
@@ -94,7 +95,7 @@ class MainPageState extends State<MainPage> {
         index: _currentTab.index,
         children: [
           // 0: 프로필
-          const ProfileBody(),
+          ProfileBody(refreshSignal: _profileRefreshSignal),
           // 1: 리더보드
           const LeaderboardBody(),
           // 2: 검색
@@ -110,7 +111,13 @@ class MainPageState extends State<MainPage> {
           onTap: (tab) {
             // 현재 페이지 내에서 탭 변경
             setState(() {
+              final wasProfile = _currentTab == BottomNavTab.profile;
+              final willBeProfile = tab == BottomNavTab.profile;
               _currentTab = tab;
+              if (willBeProfile) {
+                // 프로필 탭으로 전환되거나 재선택 시 리프레시 신호 증가
+                _profileRefreshSignal++;
+              }
             });
           },
         ),
