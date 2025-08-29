@@ -233,7 +233,7 @@ class _SearchFilterDropdownState extends State<SearchFilterDropdown> {
                     color: ColorCodes.toDisplayColorFromAny(widget.selectedOption!),
                     shape: BoxShape.circle,
                     border: ColorCodes.needsBorderForLabel(widget.selectedOption!) 
-                        ? Border.all(color: Colors.grey, width: 0.5)
+                        ? Border.all(color: Colors.grey, width: 1)
                         : null,
                   ),
                 ),

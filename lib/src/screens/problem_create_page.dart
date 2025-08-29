@@ -7,6 +7,7 @@ import '../utils/color_codes.dart';
 import '../models/gym.dart';
 import '../utils/color_schemes.dart';
 import '../utils/image_compressor.dart';
+import '../widgets/gym_area_map_overlay.dart';
 
 /// 문제 등록 페이지
 class ProblemCreatePage extends StatefulWidget {
@@ -30,6 +31,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
   List<Gym> _gyms = [];
   Gym? _selectedGym;
   int? _areaId; // 1~4
+  List<GymArea> _gymAreas = [];
   String? _holdColor;
   String? _localLevel;
   File? _imageFile;
@@ -49,6 +51,38 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
     _loadGyms();
   }
 
+  Widget _buildAreaChipsRow() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (final a in _gymAreas)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: ChoiceChip(
+                label: Text(a.areaName),
+                selected: _areaId == a.areaId,
+                showCheckmark: false,
+                onSelected: (_) => setState(() => _areaId = a.areaId),
+                backgroundColor: Colors.white,
+                selectedColor: AppColorSchemes.accentBlue.withValues(alpha: 0.12),
+                side: BorderSide(
+                  color: _areaId == a.areaId ? AppColorSchemes.accentBlue : AppColorSchemes.borderPrimary,
+                ),
+                labelStyle: TextStyle(
+                  color: _areaId == a.areaId ? AppColorSchemes.accentBlue : AppColorSchemes.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _loadGyms() async {
     setState(() {
       _isLoadingGyms = true;
@@ -65,6 +99,9 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
           }
         }
       });
+      if (_selectedGym != null) {
+        await _loadGymDetail(_selectedGym!.gymId);
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -177,9 +214,35 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
               _buildGymSelectorCard(),
               const SizedBox(height: 20),
 
-              _buildSectionTitle('Area ID (1~4)'),
+              _buildSectionTitle('영역 선택'),
               const SizedBox(height: 8),
-              _buildAreaSelector(),
+              if (_selectedGym != null && (_selectedGym!.map2DUrl.isNotEmpty))
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: _cardDecoration(),
+                  child: GymAreaMapOverlay(
+                    mapImageUrl: _selectedGym!.map2DUrl,
+                    areas: _gymAreas,
+                    selectedAreaId: _areaId,
+                    onSelected: (id) {
+                      setState(() => _areaId = id);
+                    },
+                    showAllWhenUnselected: false,
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: _cardDecoration(),
+                  child: const Text(
+                    '지점을 먼저 선택하세요',
+                    style: TextStyle(color: AppColorSchemes.textSecondary),
+                  ),
+                ),
+              if (_gymAreas.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _buildAreaChipsRow(),
+              ],
               const SizedBox(height: 20),
 
               _buildSectionTitle('홀드색'),
@@ -302,41 +365,6 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
     );
   }
 
-  Widget _buildAreaSelector() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: _cardDecoration(),
-      child: Wrap(
-        spacing: 10,
-        runSpacing: 8,
-        children: List.generate(4, (index) => index + 1).map((id) {
-          final bool selected = _areaId == id;
-          return ChoiceChip(
-            label: Text('Area $id'),
-            selected: selected,
-            onSelected: (_) => setState(() => _areaId = id),
-            backgroundColor: Colors.white,
-            selectedColor: AppColorSchemes.accentBlue.withValues(alpha: 0.12),
-            side: BorderSide(
-              color: selected
-                  ? AppColorSchemes.accentBlue
-                  : AppColorSchemes.borderPrimary,
-            ),
-            labelStyle: TextStyle(
-              color: selected
-                  ? AppColorSchemes.accentBlue
-                  : AppColorSchemes.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
   Widget _buildColorToggles({
     required List<String> options,
     required String? selected,
@@ -351,6 +379,17 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         children: options.map((opt) {
           final bool isSel = selected == opt;
           final color = ColorCodes.toDisplayColorFromAny(opt);
+          final bool needsBorder = ColorCodes.needsBorderForLabel(opt);
+          final bool isWhite = needsBorder && opt == '흰색';
+          final Color selectedBg = isWhite
+              ? const Color(0xFFF1F5F9) // very light gray for white selection
+              : color.withValues(alpha: 0.12);
+          final Color sideColor = isSel
+              ? (isWhite ? Colors.grey : color)
+              : AppColorSchemes.borderPrimary;
+          final Color textColor = isSel
+              ? (isWhite ? Colors.black87 : color)
+              : AppColorSchemes.textPrimary;
           return ChoiceChip(
             label: Row(
               mainAxisSize: MainAxisSize.min,
@@ -361,8 +400,8 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
                   decoration: BoxDecoration(
                     color: color, 
                     shape: BoxShape.circle,
-                    border: ColorCodes.needsBorderForLabel(opt) 
-                        ? Border.all(color: Colors.grey, width: 0.5)
+                    border: needsBorder 
+                        ? Border.all(color: Colors.grey, width: 1)
                         : null,
                   ),
                 ),
@@ -373,10 +412,10 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
             selected: isSel,
             onSelected: (_) => onSelected(opt),
             backgroundColor: Colors.white,
-            selectedColor: color.withValues(alpha: 0.12),
-            side: BorderSide(color: isSel ? color : AppColorSchemes.borderPrimary),
+            selectedColor: selectedBg,
+            side: BorderSide(color: sideColor),
             labelStyle: TextStyle(
-              color: isSel ? color : AppColorSchemes.textPrimary,
+              color: textColor,
               fontWeight: FontWeight.w600,
             ),
             shape: RoundedRectangleBorder(
@@ -561,6 +600,32 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
     if (result != null) {
       setState(() {
         _selectedGym = result;
+        _areaId = null;
+        _gymAreas = [];
+      });
+      await _loadGymDetail(result.gymId);
+    }
+  }
+
+  Future<void> _loadGymDetail(int gymId) async {
+    try {
+      final detail = await GymApi.getGymById(gymId);
+      if (!mounted) return;
+      setState(() {
+        _selectedGym = detail;
+        _gymAreas = detail.gymAreas;
+        if (_gymAreas.where((a) => a.areaId == _areaId).isEmpty) {
+          _areaId = null;
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('클라이밍장 구역 정보를 불러오지 못했습니다: $e')),
+      );
+      setState(() {
+        _gymAreas = [];
+        _areaId = null;
       });
     }
   }
