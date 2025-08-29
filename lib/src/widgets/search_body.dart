@@ -9,6 +9,7 @@ import 'search_filter_dropdown.dart';
 import '../screens/problem_create_page.dart';
 import '../screens/problem_submit_page.dart';
 import '../utils/color_codes.dart';
+import 'gym_area_map_overlay.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
@@ -32,6 +33,8 @@ class _SearchBodyState extends State<SearchBody> {
   // 필터 관련 상태
   String? _selectedLocalLevel;
   String? _selectedHoldColor;
+  List<GymArea> _gymAreas = [];
+  int? _selectedAreaId;
 
   // 문제 리스트 상태
   List<Problem> _problems = [];
@@ -96,6 +99,7 @@ class _SearchBodyState extends State<SearchBody> {
             _searchController.text = preselected!.name;
             _isSearching = false;
           });
+          await _loadGymAreas(preselected.gymId);
         }
       }
 
@@ -125,6 +129,7 @@ class _SearchBodyState extends State<SearchBody> {
     try {
       final problems = await ProblemApi.getProblems(
         gymId: _selectedGym?.gymId,
+        gymAreaId: _selectedAreaId,
         localLevel: _selectedLocalLevel,
         holdColor: _selectedHoldColor,
       );
@@ -172,6 +177,8 @@ class _SearchBodyState extends State<SearchBody> {
       _isSearching = false;
       _filteredGyms = _gyms;
       _selectedGym = null; // 선택된 클라이밍장도 초기화
+      _gymAreas = [];
+      _selectedAreaId = null;
     });
     _loadProblems(); // X 버튼 클릭 시에도 문제 목록 다시 로드
   }
@@ -182,7 +189,10 @@ class _SearchBodyState extends State<SearchBody> {
       _selectedGym = gym;
       _searchController.text = gym.name;
       _isSearching = false;
+      _gymAreas = [];
+      _selectedAreaId = null;
     });
+    _loadGymAreas(gym.gymId);
     _loadProblems();
   }
 
@@ -214,6 +224,24 @@ class _SearchBodyState extends State<SearchBody> {
           children: [
             // 검색바
             _buildSearchBar(),
+
+            // 지도 오버레이 (지점 선택 시 표시)
+            if (_selectedGym != null && _selectedGym!.map2DUrl.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                child: GymAreaMapOverlay(
+                  mapImageUrl: _selectedGym!.map2DUrl,
+                  areas: _gymAreas,
+                  selectedAreaId: _selectedAreaId,
+                  onSelected: (id) {
+                    setState(() => _selectedAreaId = id);
+                    _loadProblems();
+                  },
+                  selectedOpacity: 0.35,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
 
             // 필터 토글
             _buildFilterSection(),
@@ -358,28 +386,101 @@ class _SearchBodyState extends State<SearchBody> {
   Widget _buildFilterSection() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 난이도색 필터
-          SearchFilterDropdown(
-            title: '난이도색',
-            options: localLevelOptions,
-            selectedOption: _selectedLocalLevel,
-            onOptionSelected: _onLocalLevelChanged,
-          ),
+          if (_selectedGym != null) ...[
+            _buildAreaButtons(),
+            const SizedBox(height: 8),
+          ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              // 난이도색 필터
+              SearchFilterDropdown(
+                title: '난이도색',
+                options: localLevelOptions,
+                selectedOption: _selectedLocalLevel,
+                onOptionSelected: _onLocalLevelChanged,
+              ),
 
-          const SizedBox(width: 8), // 간격 축소
-          // 홀드색 필터
-          SearchFilterDropdown(
-            title: '홀드색',
-            options: holdColorOptions,
-            selectedOption: _selectedHoldColor,
-            onOptionSelected: _onHoldColorChanged,
+              const SizedBox(width: 8), // 간격 축소
+              // 홀드색 필터
+              SearchFilterDropdown(
+                title: '홀드색',
+                options: holdColorOptions,
+                selectedOption: _selectedHoldColor,
+                onOptionSelected: _onHoldColorChanged,
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  /// 영역 버튼 위젯 (간단한 버튼 리스트)
+  Widget _buildAreaButtons() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildAreaChip(null, '전체'),
+          const SizedBox(width: 6),
+          ..._gymAreas.map((a) => Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: _buildAreaChip(a.areaId, a.areaName),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAreaChip(int? areaId, String label) {
+    final bool selected = _selectedAreaId == areaId || (_selectedAreaId == null && areaId == null);
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      showCheckmark: false,
+      onSelected: (_) {
+        setState(() {
+          _selectedAreaId = areaId;
+        });
+        _loadProblems();
+      },
+      backgroundColor: Colors.white,
+      selectedColor: AppColorSchemes.accentBlue.withValues(alpha: 0.12),
+      side: BorderSide(
+        color: selected ? AppColorSchemes.accentBlue : AppColorSchemes.borderPrimary,
+      ),
+      labelStyle: TextStyle(
+        color: selected ? AppColorSchemes.accentBlue : AppColorSchemes.textPrimary,
+        fontWeight: FontWeight.w600,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+  }
+
+  /// 영역 목록 로드
+  Future<void> _loadGymAreas(int gymId) async {
+    try {
+      final detail = await GymApi.getGymById(gymId);
+      if (!mounted) return;
+      setState(() {
+        _gymAreas = detail.gymAreas;
+        if (_gymAreas.where((a) => a.areaId == _selectedAreaId).isEmpty) {
+          _selectedAreaId = null;
+        }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _gymAreas = [];
+        _selectedAreaId = null;
+      });
+    }
   }
 
   /// 문제 리스트 위젯
