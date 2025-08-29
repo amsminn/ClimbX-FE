@@ -111,7 +111,6 @@ class MainPageState extends State<MainPage> {
           onTap: (tab) {
             // 현재 페이지 내에서 탭 변경
             setState(() {
-              final wasProfile = _currentTab == BottomNavTab.profile;
               final willBeProfile = tab == BottomNavTab.profile;
               _currentTab = tab;
               if (willBeProfile) {
