@@ -6,6 +6,8 @@ import '../screens/markdown_viewer_page.dart';
 import '../screens/email_compose_page.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../screens/video_submission_flow_page.dart';
+import '../screens/public_profile_page.dart';
+import '../api/util/auth/user_identity.dart';
 
 /// 공통 네비게이션 처리 헬퍼
 class NavigationHelper {
@@ -49,6 +51,30 @@ class NavigationHelper {
       _createPageRoute(MainPage(initialTab: tab)),
       (route) => false,
 
+    );
+  }
+
+  /// 자기 자신인지 확인하여 적절한 화면으로 이동 (자기 자신이면 메인 프로필 탭으로)
+  static Future<void> navigateToPublicProfileSmart(
+    BuildContext context, {
+    required String targetNickname,
+  }) async {
+    // await 이전에 NavigatorState를 확보하여 context 경고 회피
+    final navigator = Navigator.of(context);
+    try {
+      final current = await UserIdentity.getOrFetchNickname(logContext: 'NavigationHelper');
+      if (current == targetNickname) {
+        navigator.pushAndRemoveUntil(
+          _createPageRoute(const MainPage(initialTab: BottomNavTab.profile)),
+          (route) => false,
+        );
+        return;
+      }
+    } catch (_) {}
+    navigator.push(
+      _createPageRoute(
+        PublicProfilePage(nickname: targetNickname),
+      ),
     );
   }
 
@@ -111,6 +137,16 @@ class NavigationHelper {
           hint: hint,
           contentId: contentId,
         ),
+      ),
+    );
+  }
+
+  /// 퍼블릭 프로필 페이지로 이동 (하단바 없이 오버레이)
+  static void navigateToPublicProfile(BuildContext context, String nickname) {
+    Navigator.push(
+      context,
+      _createPageRoute(
+        PublicProfilePage(nickname: nickname),
       ),
     );
   }

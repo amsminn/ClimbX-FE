@@ -13,8 +13,15 @@ import '../utils/navigation_helper.dart';
 
 class VideoGalleryWidget extends HookWidget {
   final bool isActive;
+  final bool readOnly; // 읽기 전용 여부
+  final String? nickname; // 특정 유저의 영상 목록을 보기 위한 닉네임
 
-  const VideoGalleryWidget({super.key, this.isActive = true});
+  const VideoGalleryWidget({
+    super.key,
+    this.isActive = true,
+    this.readOnly = false,
+    this.nickname,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +51,9 @@ class VideoGalleryWidget extends HookWidget {
 
       try {
         developer.log('서버 영상 목록 로드 시작', name: 'VideoGalleryWidget');
-        final videos = await VideoApi.getCurrentUserVideos();
+        final videos = nickname == null
+            ? await VideoApi.getCurrentUserVideos()
+            : await VideoApi.getUserVideosByNickname(nickname!);
 
         if (context.mounted) {
           serverVideos.value = videos;
@@ -300,12 +309,15 @@ class VideoGalleryWidget extends HookWidget {
             return VideoOverlayPlayer(
               video: video,
               tierColors: colorScheme,
-              onSubmitPressed: () {
-                NavigationHelper.startVideoSubmissionFlow(
-                  parentContext,
-                  videoId: video.videoId,
-                );
-              },
+              showSubmitButton: !readOnly,
+              onSubmitPressed: readOnly
+                  ? null
+                  : () {
+                      NavigationHelper.startVideoSubmissionFlow(
+                        parentContext,
+                        videoId: video.videoId,
+                      );
+                    },
             );
           },
         );
@@ -409,10 +421,10 @@ class VideoGalleryWidget extends HookWidget {
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
                         ),
-                    itemCount: 2 + getAllVideos().length,
-                    // 촬영 버튼 + 갤러리 버튼 + 영상들
+                    itemCount: (readOnly ? 0 : 2) + getAllVideos().length,
+                    // (읽기 전용이 아니면) 촬영/갤러리 버튼 + 영상들
                     itemBuilder: (context, index) {
-                      if (index == 0) {
+                      if (!readOnly && index == 0) {
                         // 촬영 버튼
                         return _buildActionTile(
                           icon: Icons.videocam_outlined,
@@ -420,7 +432,7 @@ class VideoGalleryWidget extends HookWidget {
                           onTap: isPickerActive.value ? null : recordVideo,
                           isDisabled: isPickerActive.value,
                         );
-                      } else if (index == 1) {
+                      } else if (!readOnly && index == 1) {
                         // 갤러리에서 선택 버튼
                         return _buildActionTile(
                           icon: Icons.photo_library_outlined,
@@ -432,7 +444,8 @@ class VideoGalleryWidget extends HookWidget {
                         );
                       } else {
                         // 실제 영상들
-                        final video = getAllVideos()[index - 2];
+                        final base = readOnly ? 0 : 2;
+                        final video = getAllVideos()[index - base];
                         return _buildVideoTile(
                           context,
                           video,
