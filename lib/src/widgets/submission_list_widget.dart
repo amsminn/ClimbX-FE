@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fquery/fquery.dart';
 import '../api/submission.dart';
 import '../models/submission.dart';
 import '../utils/color_schemes.dart';
@@ -12,31 +13,35 @@ class SubmissionListWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final submissionsState = useState<List<Submission>>([]);
-    final isLoading = useState(false);
     final isLoadingMore = useState(false);
     final nextCursor = useState<String?>(null);
     final hasNext = useState<bool>(true);
 
-    Future<void> fetchSubmissions() async {
-      final page = await SubmissionApi.getSubmissions();
-      submissionsState.value = page.submissions;
-      nextCursor.value = page.nextCursor;
-      hasNext.value = page.hasNext;
-    }
+    final initialQuery = useQuery<SubmissionPageData, Exception>(
+      ['submissions', 'initial'],
+      SubmissionApi.getSubmissions,
+    );
 
-    Future<void> loadInitial() async {
-      isLoading.value = true;
-      try {
-        await fetchSubmissions();
-      } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('제출 내역을 불러오지 못했습니다: $e')));
-      } finally {
-        isLoading.value = false;
+    // 초기 데이터 동기화 및 에러 알림
+    useEffect(() {
+      final page = initialQuery.data;
+      if (page != null) {
+        submissionsState.value = page.submissions;
+        nextCursor.value = page.nextCursor;
+        hasNext.value = page.hasNext;
       }
-    }
+      if (initialQuery.isError) {
+        if (!context.mounted) return null;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '제출 내역을 불러오지 못했습니다: ${initialQuery.error}',
+            ),
+          ),
+        );
+      }
+      return null;
+    }, [initialQuery.data, initialQuery.isError]);
 
     Future<void> loadMore() async {
       if (isLoadingMore.value || !hasNext.value) return;
@@ -61,11 +66,6 @@ class SubmissionListWidget extends HookWidget {
       }
     }
 
-    useEffect(() {
-      loadInitial();
-      return null;
-    }, const []);
-
     return LayoutBuilder(
       builder: (context, constraints) {
         return NotificationListener<ScrollNotification>(
@@ -76,7 +76,7 @@ class SubmissionListWidget extends HookWidget {
             }
             return false;
           },
-          child: isLoading.value
+          child: initialQuery.isLoading
               ? const Center(
                   child: Padding(
                     padding: EdgeInsets.all(24),

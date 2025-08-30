@@ -66,6 +66,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     } catch (e) {
       _errorByType[type] = e.toString().replaceFirst('Exception: ', '');
     } finally {
+      if (!mounted) return;
       _isLoadingByType[type] = false;
       setState(() {});
     }
@@ -91,6 +92,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     } catch (e) {
       _errorByType[type] = e.toString().replaceFirst('Exception: ', '');
     } finally {
+      if (!mounted) return;
       _isLoadingByType[type] = false;
       setState(() {});
     }
