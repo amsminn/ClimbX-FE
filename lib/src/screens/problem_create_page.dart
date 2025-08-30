@@ -38,6 +38,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
 
   bool _isLoadingGyms = false;
   bool _isSubmitting = false;
+  bool _isLoadingGymDetail = false;
 
   // 색상 옵션
   static const List<String> _colorOptions = [
@@ -100,6 +101,10 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         }
       });
       if (_selectedGym != null) {
+        if (!mounted) return;
+        setState(() {
+          _isLoadingGymDetail = true;
+        });
         await _loadGymDetail(_selectedGym!.gymId);
       }
     } catch (e) {
@@ -216,7 +221,13 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
 
               _buildSectionTitle('영역 선택'),
               const SizedBox(height: 8),
-              if (_selectedGym != null && (_selectedGym!.map2DUrl.isNotEmpty))
+              if (_isLoadingGymDetail)
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: _cardDecoration(),
+                  child: const Center(child: CircularProgressIndicator()),
+                )
+              else if (_selectedGym != null && (_selectedGym!.map2DUrl.isNotEmpty))
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: _cardDecoration(),
@@ -602,6 +613,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         _selectedGym = result;
         _areaId = null;
         _gymAreas = [];
+        _isLoadingGymDetail = true;
       });
       await _loadGymDetail(result.gymId);
     }
@@ -627,6 +639,12 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         _gymAreas = [];
         _areaId = null;
       });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingGymDetail = false;
+        });
+      }
     }
   }
 }

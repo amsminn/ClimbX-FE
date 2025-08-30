@@ -60,6 +60,15 @@ class AppColorSchemes {
   /// 빨간색 액센트 - 오류, 경고 등
   static const Color accentRed = Color(0xFFEF4444);
 
+  /// 흰색 홀드 선택 시 배경색 (white selection bg)
+  static const Color whiteSelectionBackground = backgroundTertiary;
+
+  /// 흰색 홀드 선택 시 테두리색 (기본 grey 톤)
+  static const Color whiteSelectionBorder = Color(0xFF9E9E9E);
+
+  /// 흰색 홀드 선택 시 텍스트색 (Colors.black87)
+  static const Color whiteSelectionText = Color(0xDD000000);
+
   // ===== 그라디언트 색상 (Gradient Colors) =====
   
   /// 기본 그라디언트 시작색
