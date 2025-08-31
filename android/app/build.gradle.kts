@@ -1,10 +1,7 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
-    kotlin("android")
-
 }
 
 android {
@@ -23,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.climbx_fe"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -67,4 +64,8 @@ afterEvaluate {
     // Disable outgoingVariants task
     tasks.matching { it.name.equals("outgoingVariants", ignoreCase = true) }
         .configureEach { enabled = false }
+}
+
+dependencies {
+    implementation("com.github.AbedElazizShe:LightCompressor:1.3.2")
 }
