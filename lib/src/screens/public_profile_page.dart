@@ -112,10 +112,7 @@ class PublicProfilePage extends HookWidget {
                 _buildScrollContent(TierWidget(userProfile: userProfile)),
                 _buildScrollContent(HistoryWidget(tierName: userProfile.displayTier, nickname: nickname)),
                 _buildScrollContent(StreakWidget(userProfile: userProfile, nickname: nickname)),
-                Container(
-                  color: AppColorSchemes.backgroundSecondary,
-                  child: VideoGalleryWidget(readOnly: true, nickname: nickname),
-                ),
+                _buildScrollContent(VideoGalleryWidget(readOnly: true, nickname: nickname)),
                 Container(
                   color: AppColorSchemes.backgroundSecondary,
                   child: SubmissionListWidget(nickname: nickname),
