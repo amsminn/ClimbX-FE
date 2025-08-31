@@ -8,13 +8,11 @@ import '../models/streak_data.dart';
 import '../api/user.dart';
 
 class StreakWidget extends HookWidget {
-  final String tierName;
   final UserProfile userProfile;
   final String? nickname; // 특정 유저 스트릭 조회용
 
   const StreakWidget({
     super.key,
-    this.tierName = 'Diamond I',
     required this.userProfile,
     this.nickname,
   });

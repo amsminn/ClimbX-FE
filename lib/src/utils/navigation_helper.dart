@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import '../screens/main_page.dart';
 import '../screens/login_page.dart';
@@ -70,7 +71,14 @@ class NavigationHelper {
         );
         return;
       }
-    } catch (_) {}
+    } catch (e, s) {
+      developer.log(
+        '현재 사용자 닉네임 확인 실패, 퍼블릭 프로필로 이동',
+        name: 'NavigationHelper',
+        error: e,
+        stackTrace: s,
+      );
+    }
     navigator.push(
       _createPageRoute(
         PublicProfilePage(nickname: targetNickname),
