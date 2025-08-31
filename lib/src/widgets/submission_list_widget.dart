@@ -7,7 +7,8 @@ import '../utils/tier_colors.dart';
 import '../utils/problem_tier.dart';
 
 class SubmissionListWidget extends HookWidget {
-  const SubmissionListWidget({super.key});
+  final String? nickname; // 특정 유저의 제출 조회용
+  const SubmissionListWidget({super.key, this.nickname});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class SubmissionListWidget extends HookWidget {
     final hasNext = useState<bool>(true);
 
     Future<void> fetchSubmissions() async {
-      final page = await SubmissionApi.getSubmissions();
+      final page = await SubmissionApi.getSubmissions(nickname: nickname);
       submissionsState.value = page.submissions;
       nextCursor.value = page.nextCursor;
       hasNext.value = page.hasNext;
@@ -59,6 +60,7 @@ class SubmissionListWidget extends HookWidget {
       try {
         final page = await SubmissionApi.getSubmissions(
           cursor: nextCursor.value,
+          nickname: nickname,
         );
         submissionsState.value = [
           ...submissionsState.value,

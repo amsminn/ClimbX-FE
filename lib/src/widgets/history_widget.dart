@@ -50,10 +50,12 @@ extension HistoryPeriodExtension on HistoryPeriod {
 
 class HistoryWidget extends HookWidget {
   final String tierName;
+  final String? nickname; // 특정 유저 히스토리 조회용
 
   const HistoryWidget({
     super.key,
     required this.tierName,
+    this.nickname,
   });
 
   @override
@@ -62,8 +64,8 @@ class HistoryWidget extends HookWidget {
 
     // fquery로 히스토리 데이터 get
     final historyQuery = useQuery<HistoryData, Exception>(
-      ['user_history'],
-      UserApi.getUserHistory,
+      ['user_history', nickname ?? ''],
+      () => UserApi.getUserHistory(nickname: nickname),
     );
 
     final TierType tierType = TierColors.getTierFromString(tierName);

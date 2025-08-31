@@ -14,9 +14,10 @@ import '../utils/tier_provider.dart';
 /// 인라인 편집 모드 지원
 
 class ProfileHeader extends HookWidget {
-  const ProfileHeader({super.key, required this.userProfile});
+  const ProfileHeader({super.key, required this.userProfile, this.readOnly = false});
 
   final UserProfile userProfile;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +133,8 @@ class ProfileHeader extends HookWidget {
     final ImageProvider backgroundImage;
     if (newImage.value != null) {
       backgroundImage = FileImage(newImage.value!);
-    } else if (imageUrl != null && imageUrl.isNotEmpty) {
+    } else if (imageUrl != null && imageUrl.isNotEmpty &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
       backgroundImage = NetworkImage(imageUrl);
     } else {
       backgroundImage = const AssetImage('assets/images/avatar.png');
@@ -337,51 +339,52 @@ class ProfileHeader extends HookWidget {
 
                 SizedBox(width: screenW * 0.04),
 
-                // 설정/완료 버튼
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColorSchemes.backgroundSecondary,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: AppColorSchemes.borderPrimary,
-                      width: 1,
+                // 설정/완료 버튼 (읽기 전용일 때 숨김)
+                if (!readOnly)
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColorSchemes.backgroundSecondary,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: AppColorSchemes.borderPrimary,
+                        width: 1,
+                      ),
                     ),
-                  ),
-                  child: submitting.value
-                      ? const SizedBox(
-                          width: 36,
-                          height: 36,
-                          child: Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                    child: submitting.value
+                        ? const SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                          )
+                        : IconButton(
+                            icon: Icon(
+                              isEditing.value ? Icons.check : Icons.edit_outlined,
+                              color: AppColorSchemes.textSecondary,
+                              size: 20,
+                            ),
+                            onPressed: isEditing.value
+                                ? saveChanges
+                                : () {
+                                    // 편집 모드 진입 시 초기값 설정
+                                    nickCtrl.text = u.nickname;
+                                    statusCtrl.text = u.statusMessage;
+                                    isEditing.value = true;
+                                  },
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
                             ),
                           ),
-                        )
-                      : IconButton(
-                          icon: Icon(
-                            isEditing.value ? Icons.check : Icons.edit_outlined,
-                            color: AppColorSchemes.textSecondary,
-                            size: 20,
-                          ),
-                          onPressed: isEditing.value
-                              ? saveChanges
-                              : () {
-                                  // 편집 모드 진입 시 초기값 설정
-                                  nickCtrl.text = u.nickname;
-                                  statusCtrl.text = u.statusMessage;
-                                  isEditing.value = true;
-                                },
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
-                        ),
-                ),
+                  ),
               ],
             ),
             const SizedBox(height: 12),

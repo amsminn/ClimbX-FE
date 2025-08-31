@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../api/leaderboard.dart';
 import '../models/leaderboard_item.dart';
 import '../utils/color_schemes.dart';
+import '../utils/navigation_helper.dart';
 import '../utils/leaderboard_type.dart';
 import '../utils/tier_colors.dart';
 
@@ -271,7 +272,15 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     final TierType tierType = TierColors.getTierFromString(user.tier);
     final TierColorScheme tierColorScheme = TierColors.getColorScheme(tierType);
 
-    return Container(
+    return InkWell(
+      onTap: () {
+        NavigationHelper.navigateToPublicProfileSmart(
+          context,
+          targetNickname: user.nickname,
+        );
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -370,6 +379,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
           const SizedBox(width: 4),
         ],
       ),
+    ),
     );
   }
 
@@ -389,10 +399,13 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
       return defaultAvatar;
     }
 
-    // 백엔드 이미지 경로에 base URL 추가
-    final fullUrl = profileImageCdnUrl;
+    // 절대 URL만 허용. 아니면 기본 아바타 사용
+    if (!profileImageCdnUrl.startsWith('http://') &&
+        !profileImageCdnUrl.startsWith('https://')) {
+      return defaultAvatar;
+    }
     return Image.network(
-      fullUrl,
+      profileImageCdnUrl,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => defaultAvatar,
       loadingBuilder: (context, child, loadingProgress) {

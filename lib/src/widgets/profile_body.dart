@@ -101,7 +101,6 @@ class ProfileBody extends HookWidget {
             _buildTabContent(child: HistoryWidget(tierName: currentTier)),
             _buildTabContent(
               child: StreakWidget(
-                tierName: currentTier,
                 userProfile: userProfile,
               ),
             ),
