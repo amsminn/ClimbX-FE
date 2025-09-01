@@ -632,7 +632,11 @@ class _StatsRow extends StatelessWidget {
           Icons.add_circle_outline,
         ),
         const SizedBox(width: 12),
-        card(userProfile.rivalCount.toString(), '명의 라이벌', Icons.people_outline),
+        card(
+          userProfile.currentStreak.toString(),
+          '현재 스트릭',
+          Icons.local_fire_department,
+        ),
       ],
     );
   }

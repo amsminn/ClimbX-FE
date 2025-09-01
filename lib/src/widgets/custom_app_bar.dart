@@ -119,22 +119,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
 
-        // 알림
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppColorSchemes.backgroundSecondary,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            icon: const Icon(
-              Icons.notifications_outlined,
-              color: AppColorSchemes.textSecondary,
-              size: 22,
-            ),
-            onPressed: () {},
-          ),
-        ),
+        // 알림 버튼 (비활성화/주석 처리)
+        // Container(
+        //   margin: const EdgeInsets.only(right: 8),
+        //   decoration: BoxDecoration(
+        //     color: AppColorSchemes.backgroundSecondary,
+        //     borderRadius: BorderRadius.circular(12),
+        //   ),
+        //   child: IconButton(
+        //     icon: const Icon(
+        //       Icons.notifications_outlined,
+        //       color: AppColorSchemes.textSecondary,
+        //       size: 22,
+        //     ),
+        //     onPressed: () {},
+        //   ),
+        // ),
         // 설정
         Container(
           margin: const EdgeInsets.only(right: 16),

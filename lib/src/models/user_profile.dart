@@ -13,6 +13,7 @@ class UserProfile {
   final int solvedCount;
   final int submissionCount;
   final int contributionCount;
+  // 서버 호환을 위해 rivalCount는 받아두지만 사용하지 않습니다.
   final int rivalCount;
 
   UserProfile({

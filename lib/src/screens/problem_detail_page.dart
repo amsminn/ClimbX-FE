@@ -21,7 +21,6 @@ class ProblemDetailPage extends StatefulWidget {
 }
 
 class _ProblemDetailPageState extends State<ProblemDetailPage> {
-  final TextEditingController _commentController = TextEditingController();
   String? _gymName; // 클라이밍장 이름 저장
 
   @override
@@ -32,7 +31,6 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
 
   @override
   void dispose() {
-    _commentController.dispose();
     super.dispose();
   }
 
@@ -94,8 +92,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   _buildSubmitButton(),
                   const SizedBox(height: 24),
 
-                  // 코멘트 섹션
-                  _buildCommentSection(),
+                  // 코멘트 섹션 제거됨
                 ],
               ),
             ),
@@ -269,100 +266,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       ),
     );
   }
-
-  /// 코멘트 섹션 위젯
-  Widget _buildCommentSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColorSchemes.backgroundPrimary,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColorSchemes.lightShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 코멘트 제목
-          const Text(
-            '코멘트',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColorSchemes.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // 코멘트 입력 필드
-          TextField(
-            controller: _commentController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              hintText: '코멘트를 입력하세요...',
-              hintStyle: const TextStyle(
-                color: AppColorSchemes.textTertiary,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: AppColorSchemes.borderPrimary,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: AppColorSchemes.accentBlue,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // 코멘트 작성 버튼
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  // 코멘트 작성 로직
-                  _submitComment();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColorSchemes.accentBlue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  '작성',
-                  style: TextStyle(
-                    color: AppColorSchemes.backgroundPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 코멘트 제출
-  void _submitComment() {
-    if (_commentController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('코멘트를 입력해주세요.')),
-      );
-      return;
-    }
-
-    // 코멘트 제출 로직 구현
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('코멘트가 작성되었습니다!')),
-    );
-    _commentController.clear();
-  }
+  
 
   // 색상 계산은 ColorCodes에서 처리함
 } 
