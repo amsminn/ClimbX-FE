@@ -13,7 +13,7 @@ class UserProfile {
   final int solvedCount;
   final int submissionCount;
   final int contributionCount;
-  final int rivalCount;
+  // 라이벌 수는 더 이상 사용하지 않음. 현재 스트릭을 사용합니다.
 
   UserProfile({
     required this.nickname,
@@ -28,7 +28,6 @@ class UserProfile {
     required this.solvedCount,
     required this.submissionCount,
     required this.contributionCount,
-    required this.rivalCount,
   });
 
   /// 표시용 티어 문자열
@@ -53,7 +52,6 @@ class UserProfile {
       solvedCount: json['solvedCount'] ?? 0,
       submissionCount: json['submissionCount'] ?? 0,
       contributionCount: json['contributionCount'] ?? 0,
-      rivalCount: json['rivalCount'] ?? 0,
     );
   }
 
@@ -71,7 +69,6 @@ class UserProfile {
       'solvedCount': solvedCount,
       'submissionCount': submissionCount,
       'contributionCount': contributionCount,
-      'rivalCount': rivalCount,
     };
   }
 
