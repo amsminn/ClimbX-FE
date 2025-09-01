@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
+import 'dart:async';
+import 'dart:developer' as developer;
 import 'profile_header.dart';
 import 'tier_widget.dart';
 import 'history_widget.dart';
@@ -16,9 +18,7 @@ import 'submission_list_widget.dart';
 /// 로딩/에러 상태 처리 및 탭 구조 관리
 
 class ProfileBody extends HookWidget {
-  const ProfileBody({super.key, this.refreshSignal = 0});
-
-  final int refreshSignal;
+  const ProfileBody({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,16 +27,14 @@ class ProfileBody extends HookWidget {
       'user_profile',
     ], UserApi.getUserProfile);
 
-    // 포커스/탭 재진입 시 자동 리로드
-    final didInitRef = useRef(false);
+    // 5분 주기 자동 리프레시
     useEffect(() {
-      if (didInitRef.value) {
+      final timer = Timer.periodic(const Duration(minutes: 5), (_) {
+        developer.log('프로필 자동 리프레시', name: 'ProfileBody');
         userQuery.refetch();
-      } else {
-        didInitRef.value = true;
-      }
-      return null;
-    }, [refreshSignal]);
+      });
+      return timer.cancel;
+    }, const []);
 
     // 로딩 중 표시
     if (userQuery.isLoading) {
