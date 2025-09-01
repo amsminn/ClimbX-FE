@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'dart:developer' as developer;
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../api/gym.dart';
 import '../models/gym.dart';
 import '../utils/color_schemes.dart';
@@ -133,7 +134,7 @@ class MapBody extends HookWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 상단 이미지 영역 (임시 컨테이너)
+                            // 상단 이미지 영역 지금은 map2dImageCdnUrl 사용
                             Container(
                               width: double.infinity,
                               height: 200,
@@ -143,26 +144,62 @@ class MapBody extends HookWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: Colors.grey[300]!),
                               ),
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.image,
-                                      size: 48,
-                                      color: Colors.grey[400],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      '클라이밍장 사진',
-                                      style: TextStyle(
-                                        color: Colors.grey[400],
-                                        fontSize: 14,
+                              clipBehavior: Clip.antiAlias,
+                              child: (gym.map2DUrl.isNotEmpty)
+                                  ? Image.network(
+                                      gym.map2DUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.image,
+                                              size: 48,
+                                              color: Colors.grey[400],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              '클라이밍장 사진',
+                                              style: TextStyle(
+                                                color: Colors.grey[400],
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return const Center(
+                                          child: SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : Center(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.image,
+                                            size: 48,
+                                            color: Colors.grey[400],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            '클라이밍장 사진',
+                                            style: TextStyle(
+                                              color: Colors.grey[400],
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
                             ),
 
                             // 클라이밍장 정보 영역 주소/전화만 표시
@@ -218,11 +255,31 @@ class MapBody extends HookWidget {
                                         color: AppColorSchemes.textSecondary,
                                       ),
                                       const SizedBox(width: 8),
-                                      Text(
-                                        gym.phoneNumber,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: AppColorSchemes.textSecondary,
+                                      InkWell(
+                                        onTap: () async {
+                                          final String raw = gym.phoneNumber.trim();
+                                          if (raw.isEmpty) return;
+                                          final String digits = raw.replaceAll(RegExp(r'[^0-9+]'), '');
+                                          final Uri telUri = Uri(scheme: 'tel', path: digits);
+                                          try {
+                                            final bool ok = await launchUrl(
+                                              telUri,
+                                              mode: LaunchMode.externalApplication,
+                                            );
+                                            if (!ok) {
+                                              developer.log('전화 연결 실패: $telUri', name: 'MapBody');
+                                            }
+                                          } catch (e) {
+                                            developer.log('전화 연결 중 오류: $e', name: 'MapBody');
+                                          }
+                                        },
+                                        child: Text(
+                                          gym.phoneNumber,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: AppColorSchemes.accentBlue,
+                                            decoration: TextDecoration.underline,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -435,6 +492,8 @@ class MapBody extends HookWidget {
             controller.value = mapController;
             // 지도가 준비되면 위치 권한 요청
             requestLocationPermission();
+            // 컨트롤러로 위치 추적 모드 활성화
+            mapController.setLocationTrackingMode(NLocationTrackingMode.follow);
           },
         ),
 
