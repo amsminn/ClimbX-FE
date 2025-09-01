@@ -18,6 +18,7 @@ class GymAreaMapOverlay extends StatefulWidget {
     required this.selectedAreaId,
     required this.onSelected,
     this.selectedOpacity = 0.35,
+    this.showAllWhenUnselected = true,
   });
 
   final String mapImageUrl;
@@ -25,6 +26,7 @@ class GymAreaMapOverlay extends StatefulWidget {
   final int? selectedAreaId;
   final ValueChanged<int?> onSelected; // null이면 전체
   final double selectedOpacity; // 0.0 ~ 1.0
+  final bool showAllWhenUnselected; // 선택 없을 때 모든 영역 보이기
 
   @override
   State<GymAreaMapOverlay> createState() => _GymAreaMapOverlayState();
@@ -243,8 +245,11 @@ extension _SelectedSvg on _GymAreaMapOverlayState {
     final int? id = widget.selectedAreaId;
     if (_rawGeometries.isEmpty) return const SizedBox.shrink();
 
-    // 전체(null)면 모든 영역 표시
+    // 전체(null)
     if (id == null) {
+      if (!widget.showAllWhenUnselected) {
+        return const SizedBox.shrink();
+      }
       return Stack(
         children: _rawGeometries.entries.map((e) {
           return Positioned.fill(
