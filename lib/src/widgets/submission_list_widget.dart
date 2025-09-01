@@ -8,7 +8,8 @@ import '../utils/tier_colors.dart';
 import '../utils/problem_tier.dart';
 
 class SubmissionListWidget extends HookWidget {
-  const SubmissionListWidget({super.key});
+  final String? nickname; // 특정 유저의 제출 조회용
+  const SubmissionListWidget({super.key, this.nickname});
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +19,8 @@ class SubmissionListWidget extends HookWidget {
     final hasNext = useState<bool>(true);
 
     final initialQuery = useQuery<SubmissionPageData, Exception>(
-      ['submissions', 'initial'],
-      SubmissionApi.getSubmissions,
+      ['submissions', 'initial', if (nickname != null) nickname!],
+        () => SubmissionApi.getSubmissions(nickname: nickname),
     );
 
     // 초기 데이터 동기화 및 에러 알림
@@ -49,6 +50,7 @@ class SubmissionListWidget extends HookWidget {
       try {
         final page = await SubmissionApi.getSubmissions(
           cursor: nextCursor.value,
+          nickname: nickname,
         );
         submissionsState.value = [
           ...submissionsState.value,

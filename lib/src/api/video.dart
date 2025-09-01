@@ -55,6 +55,31 @@ class VideoApi {
     }
   }
 
+  /// 특정 사용자의 영상 목록 조회
+  static Future<List<Video>> getUserVideosByNickname(String nickname) async {
+    try {
+      developer.log(
+        '사용자 영상 목록 조회 - nickname: $nickname',
+        name: 'VideoApi',
+      );
+
+      final data = await _apiClient.get<List<dynamic>>(
+        '/api/videos/$nickname',
+        logContext: 'VideoApi',
+      );
+
+      final videoList = data
+          .map((json) => Video.fromJson(json as Map<String, dynamic>))
+          .toList();
+
+      developer.log('영상 목록 조회 성공 - ${videoList.length}개', name: 'VideoApi');
+      return videoList;
+    } catch (e) {
+      developer.log('영상 목록 조회 실패: $e', name: 'VideoApi', error: e);
+      throw Exception('영상 목록을 불러올 수 없습니다: $e');
+    }
+  }
+
   /// presigned URL 요청
   static Future<VideoUploadResponse> requestUploadUrl({
     required String fileExtension,
