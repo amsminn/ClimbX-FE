@@ -65,7 +65,3 @@ afterEvaluate {
     tasks.matching { it.name.equals("outgoingVariants", ignoreCase = true) }
         .configureEach { enabled = false }
 }
-
-dependencies {
-    implementation("com.github.AbedElazizShe:LightCompressor:1.3.2")
-}
