@@ -27,11 +27,22 @@ class ProfileBody extends HookWidget {
       'user_profile',
     ], UserApi.getUserProfile);
 
-    // 5분 주기 자동 리프레시
+    // 마지막 리프레시 시각 추적
+    final lastRefreshTime = useRef<DateTime?>(null);
+
+    // 진입 시 5분 경과 시 즉시 리프레시 + 5분 주기 자동 리프레시
     useEffect(() {
+      if (lastRefreshTime.value != null &&
+          DateTime.now().difference(lastRefreshTime.value!).inMinutes >= 5) {
+        developer.log('프로필 진입 시 5분 경과로 즉시 리프레시', name: 'ProfileBody');
+        userQuery.refetch();
+        lastRefreshTime.value = DateTime.now();
+      }
+
       final timer = Timer.periodic(const Duration(minutes: 5), (_) {
         developer.log('프로필 자동 리프레시', name: 'ProfileBody');
         userQuery.refetch();
+        lastRefreshTime.value = DateTime.now();
       });
       return timer.cancel;
     }, const []);
