@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fquery/fquery.dart';
+import 'dart:async';
+import 'dart:developer' as developer;
 import 'profile_header.dart';
 import 'tier_widget.dart';
 import 'history_widget.dart';
@@ -24,6 +26,26 @@ class ProfileBody extends HookWidget {
     final userQuery = useQuery<UserProfile, Exception>([
       'user_profile',
     ], UserApi.getUserProfile);
+
+    // 마지막 리프레시 시각 추적
+    final lastRefreshTime = useRef<DateTime?>(null);
+
+    // 진입 시 5분 경과 시 즉시 리프레시 + 5분 주기 자동 리프레시
+    useEffect(() {
+      if (lastRefreshTime.value != null &&
+          DateTime.now().difference(lastRefreshTime.value!).inMinutes >= 5) {
+        developer.log('프로필 진입 시 5분 경과로 즉시 리프레시', name: 'ProfileBody');
+        userQuery.refetch();
+        lastRefreshTime.value = DateTime.now();
+      }
+
+      final timer = Timer.periodic(const Duration(minutes: 5), (_) {
+        developer.log('프로필 자동 리프레시', name: 'ProfileBody');
+        userQuery.refetch();
+        lastRefreshTime.value = DateTime.now();
+      });
+      return timer.cancel;
+    }, const []);
 
     // 로딩 중 표시
     if (userQuery.isLoading) {
@@ -86,7 +108,6 @@ class ProfileBody extends HookWidget {
                     _buildTab('히스토리'),
                     _buildTab('스트릭'),
                     _buildTab('내 영상'),
-                    // _buildTab('분야별 티어'), // 임시 비노출
                     _buildTab('제출 내역'),
                   ],
                 ),

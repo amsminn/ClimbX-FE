@@ -67,8 +67,10 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     } catch (e) {
       _errorByType[type] = e.toString().replaceFirst('Exception: ', '');
     } finally {
-      _isLoadingByType[type] = false;
-      setState(() {});
+      if (mounted) {
+        _isLoadingByType[type] = false;
+        setState(() {});
+      }
     }
   }
 
@@ -92,8 +94,10 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     } catch (e) {
       _errorByType[type] = e.toString().replaceFirst('Exception: ', '');
     } finally {
-      _isLoadingByType[type] = false;
-      setState(() {});
+      if (mounted) {
+        _isLoadingByType[type] = false;
+        setState(() {});
+      }
     }
   }
 
@@ -227,29 +231,35 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             );
           }
 
-          return NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              if (notification is ScrollEndNotification ||
-                  notification is UserScrollNotification) {
-                final metrics = notification.metrics;
-                if (metrics.pixels + _scrollThreshold >= metrics.maxScrollExtent) {
-                  _loadMore(type);
-                }
-              }
-              return false;
+          return RefreshIndicator(
+            onRefresh: () async {
+              await _loadInitial(type);
             },
-            child: ListView.builder(
-              itemCount: items.length + ((_hasMoreByType[type] == true) ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index >= items.length) {
-                  // 로딩 인디케이터 셀
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is ScrollEndNotification ||
+                    notification is UserScrollNotification) {
+                  final metrics = notification.metrics;
+                  if (metrics.pixels + _scrollThreshold >= metrics.maxScrollExtent) {
+                    _loadMore(type);
+                  }
                 }
-                return _buildLeaderboardItem(items[index]);
+                return false;
               },
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: items.length + ((_hasMoreByType[type] == true) ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index >= items.length) {
+                    // 로딩 인디케이터 셀
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return _buildLeaderboardItem(items[index]);
+                },
+              ),
             ),
           );
         },

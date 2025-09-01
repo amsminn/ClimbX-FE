@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fquery/fquery.dart';
 import '../api/submission.dart';
 import '../models/submission.dart';
 import '../utils/color_schemes.dart';
@@ -13,46 +14,35 @@ class SubmissionListWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final submissionsState = useState<List<Submission>>([]);
-    final isLoading = useState(false);
-    final isRefreshing = useState(false);
     final isLoadingMore = useState(false);
     final nextCursor = useState<String?>(null);
     final hasNext = useState<bool>(true);
 
-    Future<void> fetchSubmissions() async {
-      final page = await SubmissionApi.getSubmissions(nickname: nickname);
-      submissionsState.value = page.submissions;
-      nextCursor.value = page.nextCursor;
-      hasNext.value = page.hasNext;
-    }
+    final initialQuery = useQuery<SubmissionPageData, Exception>(
+      ['submissions', 'initial', if (nickname != null) nickname!],
+        () => SubmissionApi.getSubmissions(nickname: nickname),
+    );
 
-    Future<void> loadInitial() async {
-      isLoading.value = true;
-      try {
-        await fetchSubmissions();
-      } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('제출 내역을 불러오지 못했습니다: $e')));
-      } finally {
-        isLoading.value = false;
+    // 초기 데이터 동기화 및 에러 알림
+    useEffect(() {
+      final page = initialQuery.data;
+      if (page != null) {
+        submissionsState.value = page.submissions;
+        nextCursor.value = page.nextCursor;
+        hasNext.value = page.hasNext;
       }
-    }
-
-    Future<void> refresh() async {
-      isRefreshing.value = true;
-      try {
-        await fetchSubmissions();
-      } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('새로고침 실패: $e')));
-      } finally {
-        isRefreshing.value = false;
+      if (initialQuery.isError) {
+        if (!context.mounted) return null;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '제출 내역을 불러오지 못했습니다: ${initialQuery.error}',
+            ),
+          ),
+        );
       }
-    }
+      return null;
+    }, [initialQuery.data, initialQuery.isError]);
 
     Future<void> loadMore() async {
       if (isLoadingMore.value || !hasNext.value) return;
@@ -78,57 +68,49 @@ class SubmissionListWidget extends HookWidget {
       }
     }
 
-    useEffect(() {
-      loadInitial();
-      return null;
-    }, const []);
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        return RefreshIndicator(
-          onRefresh: refresh,
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              if (notification.metrics.pixels >=
-                  notification.metrics.maxScrollExtent - 200) {
-                loadMore();
-              }
-              return false;
-            },
-            child: isLoading.value
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : submissionsState.value.isEmpty
-                ? ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      const SizedBox(height: 120),
-                      _buildEmptyState(),
-                      const SizedBox(height: 120),
-                    ],
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount:
-                        submissionsState.value.length + (hasNext.value ? 1 : 0),
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      if (index >= submissionsState.value.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      final item = submissionsState.value[index];
-                      return _SubmissionListItem(item: item);
-                    },
+        return NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent - 200) {
+              loadMore();
+            }
+            return false;
+          },
+          child: initialQuery.isLoading
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: CircularProgressIndicator(),
                   ),
-          ),
+                )
+              : submissionsState.value.isEmpty
+                  ? ListView(
+                      physics: const ClampingScrollPhysics(),
+                      children: [
+                        const SizedBox(height: 120),
+                        _buildEmptyState(),
+                        const SizedBox(height: 120),
+                      ],
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      physics: const ClampingScrollPhysics(),
+                      itemCount: submissionsState.value.length +
+                          (hasNext.value ? 1 : 0),
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        if (index >= submissionsState.value.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        final item = submissionsState.value[index];
+                        return _SubmissionListItem(item: item);
+                      },
+                    ),
         );
       },
     );
