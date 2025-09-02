@@ -199,7 +199,7 @@ class _HistoryChartState extends State<HistoryChart>
                           ),
                           children: [
                             TextSpan(
-                              text: '${dataPoint.experience.toInt()} EXP',
+                              text: '${dataPoint.value.toInt()} EXP',
                               style: TextStyle(
                                 color: widget.colorScheme.primary,
                                 fontWeight: FontWeight.w700,
@@ -230,7 +230,7 @@ class _HistoryChartState extends State<HistoryChart>
           .map((entry) {
             final index = entry.key;
             final dataPoint = entry.value;
-            return FlSpot(index.toDouble(), dataPoint.experience);
+            return FlSpot(index.toDouble(), dataPoint.value);
           })
           .toList();
     }
@@ -246,7 +246,7 @@ class _HistoryChartState extends State<HistoryChart>
         .map((entry) {
           final index = entry.key;
           final dataPoint = entry.value;
-          return FlSpot(index.toDouble(), dataPoint.experience);
+          return FlSpot(index.toDouble(), dataPoint.value);
         })
         .toList();
   }
@@ -256,7 +256,7 @@ class _HistoryChartState extends State<HistoryChart>
       return 0.0;
     }
     final minExp = widget.historyData.dataPoints
-        .map((e) => e.experience)
+        .map((e) => e.value)
         .reduce((a, b) => a < b ? a : b);
     return (minExp - 50).floorToDouble();
   }
@@ -266,7 +266,7 @@ class _HistoryChartState extends State<HistoryChart>
       return 100.0;
     }
     final maxExp = widget.historyData.dataPoints
-        .map((e) => e.experience)
+        .map((e) => e.value)
         .reduce((a, b) => a > b ? a : b);
     return (maxExp + 50).ceilToDouble();
   }
