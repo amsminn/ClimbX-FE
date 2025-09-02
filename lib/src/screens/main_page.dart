@@ -30,8 +30,6 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   late BottomNavTab _currentTab;
   UserProfile? _userProfile;
-  bool _isLoading = true;
-  String? _error;
   int? _gymIdForSearch;
 
   @override
@@ -47,35 +45,7 @@ class MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 로딩 중이거나 에러가 있으면 로딩 화면 표시
-    if (_isLoading || _error != null) {
-      return Scaffold(
-        backgroundColor: AppColorSchemes.backgroundSecondary,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_isLoading) ...[
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
-                const Text('프로필 정보를 불러오는 중...'),
-              ] else ...[
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(_error ?? '프로필을 불러올 수 없습니다.'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _loadUserProfile,
-                  child: const Text('다시 시도'),
-                ),
-              ],
-            ],
-          ),
-        ),
-      );
-    }
-
-    // 유저 프로필이 로드된 경우
+    // 앱 전역은 항상 렌더링하고, 프로필은 내부에서 자체 로딩/에러 처리
     // 색상 스킴은 rating 기반으로 계산
     final TierType tierType = _userProfile != null
         ? TierColors.getTierTypeFromRating(_userProfile!.rating.totalRating)
@@ -120,30 +90,17 @@ class MainPageState extends State<MainPage> {
   
   /// 유저 프로필 로드
   Future<void> _loadUserProfile() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
     try {
       developer.log('유저 프로필 로드 시작', name: 'MainPage');
       final userProfile = await UserApi.getCurrentUserProfile();
-
-      if (mounted) {
-        setState(() {
-          _userProfile = userProfile;
-          _isLoading = false;
-        });
-        developer.log('유저 프로필 로드 완료: ${userProfile.tier}', name: 'MainPage');
-      }
+      if (!mounted) return;
+      setState(() {
+        _userProfile = userProfile;
+      });
+      developer.log('유저 프로필 로드 완료: ${userProfile.tier}', name: 'MainPage');
     } catch (e) {
       developer.log('유저 프로필 로드 실패: $e', name: 'MainPage', error: e);
-      if (mounted) {
-        setState(() {
-          _error = '프로필 정보를 불러오는 데 실패했습니다.';
-          _isLoading = false;
-        });
-      }
+      // 실패해도 전역 UI를 막지 않음. 기존 _userProfile 유지.
     }
   }
 
