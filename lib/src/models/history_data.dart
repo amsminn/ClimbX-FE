@@ -8,7 +8,7 @@ part 'history_data.g.dart';
 abstract class HistoryDataPoint with _$HistoryDataPoint {
   const factory HistoryDataPoint({
     required DateTime date,
-    @JsonKey(name: 'value') @Default(0.0) double experience,
+    @Default(0.0) double value,
   }) = _HistoryDataPoint;
 
   factory HistoryDataPoint.fromJson(Map<String, dynamic> json) =>
@@ -47,13 +47,13 @@ class HistoryData {
       );
     }
 
-    final firstValue = dataPoints.first.experience;
-    final lastValue = dataPoints.last.experience;
+    final firstValue = dataPoints.first.value;
+    final lastValue = dataPoints.last.value;
     final totalIncrease = lastValue - firstValue;
 
     double maxDaily = 0.0;
     for (int i = 1; i < dataPoints.length; i++) {
-      final dailyChange = (dataPoints[i].experience - dataPoints[i - 1].experience).abs();
+      final dailyChange = (dataPoints[i].value - dataPoints[i - 1].value).abs();
       if (dailyChange > maxDaily) {
         maxDaily = dailyChange;
       }

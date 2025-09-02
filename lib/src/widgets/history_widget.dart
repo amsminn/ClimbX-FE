@@ -78,15 +78,15 @@ class HistoryWidget extends HookWidget {
       filteredHistoryData = HistoryData(
         dataPoints: filteredPoints,
         totalIncrease: filteredPoints.isNotEmpty 
-            ? filteredPoints.last.experience - filteredPoints.first.experience 
+            ? filteredPoints.last.value - filteredPoints.first.value 
             : 0.0,
         averageDaily: filteredPoints.length > 1 
-            ? (filteredPoints.last.experience - filteredPoints.first.experience) / (filteredPoints.length - 1) 
+            ? (filteredPoints.last.value - filteredPoints.first.value) / (filteredPoints.length - 1) 
             : 0.0,
         maxDaily: filteredPoints.length > 1 
             ? List.generate(
                 filteredPoints.length - 1, 
-                (i) => (filteredPoints[i + 1].experience - filteredPoints[i].experience).abs()
+                (i) => (filteredPoints[i + 1].value - filteredPoints[i].value).abs()
               ).reduce((a, b) => a > b ? a : b) 
             : 0.0,
       );
