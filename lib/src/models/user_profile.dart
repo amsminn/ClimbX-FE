@@ -1,148 +1,63 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import '../utils/tier_colors.dart';
 
-class UserProfile {
-  final String nickname;
-  final String statusMessage;
-  final String? profileImageCdnUrl;
-  final int ranking;
-  final UserRating rating;
-  final String tier;
-  final List<CategoryRating> categoryRatings;
-  final int currentStreak;
-  final int longestStreak;
-  final int solvedCount;
-  final int submissionCount;
-  final int contributionCount;
-  // 서버 호환을 위해 rivalCount는 받아두지만 사용하지 않습니다.
-  final int rivalCount;
+part 'user_profile.freezed.dart';
+part 'user_profile.g.dart';
 
-  UserProfile({
-    required this.nickname,
-    required this.statusMessage,
-    this.profileImageCdnUrl,
-    required this.ranking,
-    required this.rating,
-    required this.tier,
-    required this.categoryRatings,
-    required this.currentStreak,
-    required this.longestStreak,
-    required this.solvedCount,
-    required this.submissionCount,
-    required this.contributionCount,
-    required this.rivalCount,
-  });
+@Freezed(fromJson: true, toJson: true)
+abstract class UserProfile with _$UserProfile {
+  const UserProfile._();
 
-  /// 표시용 티어 문자열
-  String get displayTier => TierColors.getTierStringFromRating(rating.totalRating);
+  const factory UserProfile({
+    @Default('') String nickname,
+    @Default('') String statusMessage,
+    String? profileImageCdnUrl,
+    @Default(0) int ranking,
+    @Default(UserRating()) UserRating rating,
+    @Default('') String tier,
+    @Default(<CategoryRating>[]) List<CategoryRating> categoryRatings,
+    @Default(0) int currentStreak,
+    @Default(0) int longestStreak,
+    @Default(0) int solvedCount,
+    @Default(0) int submissionCount,
+    @Default(0) int contributionCount,
+    // 서버 호환을 위해 rivalCount는 받아두지만 사용하지 않습니다.
+    @Default(0) int rivalCount,
+  }) = _UserProfile;
 
-  /// 색상/아이콘 계산을 위한 티어 타입
-  TierType get tierType => TierColors.getTierTypeFromRating(rating.totalRating);
+  factory UserProfile.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileFromJson(json);
 
-  factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile(
-      nickname: json['nickname'] ?? '',
-      statusMessage: json['statusMessage'] ?? '',
-      profileImageCdnUrl: json['profileImageCdnUrl'],
-      ranking: json['ranking'] ?? 0,
-      rating: UserRating.fromJson(json['rating'] as Map<String, dynamic>? ?? const {}),
-      tier: json['tier'] ?? '',
-      categoryRatings: (json['categoryRatings'] as List<dynamic>?)
-          ?.map((item) => CategoryRating.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
-      currentStreak: json['currentStreak'] ?? 0,
-      longestStreak: json['longestStreak'] ?? 0,
-      solvedCount: json['solvedCount'] ?? 0,
-      submissionCount: json['submissionCount'] ?? 0,
-      contributionCount: json['contributionCount'] ?? 0,
-      rivalCount: json['rivalCount'] ?? 0,
-    );
-  }
+  // 표시용 티어 문자열
+  String get displayTier =>
+      TierColors.getTierStringFromRating(rating.totalRating);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'nickname': nickname,
-      'statusMessage': statusMessage,
-      'profileImageCdnUrl': profileImageCdnUrl,
-      'ranking': ranking,
-      'rating': rating.toJson(),
-      'tier': tier,
-      'categoryRatings': categoryRatings.map((item) => item.toJson()).toList(),
-      'currentStreak': currentStreak,
-      'longestStreak': longestStreak,
-      'solvedCount': solvedCount,
-      'submissionCount': submissionCount,
-      'contributionCount': contributionCount,
-      'rivalCount': rivalCount,
-    };
-  }
-
-  @override
-  String toString() {
-    return 'UserProfile(nickname: $nickname, ranking: $ranking, rating: $rating, tier: $tier, streak: $currentStreak)';
-  }
+  // 색상/아이콘 계산을 위한 티어 타입
+  TierType get tierType =>
+      TierColors.getTierTypeFromRating(rating.totalRating);
 }
 
-/// 유저의 다양한 레이팅 값들을 담는 모델
-class UserRating {
-  final int totalRating;
-  final int topProblemRating;
-  final int solvedRating;
-  final int submissionRating;
-  final int contributionRating;
+@Freezed(fromJson: true, toJson: true)
+abstract class UserRating with _$UserRating {
+  const factory UserRating({
+    @Default(0) int totalRating,
+    @Default(0) int topProblemRating,
+    @Default(0) int solvedRating,
+    @Default(0) int submissionRating,
+    @Default(0) int contributionRating,
+  }) = _UserRating;
 
-  const UserRating({
-    required this.totalRating,
-    required this.topProblemRating,
-    required this.solvedRating,
-    required this.submissionRating,
-    required this.contributionRating,
-  });
-
-  factory UserRating.fromJson(Map<String, dynamic> json) {
-    return UserRating(
-      totalRating: (json['totalRating'] ?? 0) as int,
-      topProblemRating: (json['topProblemRating'] ?? 0) as int,
-      solvedRating: (json['solvedRating'] ?? 0) as int,
-      submissionRating: (json['submissionRating'] ?? 0) as int,
-      contributionRating: (json['contributionRating'] ?? 0) as int,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'totalRating': totalRating,
-        'topProblemRating': topProblemRating,
-        'solvedRating': solvedRating,
-        'submissionRating': submissionRating,
-        'contributionRating': contributionRating,
-      };
+  factory UserRating.fromJson(Map<String, dynamic> json) =>
+      _$UserRatingFromJson(json);
 }
 
-/// 카테고리별 레이팅 정보를 담는 모델
-class CategoryRating {
-  final String category;
-  final int rating;
+@Freezed(fromJson: true, toJson: true)
+abstract class CategoryRating with _$CategoryRating {
+  const factory CategoryRating({
+    @Default('') String category,
+    @Default(0) int rating,
+  }) = _CategoryRating;
 
-  CategoryRating({
-    required this.category,
-    required this.rating,
-  });
-
-  factory CategoryRating.fromJson(Map<String, dynamic> json) {
-    return CategoryRating(
-      category: json['category'] ?? '',
-      rating: json['rating'] ?? 0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'category': category,
-      'rating': rating,
-    };
-  }
-
-  @override
-  String toString() {
-    return 'CategoryRating(category: $category, rating: $rating)';
-  }
+  factory CategoryRating.fromJson(Map<String, dynamic> json) =>
+      _$CategoryRatingFromJson(json);
 }
