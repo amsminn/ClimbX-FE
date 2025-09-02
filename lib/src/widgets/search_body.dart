@@ -226,11 +226,11 @@ class _SearchBodyState extends State<SearchBody> {
             _buildSearchBar(),
 
             // 지도 오버레이 (지점 선택 시 표시)
-            if (_selectedGym != null && _selectedGym!.map2DUrl.isNotEmpty) ...[
+            if (_selectedGym != null && _selectedGym!.map2dImageCdnUrl.isNotEmpty) ...[
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 child: GymAreaMapOverlay(
-                  mapImageUrl: _selectedGym!.map2DUrl,
+                  mapImageUrl: _selectedGym!.map2dImageCdnUrl,
                   areas: _gymAreas,
                   selectedAreaId: _selectedAreaId,
                   onSelected: (id) {

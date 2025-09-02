@@ -1,64 +1,37 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'leaderboard_item.freezed.dart';
+part 'leaderboard_item.g.dart';
+
 /// 리더보드 아이템 정보를 담는 모델
-class LeaderboardItem {
-  final String nickname;
-  final String statusMessage;
-  final String? profileImageCdnUrl;
-  final int rating;
-  final int ranking;
-  final int currentStreak;
-  final int longestStreak;
-  final int solvedCount;
-  
-  // 프론트엔드에서 계산되는 필드들
-  final String tier;
-  final String value;
+@freezed
+abstract class LeaderboardItem with _$LeaderboardItem {
+  const factory LeaderboardItem({
+    @Default('') String nickname,
+    @Default('') String statusMessage,
+    String? profileImageCdnUrl,
+    @Default(0) int rating,
+    @Default(0) int ranking,
+    @Default(0) int currentStreak,
+    @Default(0) int longestStreak,
+    @Default(0) int solvedCount,
+    // 프론트 계산 필드
+    @Default('') String tier,
+    @Default('') String value,
+  }) = _LeaderboardItem;
 
-  const LeaderboardItem({
-    required this.nickname,
-    required this.statusMessage,
-    this.profileImageCdnUrl,
-    required this.rating,
-    required this.ranking,
-    required this.currentStreak,
-    required this.longestStreak,
-    required this.solvedCount,
-    required this.tier,
-    required this.value,
-  });
+  factory LeaderboardItem.fromJson(Map<String, dynamic> json) =>
+      _$LeaderboardItemFromJson(json);
 
-  /// 백엔드 응답에서 LeaderboardItem 객체 생성
-  factory LeaderboardItem.fromJson(
+  /// API 응답에 프론트 계산 필드(tier/value)를 합쳐 생성하는 헬퍼 팩토리
+  factory LeaderboardItem.withTierAndValue(
     Map<String, dynamic> json, {
     required String tier,
     required String value,
-  }) {
-    return LeaderboardItem(
-      nickname: json['nickname'] ?? '',
-      statusMessage: json['statusMessage'] ?? '',
-      profileImageCdnUrl: json['profileImageCdnUrl'],
-      rating: json['rating'] ?? 0,
-      ranking: json['ranking'] ?? 0,
-      currentStreak: json['currentStreak'] ?? 0,
-      longestStreak: json['longestStreak'] ?? 0,
-      solvedCount: json['solvedCount'] ?? 0,
-      tier: tier,
-      value: value,
-    );
-  }
-
-  /// JSON으로 직렬화
-  Map<String, dynamic> toJson() {
-    return {
-      'nickname': nickname,
-      'statusMessage': statusMessage,
-      'profileImageCdnUrl': profileImageCdnUrl,
-      'rating': rating,
-      'ranking': ranking,
-      'currentStreak': currentStreak,
-      'longestStreak': longestStreak,
-      'solvedCount': solvedCount,
-      'tier': tier,
-      'value': value,
-    };
-  }
-} 
+  }) =>
+      LeaderboardItem.fromJson({
+        ...json,
+        'tier': tier,
+        'value': value,
+      });
+}

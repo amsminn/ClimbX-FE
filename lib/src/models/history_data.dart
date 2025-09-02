@@ -1,28 +1,18 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'history_data.freezed.dart';
+part 'history_data.g.dart';
 
 // 하루 경험치 데이터 1개 -> 점 1개
-class HistoryDataPoint {
-  final DateTime date;
-  final double experience;
+@freezed
+abstract class HistoryDataPoint with _$HistoryDataPoint {
+  const factory HistoryDataPoint({
+    required DateTime date,
+    @Default(0.0) double value,
+  }) = _HistoryDataPoint;
 
-  HistoryDataPoint({
-    required this.date,
-    required this.experience,
-  });
-
-  /// 서버 응답에서 생성 (날짜 문자열 -> DateTime 변환, value -> experience)
-  factory HistoryDataPoint.fromJson(Map<String, dynamic> json) {
-    return HistoryDataPoint(
-      date: DateTime.parse(json['date']),
-      experience: (json['value'] ?? 0).toDouble(), // 서버의 'value' -> 'experience'
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'date': date.toIso8601String().split('T')[0], // YYYY-MM-DD 형태로
-      'value': experience, // experience -> 'value'로 변환
-    };
-  }
+  factory HistoryDataPoint.fromJson(Map<String, dynamic> json) =>
+      _$HistoryDataPointFromJson(json);
 }
 
 // 히스토리 정보
@@ -57,13 +47,13 @@ class HistoryData {
       );
     }
 
-    final firstValue = dataPoints.first.experience;
-    final lastValue = dataPoints.last.experience;
+    final firstValue = dataPoints.first.value;
+    final lastValue = dataPoints.last.value;
     final totalIncrease = lastValue - firstValue;
 
     double maxDaily = 0.0;
     for (int i = 1; i < dataPoints.length; i++) {
-      final dailyChange = (dataPoints[i].experience - dataPoints[i - 1].experience).abs();
+      final dailyChange = (dataPoints[i].value - dataPoints[i - 1].value).abs();
       if (dailyChange > maxDaily) {
         maxDaily = dailyChange;
       }

@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -126,7 +127,14 @@ class AuthApi {
         developer.log('카카오톡 설치되어 있음', name: 'AuthApi');
         try {
           // 카카오톡으로 로그인 시도 (nonce 포함)
-          await UserApi.instance.loginWithKakaoTalk(nonce: nonce);
+          // 카카오톡 앱으로 전환 후 사용자가 앱으로만 복귀해 Future가 끝나지 않는 문제 방지
+          try {
+            await UserApi.instance
+                .loginWithKakaoTalk(nonce: nonce)
+                .timeout(const Duration(seconds: 15));
+          } on TimeoutException {
+            throw const AuthCancelledException('카카오 로그인이 지연되어 취소되었습니다. 다시 시도해주세요.');
+          }
           developer.log('카카오톡으로 로그인 성공', name: 'AuthApi');
         } catch (error) {
           developer.log('카카오톡으로 로그인 실패: $error', name: 'AuthApi');
