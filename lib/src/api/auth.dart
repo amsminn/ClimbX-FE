@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -115,6 +116,8 @@ class AuthApi {
   /// 카카오 로그인
   static Future<String> signInWithKakao() async {
     try {
+      // 전체 로그인 플로우에 15초 타임아웃 적용 (사용자가 앱으로 복귀만 하고 완료하지 않는 경우 대비)
+      return await Future<String>(() async {
       // nonce 생성
       final nonce = _generateNonce();
       if (kDebugMode) {
@@ -126,7 +129,9 @@ class AuthApi {
         developer.log('카카오톡 설치되어 있음', name: 'AuthApi');
         try {
           // 카카오톡으로 로그인 시도 (nonce 포함)
-          await UserApi.instance.loginWithKakaoTalk(nonce: nonce);
+          await UserApi.instance
+              .loginWithKakaoTalk(nonce: nonce)
+              .timeout(const Duration(seconds: 15));
           developer.log('카카오톡으로 로그인 성공', name: 'AuthApi');
         } catch (error) {
           developer.log('카카오톡으로 로그인 실패: $error', name: 'AuthApi');
@@ -136,7 +141,9 @@ class AuthApi {
         // 카카오톡이 설치되지 않은 경우 카카오계정으로 로그인
         developer.log('카카오톡 설치되어 있지 않음', name: 'AuthApi');
         try {
-          await UserApi.instance.loginWithKakaoAccount(nonce: nonce);
+          await UserApi.instance
+              .loginWithKakaoAccount(nonce: nonce)
+              .timeout(const Duration(seconds: 15));
           developer.log('카카오계정으로 로그인 성공', name: 'AuthApi');
         } catch (error) {
           developer.log('카카오계정으로 로그인 실패: $error', name: 'AuthApi');
@@ -146,7 +153,9 @@ class AuthApi {
 
       // 카카오에서 받은 토큰 정보 가져오기
       final tokenManager = TokenManagerProvider.instance.manager;
-      final token = await tokenManager.getToken();
+      final token = await tokenManager
+          .getToken()
+          .timeout(const Duration(seconds: 15));
 
       if (token?.accessToken == null) {
         throw Exception('카카오 토큰을 가져올 수 없습니다.');
@@ -163,14 +172,20 @@ class AuthApi {
 
       // 백엔드로 id_token과 nonce 전송하여 JWT 토큰 받기 (idToken 검증 후)
       // 헤더에서 Refresh-Token을 받기 위해 순수 Dio 사용 (인터셉터 없음)
-      final dioResponse = await _pureDio.post(
+      final dioResponse = await _pureDio
+          .post(
         '/api/auth/oauth2/kakao/callback',
         data: {'idToken': idToken, 'nonce': nonce},
-      );
+      )
+          .timeout(const Duration(seconds: 15));
 
       final accessToken = await _processAuthResponse(dioResponse);
       developer.log('로그인 성공 - 토큰 저장 완료', name: 'AuthApi');
       return accessToken;
+      }).timeout(const Duration(seconds: 15));
+    } on TimeoutException {
+      // 사용자가 카톡 갔다가 미완료 복귀하는 케이스 포함하여 조용히 취소로 처리
+      throw const AuthCancelledException('로그인이 지연되어 취소되었습니다. 다시 시도해주세요.');
     } catch (e) {
       if (e is AuthCancelledException) {
         rethrow;
