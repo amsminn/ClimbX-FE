@@ -4,6 +4,7 @@ import '../api/gym.dart';
 import '../utils/color_schemes.dart';
 import '../screens/problem_submit_page.dart';
 import '../utils/color_codes.dart';
+import '../utils/navigation_helper.dart';
 
 /// 문제 상세 정보 페이지
 class ProblemDetailPage extends StatefulWidget {
@@ -90,6 +91,9 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
 
                   // 문제 제출 버튼
                   _buildSubmitButton(),
+                  const SizedBox(height: 12),
+                  // 난이도 기여 페이지로 이동 버튼
+                  _buildVotesButton(),
                   const SizedBox(height: 24),
 
                   // 코멘트 섹션 제거됨
@@ -266,7 +270,28 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       ),
     );
   }
-  
 
-  // 색상 계산은 ColorCodes에서 처리함
-} 
+  /// 난이도 기여 페이지 이동 버튼
+  Widget _buildVotesButton() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: OutlinedButton(
+        onPressed: () => NavigationHelper.navigateToProblemVotes(context, widget.problem.problemId),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: AppColorSchemes.accentBlue, width: 1.5),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: const Text(
+          '난이도 기여 보기',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColorSchemes.accentBlue,
+          ),
+        ),
+      ),
+    );
+  }
+}

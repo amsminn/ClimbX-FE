@@ -6,6 +6,7 @@ import '../models/submission.dart';
 import '../utils/color_schemes.dart';
 import '../utils/tier_colors.dart';
 import '../utils/problem_tier.dart';
+import '../utils/navigation_helper.dart';
 
 class SubmissionListWidget extends HookWidget {
   final String? nickname; // 특정 유저의 제출 조회용
@@ -183,7 +184,9 @@ class _SubmissionListItem extends StatelessWidget {
     final levelColor = Color(levelColorInt);
     final holdColor = Color(holdColorInt);
 
-    return Container(
+    return InkWell(
+      onTap: () => NavigationHelper.navigateToProblemVotes(context, item.problemId),
+      child: Container(
       decoration: BoxDecoration(
         color: AppColorSchemes.backgroundPrimary,
         borderRadius: BorderRadius.circular(16),
@@ -291,6 +294,7 @@ class _SubmissionListItem extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 
