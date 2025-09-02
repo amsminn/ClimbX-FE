@@ -83,9 +83,15 @@ class ProfileRefreshManager {
 
   /// 프로필 새로고침이 필요한지 종합적으로 판단
   /// 플래그가 true이거나 5분이 경과했으면 새로고침 필요
+  /// needsRefresh()와 isFiveMinutesElapsed()를 병렬로 실행하여 성능 최적화
   Future<bool> shouldRefresh() async {
-    final needsFlag = await needsRefresh();
-    final timeElapsed = await isFiveMinutesElapsed();
+    final results = await Future.wait([
+      needsRefresh(),
+      isFiveMinutesElapsed(),
+    ]);
+    
+    final needsFlag = results[0];
+    final timeElapsed = results[1];
     final should = needsFlag || timeElapsed;
     
     developer.log('프로필 새로고침 필요 여부: $should (플래그: $needsFlag, 시간경과: $timeElapsed)', 
