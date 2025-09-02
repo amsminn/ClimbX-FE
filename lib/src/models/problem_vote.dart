@@ -15,7 +15,7 @@ class ProblemVote {
 
   factory ProblemVote.fromJson(Map<String, dynamic> json) {
     return ProblemVote(
-      nickname: (json['nickname'] ?? '') as String,
+      nickname: json['nickname']?.toString() ?? '',
       tier: json['tier'] as String?,
       tags: (json['tags'] as List?)?.map((e) => e.toString()).toList() ?? const [],
       comment: json['comment'] as String?,

@@ -41,7 +41,7 @@ class ProblemVoteApi {
       data: {
         'tier': tier,
         'tags': tags,
-        if (comment != null && comment.isNotEmpty) 'comment': comment,
+        if (comment?.isNotEmpty ?? false) 'comment': comment,
       },
       fromJson: (json) => Problem.fromJson(json as Map<String, dynamic>),
       logContext: 'ProblemVoteApi',

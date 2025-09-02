@@ -41,9 +41,9 @@ class ProblemVoteCompose extends HookWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('의견이 등록되었습니다.')),
           );
+          onSubmitted?.call();
+          queryClient.invalidateQueries(['problem_votes', problemId]);
         }
-        onSubmitted?.call();
-        queryClient.invalidateQueries(['problem_votes', problemId]);
         isSubmitting.value = false;
       },
       onError: (error, __, ___) {
@@ -92,25 +92,8 @@ class ProblemVoteCompose extends HookWidget {
             ),
           ),
           const SizedBox(height: 12),
-          // 티어 선택 (드롭다운)
-          DropdownButtonFormField<String>(
-            value: selectedTier.value,
-            isExpanded: true,
-            icon: const Icon(Icons.keyboard_arrow_down, color: AppColorSchemes.textSecondary),
-            dropdownColor: AppColorSchemes.backgroundPrimary,
-            borderRadius: BorderRadius.circular(12),
-            menuMaxHeight: 360,
-            items: tiers.map((code) {
-              return DropdownMenuItem<String>(
-                value: code,
-                child: _TierSmallBadge(code: code, compact: false),
-              );
-            }).toList(),
-            selectedItemBuilder: (context) => tiers.map((code) => Align(
-                  alignment: Alignment.centerLeft,
-                  child: _TierSmallBadge(code: code, compact: true),
-                )).toList(),
-            onChanged: (v) => selectedTier.value = v,
+          // 티어 선택 (드롭다운) - FormField 직접 사용해 버전 호환/디프리케이션 회피
+          InputDecorator(
             decoration: InputDecoration(
               labelText: '난이도 티어 선택',
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -121,6 +104,20 @@ class ProblemVoteCompose extends HookWidget {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColorSchemes.accentBlue),
+              ),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: selectedTier.value,
+                isExpanded: true,
+                icon: const Icon(Icons.keyboard_arrow_down, color: AppColorSchemes.textSecondary),
+                items: tiers.map((code) {
+                  return DropdownMenuItem<String>(
+                    value: code,
+                    child: _TierSmallBadge(code: code, compact: true),
+                  );
+                }).toList(),
+                onChanged: (v) => selectedTier.value = v,
               ),
             ),
           ),

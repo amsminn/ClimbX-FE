@@ -36,7 +36,7 @@ class ProblemVotesPage extends HookWidget {
     }, [initialQuery.data]);
 
     Future<void> loadMore() async {
-      if (isLoadingMore.value || !hasMore.value) return;
+      if (isLoadingMore.value || !hasMore.value || !context.mounted) return;
       isLoadingMore.value = true;
       try {
         final nextPage = page.value + 1;
@@ -50,7 +50,9 @@ class ProblemVotesPage extends HookWidget {
           SnackBar(content: Text('불러오기 실패: $e')),
         );
       } finally {
-        isLoadingMore.value = false;
+        if (context.mounted) {
+          isLoadingMore.value = false;
+        }
       }
     }
 

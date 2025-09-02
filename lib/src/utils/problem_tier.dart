@@ -42,54 +42,13 @@ class ProblemTierHelper {
   static ({String display, TierType type}) getDisplayAndTypeFromCode(String code) {
     if (code.isEmpty) return (display: '', type: TierType.bronze);
     final c = code.toUpperCase();
-    if (c == 'M') return (display: 'Master', type: TierType.master);
 
-    final prefix = c[0];
-    final numPart = c.length > 1 ? c.substring(1) : '';
-    String roman;
-    switch (numPart) {
-      case '1':
-        roman = 'I';
-        break;
-      case '2':
-        roman = 'II';
-        break;
-      case '3':
-        roman = 'III';
-        break;
-      default:
-        roman = numPart;
-    }
+    final bound = _bounds.firstWhere(
+      (b) => b.code.toUpperCase() == c,
+      orElse: () => _bounds.first,
+    );
 
-    TierType type;
-    String head;
-    switch (prefix) {
-      case 'B':
-        type = TierType.bronze;
-        head = 'Bronze';
-        break;
-      case 'S':
-        type = TierType.silver;
-        head = 'Silver';
-        break;
-      case 'G':
-        type = TierType.gold;
-        head = 'Gold';
-        break;
-      case 'P':
-        type = TierType.platinum;
-        head = 'Platinum';
-        break;
-      case 'D':
-        type = TierType.diamond;
-        head = 'Diamond';
-        break;
-      default:
-        type = TierType.bronze;
-        head = 'Bronze';
-    }
-    final display = roman.isEmpty ? head : '$head $roman';
-    return (display: display, type: type);
+    return (display: bound.display, type: bound.type);
   }
 }
 

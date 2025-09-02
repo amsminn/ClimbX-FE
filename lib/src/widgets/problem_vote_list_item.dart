@@ -65,7 +65,7 @@ class ProblemVoteListItem extends HookWidget {
                           ),
                           const SizedBox(height: 4),
                           if (userProfile != null)
-                            _UserTierGradientBadge(rating: userProfile.rating.totalRating),
+                            _UserTierBadge(rating: userProfile.rating.totalRating),
                         ],
                       ),
                     ),
@@ -73,7 +73,7 @@ class ProblemVoteListItem extends HookWidget {
                 ),
               ),
               if (vote.tier != null && vote.tier!.isNotEmpty)
-                _VotedTierRightPill(tierLabel: vote.tier!, userTierDisplay: userProfile != null ? ProblemTierHelper.getDisplayName(userProfile.rating.totalRating) : null),
+                _VotedTierRightPill(tierLabel: vote.tier!),
             ],
           ),
           const SizedBox(height: 4),
@@ -144,8 +144,7 @@ class ProblemVoteListItem extends HookWidget {
 
 class _VotedTierRightPill extends StatelessWidget {
   final String tierLabel;
-  final String? userTierDisplay;
-  const _VotedTierRightPill({required this.tierLabel, this.userTierDisplay});
+  const _VotedTierRightPill({required this.tierLabel});
 
   @override
   Widget build(BuildContext context) {
@@ -221,15 +220,3 @@ class _UserTierBadge extends StatelessWidget {
     );
   }
 }
-
-class _UserTierGradientBadge extends StatelessWidget {
-  final int rating;
-  const _UserTierGradientBadge({required this.rating});
-
-  @override
-  Widget build(BuildContext context) {
-    return _UserTierBadge(rating: rating);
-  }
-}
-
-
