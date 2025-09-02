@@ -59,17 +59,6 @@ abstract class Video with _$Video {
   factory Video.fromJson(Map<String, dynamic> json) => _$VideoFromJson(json);
 
   const Video._();
-  final String? videoId;           // 업로드 후 받을 ID
-  final String? thumbnailCdnUrl;   // 백엔드 생성 썸네일 URL
-  final String? hlsCdnUrl;         // HLS 스트리밍 URL
-  final VideoStatus status;        // 영상 처리 상태
-  final int? durationSeconds;      // 영상 길이 (초)
-  final DateTime createdAt;        // 생성 시간
-
-  // 클라이언트 전용 필드들 (서버에 저장되지 않음)
-  final String? localPath;         // 업로드 전 로컬 파일 경로
-  final double? uploadProgress;    // 업로드 진행률 (0.0 ~ 1.0)
-  final bool isUploading;          // 업로드 중 여부
 
   /// 로컬 파일에서 Video 객체 생성 (업로드 전)
   factory Video.fromLocalFile(String filePath) => Video(
@@ -79,8 +68,7 @@ abstract class Video with _$Video {
         isUploading: false,
       );
 
-  /// JSON 직렬화 (백엔드 필드만)
-  Map<String, dynamic> toJson() => _$VideoToJson(this);
+  /// JSON 직렬화는 Freezed/json_serializable 생성 코드 사용
 
   // === 편의 메서드들 ===
 
@@ -164,7 +152,6 @@ abstract class Video with _$Video {
   // copyWith는 Freezed가 생성
 
   @override
-  String toString() {
-    return 'Video(videoId: $videoId, status: ${status.value}, localPath: $localPath, isUploading: $isUploading)';
-  }
+  String toString() =>
+      'Video(videoId: $videoId, status: ${status.name}, localPath: $localPath, isUploading: $isUploading)';
 }
