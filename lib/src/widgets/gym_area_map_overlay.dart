@@ -48,7 +48,7 @@ class _GymAreaMapOverlayState extends State<GymAreaMapOverlay> {
   @override
   void didUpdateWidget(covariant GymAreaMapOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.areas != widget.areas) {
+    if (oldWidget.areas != widget.areas || oldWidget.mapImageUrl != widget.mapImageUrl) {
       _loadAllSvgGeometries();
     }
     if (oldWidget.mapImageUrl != widget.mapImageUrl) {

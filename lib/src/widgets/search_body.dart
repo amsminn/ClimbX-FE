@@ -220,37 +220,68 @@ class _SearchBodyState extends State<SearchBody> {
     return Stack(
       children: [
         // 메인 컨텐츠
-        Column(
-          children: [
+        CustomScrollView(
+          slivers: [
             // 검색바
-            _buildSearchBar(),
+            SliverToBoxAdapter(child: _buildSearchBar()),
 
-            // 지도 오버레이 (지점 선택 시 표시)
-            if (_selectedGym != null && _selectedGym!.map2dImageCdnUrl.isNotEmpty) ...[
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                child: GymAreaMapOverlay(
-                  mapImageUrl: _selectedGym!.map2dImageCdnUrl,
-                  areas: _gymAreas,
-                  selectedAreaId: _selectedAreaId,
-                  onSelected: (id) {
-                    setState(() => _selectedAreaId = id);
-                    _loadProblems();
-                  },
-                  selectedOpacity: 0.35,
+            // 지도 오버레이 (지점 선택 시 표시 - areas 데이터가 있을 때만)
+            if (_selectedGym != null && _selectedGym!.map2dImageCdnUrl.isNotEmpty && _gymAreas.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: GymAreaMapOverlay(
+                        mapImageUrl: _selectedGym!.map2dImageCdnUrl,
+                        areas: _gymAreas,
+                        selectedAreaId: _selectedAreaId,
+                        onSelected: (id) {
+                          setState(() => _selectedAreaId = id);
+                          _loadProblems();
+                        },
+                        selectedOpacity: 0.35,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              )
+            else if (_selectedGym != null && _selectedGym!.map2dImageCdnUrl.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    // areas 로딩 중일 때는 PNG만 표시
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Image.network(
+                        _selectedGym!.map2dImageCdnUrl,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(child: CircularProgressIndicator());
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-            ],
 
             // 필터 토글
-            _buildFilterSection(),
+            SliverToBoxAdapter(child: _buildFilterSection()),
 
             // 필터와 리스트 사이 간격
-            const SizedBox(height: 16),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
             // 문제 리스트
-            Expanded(child: _buildProblemList()),
+            _buildProblemListSliver(),
           ],
         ),
 
@@ -483,91 +514,99 @@ class _SearchBodyState extends State<SearchBody> {
     }
   }
 
-  /// 문제 리스트 위젯
-  Widget _buildProblemList() {
+  /// 문제 리스트 Sliver 위젯
+  Widget _buildProblemListSliver() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const SliverToBoxAdapter(
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (_problems.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.search_off,
-              size: 48,
-              color: AppColorSchemes.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _selectedGym == null ? '클라이밍장을 선택해주세요' : '조건에 맞는 문제가 없습니다',
-              style: const TextStyle(
+      return SliverToBoxAdapter(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.search_off,
+                size: 48,
                 color: AppColorSchemes.textSecondary,
-                fontSize: 14,
               ),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: () async {
-                final created = await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ProblemCreatePage(
-                      initialGymId: selectedGymId,
-                    ),
-                  ),
-                );
-                if (created == true) {
-                  _loadProblems();
-                }
-              },
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text('문제 등록하기'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColorSchemes.accentBlue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 16),
+              Text(
+                _selectedGym == null ? '클라이밍장을 선택해주세요' : '조건에 맞는 문제가 없습니다',
+                style: const TextStyle(
+                  color: AppColorSchemes.textSecondary,
+                  fontSize: 14,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final created = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ProblemCreatePage(
+                        initialGymId: selectedGymId,
+                      ),
+                    ),
+                  );
+                  if (created == true) {
+                    _loadProblems();
+                  }
+                },
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: const Text('문제 등록하기'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColorSchemes.accentBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.builder(
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, // 2열
           crossAxisSpacing: 12, // 가로 간격
           mainAxisSpacing: 16, // 세로 간격
           childAspectRatio: 0.8, // 아이템 비율 (세로가 더 길게)
         ),
-        itemCount: _problems.length,
-        itemBuilder: (context, index) {
-          final p = _problems[index];
-          return ProblemGridItem(
-            problem: p,
-            gymId: selectedGymId,
-            onTapOverride: widget.submissionVideoId != null
-                ? () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ProblemSubmitPage(
-                          problem: p,
-                          gymId: selectedGymId,
-                          initialSelectedVideoId: widget.submissionVideoId,
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final p = _problems[index];
+            return ProblemGridItem(
+              problem: p,
+              gymId: selectedGymId,
+              onTapOverride: widget.submissionVideoId != null
+                  ? () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ProblemSubmitPage(
+                            problem: p,
+                            gymId: selectedGymId,
+                            initialSelectedVideoId: widget.submissionVideoId,
+                          ),
                         ),
-                      ),
-                    );
-                  }
-                : null,
-          );
-        },
+                      );
+                    }
+                  : null,
+            );
+          },
+          childCount: _problems.length,
+        ),
       ),
     );
   }
+
 }

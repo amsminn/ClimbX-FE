@@ -97,13 +97,8 @@ class NavigationHelper {
     );
   }
 
-  /// 지도에서 검색 탭으로 이동하며 특정 지점을 프리필
+  /// 지도에서 검색 탭으로 이동하며 특정 지점을 프리필 (완전히 새로운 페이지로)
   static void navigateToSearchWithGym(BuildContext context, int gymId) {
-    final mainState = context.findAncestorStateOfType<MainPageState>();
-    if (mainState != null) {
-      mainState.switchToSearchWithGym(gymId);
-      return;
-    }
     Navigator.pushReplacement(
       context,
       _createPageRoute(

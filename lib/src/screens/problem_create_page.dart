@@ -393,13 +393,13 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
           final bool needsBorder = ColorCodes.needsBorderForLabel(opt);
           final bool isWhite = needsBorder && opt == '흰색';
           final Color selectedBg = isWhite
-              ? const Color(0xFFF1F5F9) // very light gray for white selection
+              ? AppColorSchemes.whiteSelectionBackground
               : color.withValues(alpha: 0.12);
           final Color sideColor = isSel
-              ? (isWhite ? Colors.grey : color)
+              ? (isWhite ? AppColorSchemes.whiteSelectionBorder : color)
               : AppColorSchemes.borderPrimary;
           final Color textColor = isSel
-              ? (isWhite ? Colors.black87 : color)
+              ? (isWhite ? AppColorSchemes.whiteSelectionText : color)
               : AppColorSchemes.textPrimary;
           return ChoiceChip(
             label: Row(
@@ -412,7 +412,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
                     color: color, 
                     shape: BoxShape.circle,
                     border: needsBorder 
-                        ? Border.all(color: Colors.grey, width: 1)
+                        ? Border.all(color: AppColorSchemes.whiteSelectionBorder, width: 1)
                         : null,
                   ),
                 ),
