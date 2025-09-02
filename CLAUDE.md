@@ -117,7 +117,7 @@ class UserApi {
 
 ### Authentication Flow
 - Automatic token management via AuthInterceptor
-- Token stored in flutter_secure_storage  
+- Token stored in flutter_secure_storage
 - 401 responses trigger automatic logout with user notification
 - Global navigator key for auth popups
 
