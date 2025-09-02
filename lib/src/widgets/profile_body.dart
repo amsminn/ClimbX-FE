@@ -34,20 +34,26 @@ class ProfileBody extends HookWidget {
     // 페이지 진입 시 새로고침 필요성 체크 + 5분 주기 백그라운드 새로고침
     useEffect(() {
       // 진입 시 즉시 새로고침 필요성 체크
-      refreshManager.shouldRefresh().then((shouldRefresh) {
+      refreshManager.shouldRefresh().then((shouldRefresh) async {
         if (shouldRefresh && context.mounted) {
           developer.log('프로필 진입 시 새로고침 트리거', name: 'ProfileBody');
           userQuery.refetch();
-          refreshManager.markRefreshed();
+          // markRefreshed도 비동기이므로 context.mounted 재확인
+          if (context.mounted) {
+            await refreshManager.markRefreshed();
+          }
         }
       });
 
       // 5분 주기 백그라운드 새로고침 (기존 동작 보장)
-      final timer = Timer.periodic(const Duration(minutes: 5), (_) {
+      final timer = Timer.periodic(const Duration(minutes: 5), (_) async {
         if (context.mounted) {
           developer.log('프로필 백그라운드 자동 리프레시', name: 'ProfileBody');
           userQuery.refetch();
-          refreshManager.markRefreshed();
+          // markRefreshed도 비동기이므로 context.mounted 재확인
+          if (context.mounted) {
+            await refreshManager.markRefreshed();
+          }
         }
       });
       return timer.cancel;
