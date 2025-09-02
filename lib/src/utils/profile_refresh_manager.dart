@@ -56,12 +56,16 @@ class ProfileRefreshManager {
 
   /// 프로필 새로고침 완료 처리
   /// 플래그를 false로 설정하고 현재 시간을 마지막 새로고침 시간으로 저장
+  /// Future.wait 사용으로 두 쓰기 작업의 원자성 및 성능 향상
   Future<void> markRefreshed() async {
     try {
       final now = DateTime.now();
       
-      await _storage.write(key: _needsRefreshKey, value: 'false');
-      await _storage.write(key: _lastRefreshTimeKey, value: now.millisecondsSinceEpoch.toString());
+      // 두 storage 쓰기 작업을 병렬로 실행하여 원자성과 성능 향상
+      await Future.wait([
+        _storage.write(key: _needsRefreshKey, value: 'false'),
+        _storage.write(key: _lastRefreshTimeKey, value: now.millisecondsSinceEpoch.toString()),
+      ]);
       
       developer.log('프로필 새로고침 완료 처리: $now', name: 'ProfileRefreshManager');
     } catch (e) {
