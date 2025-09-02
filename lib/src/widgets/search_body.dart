@@ -524,7 +524,7 @@ class _SearchBodyState extends State<SearchBody> {
 
     if (_problems.isEmpty) {
       return SliverToBoxAdapter(
-        child: Container(
+        child: SizedBox(
           height: MediaQuery.of(context).size.height * 0.6, // 화면 높이의 60%
           child: Center(
             child: Column(
