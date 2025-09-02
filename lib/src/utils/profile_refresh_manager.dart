@@ -12,15 +12,15 @@ class ProfileRefreshManager {
   static const String _needsRefreshKey = 'profile_needs_refresh';
   static const String _lastRefreshTimeKey = 'profile_last_refresh_time';
 
-  /// 프로필 새로고침이 필요한지 확인
+  /// 프로필 새로고침 플래그 확인
   Future<bool> needsRefresh() async {
     try {
       final needsRefreshStr = await _storage.read(key: _needsRefreshKey);
       final needsRefresh = needsRefreshStr == 'true';
-      developer.log('프로필 새로고침 필요 여부: $needsRefresh', name: 'ProfileRefreshManager');
+      developer.log('프로필 새로고침 플래그: $needsRefresh', name: 'ProfileRefreshManager');
       return needsRefresh;
     } catch (e) {
-      developer.log('새로고침 필요 여부 확인 실패: $e', name: 'ProfileRefreshManager', error: e);
+      developer.log('새로고침 플래그 확인 실패: $e', name: 'ProfileRefreshManager', error: e);
       return false;
     }
   }
