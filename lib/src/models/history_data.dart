@@ -15,8 +15,8 @@ abstract class HistoryDataPoint with _$HistoryDataPoint {
   factory HistoryDataPoint.fromJson(Map<String, dynamic> json) =>
       _$HistoryDataPointFromJson(json);
 
-  /// API 응답 전용 파서 (value -> experience 정규화)
-  factory HistoryDataPoint.fromApi(Map<String, dynamic> json) {
+  /// API 응답에서 value 키를 experience로 정규화하는 헬퍼
+  factory HistoryDataPoint.withValueAsExperience(Map<String, dynamic> json) {
     final normalized = <String, dynamic>{
       'date': json['date'],
       'experience': (json['value'] is num)
@@ -46,7 +46,7 @@ class HistoryData {
   /// 서버 응답 데이터에서 생성 (통계는 자동 계산)
   factory HistoryData.fromJson(List<dynamic> jsonList) {
     final dataPoints = jsonList
-        .map((json) => HistoryDataPoint.fromApi(json as Map<String, dynamic>))
+        .map((json) => HistoryDataPoint.withValueAsExperience(json as Map<String, dynamic>))
         .toList();
 
     // 통계 자동 계산
