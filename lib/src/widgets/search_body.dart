@@ -524,11 +524,12 @@ class _SearchBodyState extends State<SearchBody> {
 
     if (_problems.isEmpty) {
       return SliverToBoxAdapter(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.6, // 화면 높이의 60%
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
               const Icon(
                 Icons.search_off,
                 size: 48,
@@ -536,7 +537,9 @@ class _SearchBodyState extends State<SearchBody> {
               ),
               const SizedBox(height: 16),
               Text(
-                _selectedGym == null ? '클라이밍장을 선택해주세요' : '조건에 맞는 문제가 없습니다',
+                (_selectedGym == null && _selectedLocalLevel == null && _selectedHoldColor == null) 
+                    ? '클라이밍장을 선택하거나 조건을 설정해주세요' 
+                    : '조건에 맞는 문제가 없습니다',
                 style: const TextStyle(
                   color: AppColorSchemes.textSecondary,
                   fontSize: 14,
@@ -568,6 +571,7 @@ class _SearchBodyState extends State<SearchBody> {
                 ),
               ),
             ],
+            ),
           ),
         ),
       );
