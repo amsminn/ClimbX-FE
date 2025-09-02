@@ -8,6 +8,7 @@ import '../screens/email_compose_page.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../screens/video_submission_flow_page.dart';
 import '../screens/public_profile_page.dart';
+import '../screens/problem_votes_page.dart';
 import '../api/util/auth/user_identity.dart';
 
 /// 공통 네비게이션 처리 헬퍼
@@ -33,6 +34,16 @@ class NavigationHelper {
     Navigator.pushReplacement(
       context,
       _createPageRoute(const MainPage()),
+    );
+  }
+
+  /// 난이도 기여 페이지로 이동
+  static void navigateToProblemVotes(BuildContext context, String problemId) {
+    Navigator.push(
+      context,
+      _createPageRoute(
+        ProblemVotesPage(problemId: problemId),
+      ),
     );
   }
 
