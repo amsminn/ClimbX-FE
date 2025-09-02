@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fquery/fquery.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import '../api/vote.dart';
 import '../models/problem_vote.dart';
 import '../utils/color_schemes.dart';
@@ -14,50 +14,39 @@ class ProblemVotesPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final queryClient = useQueryClient();
-    final page = useState(0);
-    const size = 20;
-    final votes = useState<List<ProblemVote>>([]);
-    final hasMore = useState(true);
-    final isLoadingMore = useState(false);
-
-    final initialQuery = useQuery<List<ProblemVote>, Exception>(
-      ['problem_votes', problemId],
-      () => ProblemVoteApi.getVotes(problemId: problemId, page: 0, size: size),
+    const pageSize = 20;
+    
+    final pagingController = useMemoized(
+      () => PagingController<int, ProblemVote>(firstPageKey: 0),
     );
 
     useEffect(() {
-      if (initialQuery.data != null) {
-        votes.value = initialQuery.data!;
-        hasMore.value = initialQuery.data!.length == size;
-        page.value = 0;
-      }
-      return null;
-    }, [initialQuery.data]);
-
-    Future<void> loadMore() async {
-      if (isLoadingMore.value || !hasMore.value || !context.mounted) return;
-      isLoadingMore.value = true;
-      try {
-        final nextPage = page.value + 1;
-        final next = await ProblemVoteApi.getVotes(problemId: problemId, page: nextPage, size: size);
-        votes.value = [...votes.value, ...next];
-        page.value = nextPage;
-        hasMore.value = next.length == size;
-      } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('불러오기 실패: $e')),
-        );
-      } finally {
-        if (context.mounted) {
-          isLoadingMore.value = false;
+      void fetchPage(int pageKey) async {
+        try {
+          final votes = await ProblemVoteApi.getVotes(
+            problemId: problemId, 
+            page: pageKey, 
+            size: pageSize,
+          );
+          
+          final isLastPage = votes.length < pageSize;
+          if (isLastPage) {
+            pagingController.appendLastPage(votes);
+          } else {
+            final nextPageKey = pageKey + 1;
+            pagingController.appendPage(votes, nextPageKey);
+          }
+        } catch (error) {
+          pagingController.error = error;
         }
       }
-    }
+
+      pagingController.addPageRequestListener(fetchPage);
+      return () => pagingController.dispose();
+    }, []);
 
     void refreshAfterSubmit() {
-      queryClient.invalidateQueries(['problem_votes', problemId]);
+      pagingController.refresh();
     }
 
     return Scaffold(
@@ -74,11 +63,37 @@ class ProblemVotesPage extends HookWidget {
           style: TextStyle(color: AppColorSchemes.textPrimary),
         ),
       ),
-      body: initialQuery.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : initialQuery.isError
-              ? _buildError(context, initialQuery.error.toString())
-              : _buildContent(context, votes.value, hasMore.value, isLoadingMore.value, loadMore, refreshAfterSubmit),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            ProblemVoteCompose(problemId: problemId, onSubmitted: refreshAfterSubmit),
+            const SizedBox(height: 16),
+            Expanded(
+              child: PagedListView<int, ProblemVote>(
+                pagingController: pagingController,
+                builderDelegate: PagedChildBuilderDelegate<ProblemVote>(
+                  itemBuilder: (context, item, index) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: ProblemVoteListItem(vote: item),
+                  ),
+                  firstPageErrorIndicatorBuilder: (context) => _buildError(
+                    context, 
+                    pagingController.error.toString(),
+                  ),
+                  noItemsFoundIndicatorBuilder: (context) => _buildEmpty(),
+                  newPageProgressIndicatorBuilder: (context) => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -95,48 +110,6 @@ class ProblemVotesPage extends HookWidget {
     );
   }
 
-  Widget _buildContent(
-    BuildContext context,
-    List<ProblemVote> list,
-    bool hasMore,
-    bool isLoadingMore,
-    Future<void> Function() loadMore,
-    VoidCallback refreshAfterSubmit,
-  ) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (n) {
-        if (n.metrics.pixels >= n.metrics.maxScrollExtent - 200) {
-          loadMore();
-        }
-        return false;
-      },
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          ProblemVoteCompose(problemId: problemId, onSubmitted: refreshAfterSubmit),
-          const SizedBox(height: 16),
-          if (list.isEmpty)
-            _buildEmpty()
-          else ...[
-            ...list.map(
-              (v) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: ProblemVoteListItem(vote: v),
-              ),
-            ),
-            if (isLoadingMore) const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-            if (!isLoadingMore && hasMore)
-              Center(
-                child: TextButton(
-                  onPressed: loadMore,
-                  child: const Text('더 보기'),
-                ),
-              ),
-          ]
-        ],
-      ),
-    );
-  }
 
   Widget _buildEmpty() {
     return Container(

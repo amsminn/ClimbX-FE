@@ -4,7 +4,7 @@ import 'package:fquery/fquery.dart';
 import '../api/vote.dart';
 import '../utils/color_schemes.dart';
 import '../utils/tier_colors.dart';
-import '../utils/problem_tier.dart';
+import '../models/problem_tier_code.dart';
 
 class ProblemVoteCompose extends HookWidget {
   final String problemId;
@@ -16,16 +16,7 @@ class ProblemVoteCompose extends HookWidget {
   Widget build(BuildContext context) {
     final controller = useTextEditingController();
     final isSubmitting = useState(false);
-    // 서버 스펙: B/S/G/P 각 3단계, M 1단계
-    const tiers = [
-      'B3','B2','B1',
-      'S3','S2','S1',
-      'G3','G2','G1',
-      'P3','P2','P1',
-      'D3','D2','D1',
-      'M',
-    ];
-    final selectedTier = useState<String?>(null);
+    final selectedTier = useState<ProblemTierCode?>(null);
 
     final queryClient = useQueryClient();
     final mutation = useMutation(
@@ -67,7 +58,7 @@ class ProblemVoteCompose extends HookWidget {
       if (isSubmitting.value) return;
       isSubmitting.value = true;
       final vars = <String, dynamic>{
-        'tier': selectedTier.value!,
+        'tier': selectedTier.value!.code,
         if (text.isNotEmpty) 'comment': text,
       };
       mutation.mutate(vars);
@@ -107,14 +98,14 @@ class ProblemVoteCompose extends HookWidget {
               ),
             ),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
+              child: DropdownButton<ProblemTierCode>(
                 value: selectedTier.value,
                 isExpanded: true,
                 icon: const Icon(Icons.keyboard_arrow_down, color: AppColorSchemes.textSecondary),
-                items: tiers.map((code) {
-                  return DropdownMenuItem<String>(
-                    value: code,
-                    child: _TierSmallBadge(code: code, compact: true),
+                items: ProblemTierCode.all.map((tierCode) {
+                  return DropdownMenuItem<ProblemTierCode>(
+                    value: tierCode,
+                    child: _TierSmallBadge(tierCode: tierCode, compact: true),
                   );
                 }).toList(),
                 onChanged: (v) => selectedTier.value = v,
@@ -162,14 +153,13 @@ class ProblemVoteCompose extends HookWidget {
 }
 
 class _TierSmallBadge extends StatelessWidget {
-  final String code;
+  final ProblemTierCode tierCode;
   final bool compact;
-  const _TierSmallBadge({required this.code, this.compact = false});
+  const _TierSmallBadge({required this.tierCode, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
-    final mapped = ProblemTierHelper.getDisplayAndTypeFromCode(code);
-    final scheme = TierColors.getColorScheme(mapped.type);
+    final scheme = TierColors.getColorScheme(tierCode.tierType);
     final double vPad = compact ? 3 : 6;
     final double hPad = compact ? 8 : 10;
     final double fSize = compact ? 11 : 12;
@@ -180,7 +170,7 @@ class _TierSmallBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        mapped.display,
+        tierCode.display,
         style: TextStyle(
           fontSize: fSize,
           fontWeight: FontWeight.w800,
