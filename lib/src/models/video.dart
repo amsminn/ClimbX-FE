@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'video.freezed.dart';
+part 'video.g.dart';
 
 /// 영상 처리 상태
-enum VideoStatus {
-  pending('PENDING'),
-  processing('PROCESSING'),
-  completed('COMPLETED'),
-  failed('FAILED');
+enum VideoStatus { pending, processing, completed, failed }
 
-  const VideoStatus(this.value);
-  final String value;
-
-  static VideoStatus fromString(String status) {
-    switch (status.toUpperCase()) {
+class VideoStatusConverter implements JsonConverter<VideoStatus, String> {
+  const VideoStatusConverter();
+  @override
+  VideoStatus fromJson(String json) {
+    switch (json.toUpperCase()) {
       case 'PENDING':
         return VideoStatus.pending;
       case 'PROCESSING':
@@ -24,10 +24,41 @@ enum VideoStatus {
         return VideoStatus.pending;
     }
   }
+
+  @override
+  String toJson(VideoStatus object) {
+    switch (object) {
+      case VideoStatus.pending:
+        return 'PENDING';
+      case VideoStatus.processing:
+        return 'PROCESSING';
+      case VideoStatus.completed:
+        return 'COMPLETED';
+      case VideoStatus.failed:
+        return 'FAILED';
+    }
+  }
 }
 
 /// 영상 정보 모델 (백엔드 응답 + 클라이언트 전용 필드)
-class Video {
+@freezed
+abstract class Video with _$Video {
+  const factory Video({
+    String? videoId,
+    String? thumbnailCdnUrl,
+    String? hlsCdnUrl,
+    @VideoStatusConverter() @Default(VideoStatus.pending) VideoStatus status,
+    int? durationSeconds,
+    required DateTime createdAt,
+    // 클라이언트 전용 필드
+    String? localPath,
+    double? uploadProgress,
+    @Default(false) bool isUploading,
+  }) = _Video;
+
+  factory Video.fromJson(Map<String, dynamic> json) => _$VideoFromJson(json);
+
+  const Video._();
   final String? videoId;           // 업로드 후 받을 ID
   final String? thumbnailCdnUrl;   // 백엔드 생성 썸네일 URL
   final String? hlsCdnUrl;         // HLS 스트리밍 URL
@@ -40,52 +71,16 @@ class Video {
   final double? uploadProgress;    // 업로드 진행률 (0.0 ~ 1.0)
   final bool isUploading;          // 업로드 중 여부
 
-  Video({
-    this.videoId,
-    this.thumbnailCdnUrl,
-    this.hlsCdnUrl,
-    required this.status,
-    this.durationSeconds,
-    required this.createdAt,
-    this.localPath,
-    this.uploadProgress,
-    this.isUploading = false,
-  });
-
-  /// 백엔드 응답에서 Video 객체 생성
-  factory Video.fromJson(Map<String, dynamic> json) {
-    return Video(
-      // TODO: 백엔드에서 videoId 필드 추가 예정
-      videoId: json['videoId'] as String?,
-      thumbnailCdnUrl: json['thumbnailCdnUrl'] as String?,
-      hlsCdnUrl: json['hlsCdnUrl'] as String?,
-      status: VideoStatus.fromString(json['status'] as String),
-      durationSeconds: json['durationSeconds'] as int?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-    );
-  }
-
   /// 로컬 파일에서 Video 객체 생성 (업로드 전)
-  factory Video.fromLocalFile(String filePath) {
-    return Video(
-      status: VideoStatus.pending,
-      createdAt: DateTime.now(),
-      localPath: filePath,
-      isUploading: false,
-    );
-  }
+  factory Video.fromLocalFile(String filePath) => Video(
+        status: VideoStatus.pending,
+        createdAt: DateTime.now(),
+        localPath: filePath,
+        isUploading: false,
+      );
 
   /// JSON 직렬화 (백엔드 필드만)
-  Map<String, dynamic> toJson() {
-    return {
-      'videoId': videoId,
-      'thumbnailCdnUrl': thumbnailCdnUrl,
-      'hlsCdnUrl': hlsCdnUrl,
-      'status': status.value,
-      'durationSeconds': durationSeconds,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toJson() => _$VideoToJson(this);
 
   // === 편의 메서드들 ===
 
@@ -166,30 +161,7 @@ class Video {
     );
   }
 
-  /// 복사본 생성 (일부 필드 수정용)
-  Video copyWith({
-    String? videoId,
-    String? thumbnailCdnUrl,
-    String? hlsCdnUrl,
-    VideoStatus? status,
-    int? durationSeconds,
-    DateTime? createdAt,
-    String? localPath,
-    double? uploadProgress,
-    bool? isUploading,
-  }) {
-    return Video(
-      videoId: videoId ?? this.videoId,
-      thumbnailCdnUrl: thumbnailCdnUrl ?? this.thumbnailCdnUrl,
-      hlsCdnUrl: hlsCdnUrl ?? this.hlsCdnUrl,
-      status: status ?? this.status,
-      durationSeconds: durationSeconds ?? this.durationSeconds,
-      createdAt: createdAt ?? this.createdAt,
-      localPath: localPath ?? this.localPath,
-      uploadProgress: uploadProgress ?? this.uploadProgress,
-      isUploading: isUploading ?? this.isUploading,
-    );
-  }
+  // copyWith는 Freezed가 생성
 
   @override
   String toString() {
