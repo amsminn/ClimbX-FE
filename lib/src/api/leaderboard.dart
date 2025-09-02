@@ -53,11 +53,7 @@ class LeaderboardApi {
         );
         final value = _getValueByCriteria(userData, type.criteria);
 
-        return LeaderboardItem.fromJson(
-          userData,
-          tier: tier,
-          value: value,
-        );
+        return LeaderboardItem.withTierAndValue(userData, tier: tier, value: value);
       }).toList();
 
       developer.log('리더보드 조회 성공 - ${users.length}명 조회', name: 'LeaderboardApi');
