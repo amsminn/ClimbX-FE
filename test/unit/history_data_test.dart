@@ -16,8 +16,8 @@ void main() {
       // 파싱 검증
       expect(historyData, isNotNull);
       expect(historyData.dataPoints.length, equals(3));
-      expect(historyData.dataPoints.first.experience, equals(1000.0));
-      expect(historyData.dataPoints.last.experience, equals(1030.0));
+      expect(historyData.dataPoints.first.value, equals(1000.0));
+      expect(historyData.dataPoints.last.value, equals(1030.0));
       expect(historyData.totalIncrease, equals(30.0)); // 1030 - 1000
     });
 
@@ -26,7 +26,7 @@ void main() {
       final dataPoint = HistoryDataPoint.fromJson(json);
       
       expect(dataPoint.date, equals(DateTime.parse('2025-01-01')));
-      expect(dataPoint.experience, equals(1500.0));
+      expect(dataPoint.value, equals(1500.0));
     });
 
     test('빈 데이터 목록을 올바르게 처리한다', () {
