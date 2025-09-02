@@ -145,9 +145,9 @@ class MapBody extends HookWidget {
                                 border: Border.all(color: Colors.grey[300]!),
                               ),
                               clipBehavior: Clip.antiAlias,
-                              child: (gym.map2DUrl.isNotEmpty)
+                              child: (gym.map2dImageCdnUrl.isNotEmpty)
                                   ? Image.network(
-                                      gym.map2DUrl,
+                                      gym.map2dImageCdnUrl,
                                       fit: BoxFit.cover,
                                       errorBuilder: (context, error, stackTrace) => Center(
                                         child: Column(

@@ -227,12 +227,12 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
                   decoration: _cardDecoration(),
                   child: const Center(child: CircularProgressIndicator()),
                 )
-              else if (_selectedGym != null && (_selectedGym!.map2DUrl.isNotEmpty))
+              else if (_selectedGym != null && (_selectedGym!.map2dImageCdnUrl.isNotEmpty))
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: _cardDecoration(),
                   child: GymAreaMapOverlay(
-                    mapImageUrl: _selectedGym!.map2DUrl,
+                    mapImageUrl: _selectedGym!.map2dImageCdnUrl,
                     areas: _gymAreas,
                     selectedAreaId: _areaId,
                     onSelected: (id) {
@@ -648,4 +648,3 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
     }
   }
 }
-
