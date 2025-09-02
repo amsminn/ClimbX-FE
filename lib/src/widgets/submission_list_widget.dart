@@ -7,6 +7,7 @@ import '../utils/color_schemes.dart';
 import '../utils/tier_colors.dart';
 import '../utils/problem_tier.dart';
 import '../utils/navigation_helper.dart';
+import '../utils/color_codes.dart';
 
 class SubmissionListWidget extends HookWidget {
   final String? nickname; // 특정 유저의 제출 조회용
@@ -299,17 +300,34 @@ class _SubmissionListItem extends StatelessWidget {
   }
 
   Widget _buildBadge(String text, Color color) {
+    // Extract color label from text (e.g., "난이도: 흰색" -> "흰색")
+    final parts = text.split(': ');
+    final colorLabel = parts.length > 1 ? parts[1] : text;
+    
+    // 흰색 처리: AppColorSchemes 사용
+    final bool needsBorder = ColorCodes.needsBorderForLabel(colorLabel);
+    final bool isWhite = needsBorder && colorLabel == '흰색';
+    final Color bgColor = isWhite
+        ? AppColorSchemes.whiteSelectionBackground
+        : color.withValues(alpha: 0.1);
+    final Color borderColor = isWhite
+        ? AppColorSchemes.whiteSelectionBorder.withValues(alpha: 0.3)
+        : color.withValues(alpha: 0.3);
+    final Color textColor = isWhite
+        ? AppColorSchemes.whiteSelectionText
+        : color;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+        color: bgColor,
+        border: Border.all(color: borderColor, width: 1),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: color,
+          color: textColor,
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
