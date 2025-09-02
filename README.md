@@ -94,6 +94,8 @@ cd ..
 
 ##### 개발 모드 실행
 ```bash
+dart run build_runner build --delete-conflicting-outputs
+
 # 연결된 기기 확인
 flutter devices
 
@@ -109,6 +111,8 @@ flutter run -d [device-id]
 
 ##### 릴리스 모드 빌드
 ```bash
+dart run build_runner build --delete-conflicting-outputs
+
 # iOS 릴리스 빌드
 flutter build ios --release
 
