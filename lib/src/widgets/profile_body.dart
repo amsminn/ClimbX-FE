@@ -31,30 +31,30 @@ class ProfileBody extends HookWidget {
     // 프로필 새로고침 매니저 인스턴스
     final refreshManager = useMemoized(() => ProfileRefreshManager(), []);
 
+    // 공통 프로필 새로고침 로직
+    Future<void> performProfileRefresh(String logMessage) async {
+      if (context.mounted) {
+        developer.log(logMessage, name: 'ProfileBody');
+        userQuery.refetch();
+        // markRefreshed도 비동기이므로 context.mounted 재확인
+        if (context.mounted) {
+          await refreshManager.markRefreshed();
+        }
+      }
+    }
+
     // 페이지 진입 시 새로고침 필요성 체크 + 5분 주기 백그라운드 새로고침
     useEffect(() {
       // 진입 시 즉시 새로고침 필요성 체크
       refreshManager.shouldRefresh().then((shouldRefresh) async {
-        if (shouldRefresh && context.mounted) {
-          developer.log('프로필 진입 시 새로고침 트리거', name: 'ProfileBody');
-          userQuery.refetch();
-          // markRefreshed도 비동기이므로 context.mounted 재확인
-          if (context.mounted) {
-            await refreshManager.markRefreshed();
-          }
+        if (shouldRefresh) {
+          await performProfileRefresh('프로필 진입 시 새로고침 트리거');
         }
       });
 
       // 5분 주기 백그라운드 새로고침 (기존 동작 보장)
       final timer = Timer.periodic(const Duration(minutes: 5), (_) async {
-        if (context.mounted) {
-          developer.log('프로필 백그라운드 자동 리프레시', name: 'ProfileBody');
-          userQuery.refetch();
-          // markRefreshed도 비동기이므로 context.mounted 재확인
-          if (context.mounted) {
-            await refreshManager.markRefreshed();
-          }
-        }
+        await performProfileRefresh('프로필 백그라운드 자동 리프레시');
       });
       return timer.cancel;
     }, const []);
