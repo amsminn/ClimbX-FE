@@ -13,6 +13,7 @@ import '../widgets/video_overlay_player.dart';
 import '../api/submission.dart';
 import '../utils/navigation_helper.dart';
 import '../utils/bottom_nav_tab.dart';
+import '../utils/error_message_helper.dart';
 
 /// 문제 제출 페이지
 class ProblemSubmitPage extends HookWidget {
@@ -124,9 +125,10 @@ class ProblemSubmitPage extends HookWidget {
         developer.log('영상 업로드 실패: $e', name: 'ProblemSubmitPage', error: e);
 
         if (context.mounted) {
+          final userFriendlyMessage = ErrorMessageHelper.getUserFriendlyMessage(e);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('영상 업로드 실패: $e'),
+              content: Text('영상 업로드 실패: $userFriendlyMessage'),
               backgroundColor: AppColorSchemes.accentRed,
               duration: const Duration(seconds: 5),
             ),
@@ -181,9 +183,10 @@ class ProblemSubmitPage extends HookWidget {
       } catch (e) {
         developer.log('비디오 촬영 실패: $e', name: 'ProblemSubmitPage', error: e);
         if (context.mounted) {
+          final userFriendlyMessage = ErrorMessageHelper.getUserFriendlyMessage(e);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('비디오 촬영 실패: $e'),
+              content: Text('비디오 촬영 실패: $userFriendlyMessage'),
               backgroundColor: AppColorSchemes.accentRed,
             ),
           );
@@ -209,9 +212,10 @@ class ProblemSubmitPage extends HookWidget {
           error: e,
         );
         if (context.mounted) {
+          final userFriendlyMessage = ErrorMessageHelper.getUserFriendlyMessage(e);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('갤러리 영상 선택 실패: $e'),
+              content: Text('갤러리 영상 선택 실패: $userFriendlyMessage'),
               backgroundColor: AppColorSchemes.accentRed,
             ),
           );
@@ -964,9 +968,10 @@ class ProblemSubmitPage extends HookWidget {
       }
     } catch (e) {
       if (context.mounted) {
+        final userFriendlyMessage = ErrorMessageHelper.getUserFriendlyMessage(e);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('제출 실패: $e'),
+            content: Text(userFriendlyMessage),
             backgroundColor: AppColorSchemes.accentRed,
           ),
         );
