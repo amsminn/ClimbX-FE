@@ -149,9 +149,6 @@ class VideoGalleryWidget extends HookWidget {
 
         developer.log('영상 업로드 완료: $videoId', name: 'VideoGalleryWidget');
 
-        // 영상 업로드 성공 시 프로필 새로고침 플래그 설정
-        await ProfileRefreshManager().setNeedsRefresh(true);
-
         // 업로드 완료 - 업로드 상태만 해제하고 로컬에서 삭제하지 않음
         final currentIndex = localVideos.value.indexWhere(
           (v) => v.localPath == pickedFile.path,
