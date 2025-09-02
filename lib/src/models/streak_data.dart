@@ -1,29 +1,18 @@
-/// 개별 스트릭 항목 (API 응답 구조)
-class StreakItem {
-  final DateTime date;
-  final int value;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  StreakItem({required this.date, required this.value});
+part 'streak_data.freezed.dart';
+part 'streak_data.g.dart';
+
+/// 개별 스트릭 항목 (API 응답 구조)
+@freezed
+abstract class StreakItem with _$StreakItem {
+  const factory StreakItem({
+    required DateTime date,
+    @Default(0) int value,
+  }) = _StreakItem;
 
   /// 서버 응답에서 생성
-  factory StreakItem.fromJson(Map<String, dynamic> json) {
-    return StreakItem(
-      date: DateTime.parse(json['date']),
-      value: (json['value'] ?? 0).toInt(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'date': date.toIso8601String().split('T')[0], // YYYY-MM-DD 형태로
-      'value': value,
-    };
-  }
-
-  @override
-  String toString() {
-    return 'StreakItem(date: $date, value: $value)';
-  }
+  factory StreakItem.fromJson(Map<String, dynamic> json) => _$StreakItemFromJson(json);
 }
 
 /// 스트릭 통계 데이터
