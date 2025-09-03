@@ -10,7 +10,6 @@ import '../utils/tier_provider.dart';
 import '../utils/tier_colors.dart';
 import 'video_overlay_player.dart';
 import '../utils/navigation_helper.dart';
-import '../utils/profile_refresh_manager.dart';
 
 class VideoGalleryWidget extends HookWidget {
   final bool isActive;
