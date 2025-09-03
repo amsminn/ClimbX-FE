@@ -73,44 +73,45 @@ class TierWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColorSchemes.backgroundTertiary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '#${userProfile.ranking}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        const Flexible(
-                          child: Text(
-                            '상위 0.1%',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColorSchemes.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // TODO: 백엔드에서 전체 유저 수와 랭킹 %를 API로 제공하면 주석 해제
+                // const SizedBox(width: 8),
+                // Flexible(
+                //   child: Container(
+                //     padding: const EdgeInsets.symmetric(
+                //       horizontal: 12,
+                //       vertical: 6,
+                //     ),
+                //     decoration: BoxDecoration(
+                //       color: AppColorSchemes.backgroundTertiary,
+                //       borderRadius: BorderRadius.circular(20),
+                //     ),
+                //     child: Row(
+                //       mainAxisSize: MainAxisSize.min,
+                //       children: [
+                //         Text(
+                //           '#${userProfile.ranking}',
+                //           style: TextStyle(
+                //             fontSize: 14,
+                //             fontWeight: FontWeight.w700,
+                //             color: colorScheme.primary,
+                //           ),
+                //         ),
+                //         const SizedBox(width: 6),
+                //         Flexible(
+                //           child: Text(
+                //             '상위 0.1%',
+                //             style: TextStyle(
+                //               fontSize: 12,
+                //               color: AppColorSchemes.textSecondary,
+                //               fontWeight: FontWeight.w500,
+                //             ),
+                //             overflow: TextOverflow.ellipsis,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
               ],
             ),
 
