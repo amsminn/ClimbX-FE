@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:developer' as developer;
 import '../utils/navigation_helper.dart';
 import '../utils/color_schemes.dart';
-import '../api/auth.dart';
-import 'package:dio/dio.dart'; // TEMP: debug PATCH
-import 'package:flutter/services.dart'; // TEMP: input formatter
-import '../api/util/auth/token_storage.dart'; // TEMP: get current nickname
-import '../api/util/core/api_client.dart'; // TEMP: BASE_URL 사용
-import 'package:flutter/foundation.dart'; // kDebugMode
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -82,23 +74,4 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  // 로그아웃 처리
-  static void _handleLogout(BuildContext context) {
-    developer.log('로그아웃 요청', name: 'CustomAppBar');
-
-    AuthHelpers.clearToken()
-      .then((_) {
-        developer.log('토큰 삭제 완료', name: 'CustomAppBar');
-
-        // LoginPage로 이동
-        if (context.mounted) {
-          NavigationHelper.navigateToLoginAfterLogout(context);
-          developer.log('LoginPage로 이동 완료', name: 'CustomAppBar');
-        }
-      })
-      .catchError((error) {
-        developer.log('로그아웃 실패: $error', name: 'CustomAppBar');
-      });
-  }
 }
