@@ -978,7 +978,7 @@ class ProblemSubmitPage extends HookWidget {
         final userFriendlyMessage = ErrorMessageHelper.getUserFriendlyMessage(e);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(userFriendlyMessage),
+            content: Text('제출 실패: $userFriendlyMessage'),
             backgroundColor: AppColorSchemes.accentRed,
           ),
         );
