@@ -139,3 +139,6 @@ Required `.env` variables:
 - Android: Requires API 36, NDK 27.0.12077973
 - Camera/gallery/location permissions handled at runtime
 - Video compression maintains aspect ratio via light_compressor
+
+이 프로젝트에서 사용자가 코드 예시, 설치/설정 단계, 라이브러리/API 문서를 요청하면 반드시 Context7 MCP를 사용해 최신 정보를 우선 조회하세요.
+
