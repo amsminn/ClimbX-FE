@@ -13,6 +13,7 @@ import '../api/user.dart';
 import 'video_gallery_widget.dart';
 import '../utils/tier_provider.dart';
 import 'submission_list_widget.dart';
+import '../utils/profile_refresh_manager.dart';
 
 /// 프로필 화면의 메인 바디 위젯
 /// 로딩/에러 상태 처리 및 탭 구조 관리
@@ -27,24 +28,31 @@ class ProfileBody extends HookWidget {
       'user_profile',
     ], UserApi.getUserProfile);
 
-    // 마지막 리프레시 시각 추적
-    final lastRefreshTime = useRef<DateTime?>(null);
+    // 프로필 새로고침 매니저 인스턴스
+    final refreshManager = useMemoized(() => ProfileRefreshManager(), []);
 
-    // 진입 시 5분 경과 시 즉시 리프레시 + 5분 주기 자동 리프레시
-    useEffect(() {
-      if (lastRefreshTime.value != null &&
-          DateTime.now().difference(lastRefreshTime.value!).inMinutes >= 5) {
-        developer.log('프로필 진입 시 5분 경과로 즉시 리프레시', name: 'ProfileBody');
+    // 공통 프로필 새로고침 로직
+    Future<void> performProfileRefresh(String logMessage) async {
+      if (context.mounted) {
+        developer.log(logMessage, name: 'ProfileBody');
         userQuery.refetch();
-        lastRefreshTime.value = DateTime.now();
+        // markRefreshed도 비동기이므로 context.mounted 재확인
+        if (context.mounted) {
+          await refreshManager.markRefreshed();
+        }
       }
+    }
 
-      final timer = Timer.periodic(const Duration(minutes: 5), (_) {
-        developer.log('프로필 자동 리프레시', name: 'ProfileBody');
-        userQuery.refetch();
-        lastRefreshTime.value = DateTime.now();
+    // 페이지 진입 시 새로고침 필요성 체크
+    useEffect(() {
+      // 진입 시 즉시 새로고침 필요성 체크 (플래그 + 5분 경과 종합 판단)
+      refreshManager.shouldRefresh().then((shouldRefresh) async {
+        if (shouldRefresh) {
+          await performProfileRefresh('프로필 진입 시 새로고침 트리거');
+        }
       });
-      return timer.cancel;
+
+      return null;
     }, const []);
 
     // 로딩 중 표시
