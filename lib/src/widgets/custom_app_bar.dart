@@ -24,100 +24,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
 
       // 로고
-      title: const Text(
-        'ClimbX',
-        style: TextStyle(
-          color: AppColorSchemes.textPrimary,
-          fontSize: 24,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.5,
+      title: const Padding(
+        padding: EdgeInsets.only(left: 8.0), // 원하는 만큼 값 조정
+        child: Text(
+          'ClimbX',
+          style: TextStyle(
+            color: AppColorSchemes.textPrimary,
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+          ),
         ),
       ),
+      centerTitle: false, // 왼쪽 정렬
 
       // 액션들
       actions: [
-
-        // TEMP: 디버그 - 현재 닉네임의 레이팅 PATCH 후 즉시 로그아웃 
-        if (kDebugMode)
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppColorSchemes.backgroundSecondary,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            icon: const Icon(
-              Icons.bug_report_outlined,
-              color: AppColorSchemes.textSecondary,
-              size: 22,
-            ),
-            onPressed: () async {
-              try {
-                final nickname = await TokenStorage.getUserNickname() ?? 'alice';
-                if (!context.mounted) return;
-                final controller = TextEditingController();
-                final rating = await showDialog<int>(
-                  context: context,
-                  builder: (ctx) {
-                    return AlertDialog(
-                      title: const Text('레이팅 입력'),
-                      content: TextField(
-                        controller: controller,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        decoration: const InputDecoration(
-                          hintText: '정수값을 입력하세요',
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: const Text('취소'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            if (controller.text.isEmpty) {
-                              Navigator.of(ctx).pop();
-                              return;
-                            }
-                            final value = int.tryParse(controller.text);
-                            Navigator.of(ctx).pop(value);
-                          },
-                          child: const Text('확인'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-                if (rating == null) return;
-
-                final baseUrl = ApiClient.baseUrl ?? '';
-                final dio = Dio(
-                  BaseOptions(
-                    baseUrl: baseUrl,
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'Accept': 'application/json',
-                      'Authorization': 'Bearer ${dotenv.env['PATCH_TOKEN']}',
-                    },
-                  ),
-                );
-
-                await dio.patch('/api/admin/users/$nickname/rating', data: rating);
-                if (!context.mounted) return;
-                _handleLogout(context);
-              } catch (e) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('레이팅 갱신 실패: $e')),
-                );
-                return;
-              }
-            },
-          ),
-        ),
+        // 레이팅 디버깅 버튼 삭제
 
         // 알림 버튼 (비활성화/주석 처리)
         // Container(
