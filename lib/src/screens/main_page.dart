@@ -104,11 +104,4 @@ class MainPageState extends State<MainPage> {
     }
   }
 
-  /// 외부에서 검색 탭으로 전환하면서 지점 프리필을 전달하기 위한 메서드
-  void switchToSearchWithGym(int gymId) {
-    setState(() {
-      _currentTab = BottomNavTab.search;
-      _gymIdForSearch = gymId;
-    });
-  }
 }

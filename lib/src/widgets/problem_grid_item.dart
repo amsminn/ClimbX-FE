@@ -150,16 +150,26 @@ class ProblemGridItem extends StatelessWidget {
     final displayLabel = normalized?.$1 ?? raw;
     final displayColor = normalized?.$2 ?? AppColorSchemes.accentBlue;
     
+    // 흰색 처리: AppColorSchemes 사용
+    final bool needsBorder = ColorCodes.needsBorderForLabel(displayLabel);
+    final bool isWhite = needsBorder && displayLabel == '흰색';
+    final Color bgColor = isWhite
+        ? AppColorSchemes.whiteSelectionBackground
+        : displayColor.withValues(alpha: 0.1);
+    final Color borderColor = isWhite
+        ? AppColorSchemes.whiteSelectionBorder.withValues(alpha: 0.3)
+        : displayColor.withValues(alpha: 0.3);
+    
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding, 
         vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
-        color: displayColor.withValues(alpha: 0.1),
+        color: bgColor,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: displayColor.withValues(alpha: 0.3),
+          color: borderColor,
           width: 1,
         ),
       ),
@@ -181,7 +191,7 @@ class ProblemGridItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: fontSize,
                 fontWeight: FontWeight.w500,
-                color: displayColor,
+                color: isWhite ? AppColorSchemes.whiteSelectionText : displayColor,
               ),
             ),
           ),
