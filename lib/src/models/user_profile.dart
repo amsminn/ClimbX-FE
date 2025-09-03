@@ -1,61 +1,63 @@
-/// 사용자 프로필 정보를 담는 모델
-class UserProfile {
-  final String nickname;
-  final String statusMessage;
-  final String? profileImageUrl;
-  final int ranking;
-  final int rating;
-  final Map<String, int> categoryRatings;
-  final int currentStreak;
-  final int longestStreak;
-  final int solvedProblemsCount;
-  final int rivalCount;
+import 'package:freezed_annotation/freezed_annotation.dart';
+import '../utils/tier_colors.dart';
 
-  UserProfile({
-    required this.nickname,
-    required this.statusMessage,
-    this.profileImageUrl,
-    required this.ranking,
-    required this.rating,
-    required this.categoryRatings,
-    required this.currentStreak,
-    required this.longestStreak,
-    required this.solvedProblemsCount,
-    required this.rivalCount,
-  });
+part 'user_profile.freezed.dart';
+part 'user_profile.g.dart';
 
-  factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile(
-      nickname: json['nickname'] ?? '',
-      statusMessage: json['statusMessage'] ?? '',
-      profileImageUrl: json['profileImageUrl'],
-      ranking: json['ranking'] ?? 0,
-      rating: json['rating'] ?? 0,
-      categoryRatings: Map<String, int>.from(json['categoryRatings'] ?? {}),
-      currentStreak: json['currentStreak'] ?? 0,
-      longestStreak: json['longestStreak'] ?? 0,
-      solvedProblemsCount: json['solvedProblemsCount'] ?? 0,
-      rivalCount: json['rivalCount'] ?? 0,
-    );
-  }
+@Freezed(fromJson: true, toJson: true)
+abstract class UserProfile with _$UserProfile {
+  const UserProfile._();
 
-  Map<String, dynamic> toJson() {
-    return {
-      'nickname': nickname,
-      'statusMessage': statusMessage,
-      'profileImageUrl': profileImageUrl,
-      'ranking': ranking,
-      'rating': rating,
-      'categoryRatings': categoryRatings,
-      'currentStreak': currentStreak,
-      'longestStreak': longestStreak,
-      'solvedProblemsCount': solvedProblemsCount,
-      'rivalCount': rivalCount,
-    };
-  }
+  const factory UserProfile({
+    @Default('') String nickname,
+    @Default('') String statusMessage,
+    String? profileImageCdnUrl,
+    @Default(0) int ranking,
+    @Default(UserRating()) UserRating rating,
+    @Default('') String tier,
+    @Default(<CategoryRating>[]) List<CategoryRating> categoryRatings,
+    @Default(0) int currentStreak,
+    @Default(0) int longestStreak,
+    @Default(0) int solvedCount,
+    @Default(0) int submissionCount,
+    @Default(0) int contributionCount,
+    // 서버 호환을 위해 rivalCount는 받아두지만 사용하지 않습니다.
+    @Default(0) int rivalCount,
+  }) = _UserProfile;
 
-  @override
-  String toString() {
-    return 'UserProfile(nickname: $nickname, ranking: $ranking, rating: $rating, streak: $currentStreak)';
-  }
-} 
+  factory UserProfile.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileFromJson(json);
+
+  // 표시용 티어 문자열
+  String get displayTier =>
+      TierColors.getTierStringFromRating(rating.totalRating);
+
+  // 색상/아이콘 계산을 위한 티어 타입
+  TierType get tierType =>
+      TierColors.getTierTypeFromRating(rating.totalRating);
+}
+
+@Freezed(fromJson: true, toJson: true)
+abstract class UserRating with _$UserRating {
+  const factory UserRating({
+    @Default(0) int totalRating,
+    @Default(0) int topProblemRating,
+    @Default(0) int solvedRating,
+    @Default(0) int submissionRating,
+    @Default(0) int contributionRating,
+  }) = _UserRating;
+
+  factory UserRating.fromJson(Map<String, dynamic> json) =>
+      _$UserRatingFromJson(json);
+}
+
+@Freezed(fromJson: true, toJson: true)
+abstract class CategoryRating with _$CategoryRating {
+  const factory CategoryRating({
+    @Default('') String category,
+    @Default(0) int rating,
+  }) = _CategoryRating;
+
+  factory CategoryRating.fromJson(Map<String, dynamic> json) =>
+      _$CategoryRatingFromJson(json);
+}

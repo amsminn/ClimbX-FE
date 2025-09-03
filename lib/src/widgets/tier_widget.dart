@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
 import '../utils/tier_colors.dart';
 import '../utils/color_schemes.dart';
+import '../utils/tier_provider.dart';
 import '../models/user_profile.dart';
 
 class TierWidget extends StatelessWidget {
-  final String tierName;
-  final UserProfile? userProfile;
+  final UserProfile userProfile;
 
   const TierWidget({
     super.key, 
-    this.tierName = 'Diamond I',
-    this.userProfile,
+    required this.userProfile,
   });
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final TierType currentTier = TierColors.getTierFromString(tierName);
-    final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
+    final TierColorScheme colorScheme = TierProvider.of(context);
 
     return Container(
       width: double.infinity,
@@ -75,44 +73,45 @@ class TierWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColorSchemes.backgroundTertiary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          userProfile != null ? '#${userProfile!.ranking}' : '#---',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        const Flexible(
-                          child: Text(
-                            '상위 0.1%',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColorSchemes.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // TODO: 백엔드에서 전체 유저 수와 랭킹 %를 API로 제공하면 주석 해제
+                // const SizedBox(width: 8),
+                // Flexible(
+                //   child: Container(
+                //     padding: const EdgeInsets.symmetric(
+                //       horizontal: 12,
+                //       vertical: 6,
+                //     ),
+                //     decoration: BoxDecoration(
+                //       color: AppColorSchemes.backgroundTertiary,
+                //       borderRadius: BorderRadius.circular(20),
+                //     ),
+                //     child: Row(
+                //       mainAxisSize: MainAxisSize.min,
+                //       children: [
+                //         Text(
+                //           '#${userProfile.ranking}',
+                //           style: TextStyle(
+                //             fontSize: 14,
+                //             fontWeight: FontWeight.w700,
+                //             color: colorScheme.primary,
+                //           ),
+                //         ),
+                //         const SizedBox(width: 6),
+                //         Flexible(
+                //           child: Text(
+                //             '상위 0.1%',
+                //             style: TextStyle(
+                //               fontSize: 12,
+                //               color: AppColorSchemes.textSecondary,
+                //               fontWeight: FontWeight.w500,
+                //             ),
+                //             overflow: TextOverflow.ellipsis,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
               ],
             ),
 
@@ -132,7 +131,7 @@ class TierWidget extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          tierName,
+                          userProfile.displayTier,
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 20 : 24,
                             fontWeight: FontWeight.w800,
@@ -146,7 +145,7 @@ class TierWidget extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          userProfile != null ? '${userProfile!.rating}' : '---',
+                          '${userProfile.rating.totalRating}',
                           style: TextStyle(
                             fontSize: screenWidth < 360 ? 28 : 32,
                             fontWeight: FontWeight.w900,
@@ -181,7 +180,7 @@ class TierWidget extends StatelessWidget {
                     ],
                   ),
                   child: Icon(
-                    TierColors.getTierIcon(currentTier),
+                    TierColors.getTierIcon(userProfile.tierType),
                     color: AppColorSchemes.backgroundPrimary,
                     size: screenWidth * 0.07,
                   ),
@@ -200,31 +199,55 @@ class TierWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColorSchemes.borderPrimary, width: 1),
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.trending_up, color: colorScheme.primary, size: 20),
-                  SizedBox(width: screenWidth * 0.02),
-                  Expanded(
-                    child: Text(
-                      '상위 50문제 난이도 합',
-                      style: TextStyle(
-                        fontSize: screenWidth < 360 ? 12 : 13,
-                        color: AppColorSchemes.textSecondary,
-                        fontWeight: FontWeight.w500,
+              child: Builder(builder: (context) {
+                final ratingItems = [
+                  (icon: Icons.trending_up, label: '상위 50문제 난이도 합', value: userProfile.rating.topProblemRating),
+                  (icon: Icons.check_circle_outline, label: '해결한 문제 수', value: userProfile.rating.solvedRating),
+                  (icon: Icons.outbox, label: '제출한 문제 수', value: userProfile.rating.submissionRating),
+                  (icon: Icons.volunteer_activism, label: '기여한 문제 수', value: userProfile.rating.contributionRating),
+                ];
+
+                Widget buildRatingRow({required IconData icon, required String label, required int value}) {
+                  return Row(
+                    children: [
+                      Icon(icon, color: colorScheme.primary, size: 20),
+                      SizedBox(width: screenWidth * 0.02),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: screenWidth < 360 ? 12 : 13,
+                            color: AppColorSchemes.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Text(
-                    '+2714',
-                    style: TextStyle(
-                      fontSize: screenWidth < 360 ? 14 : 15,
-                      fontWeight: FontWeight.w700,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
+                      Text(
+                        '+$value',
+                        style: TextStyle(
+                          fontSize: screenWidth < 360 ? 14 : 15,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                return Column(
+                  children: [
+                    for (int i = 0; i < ratingItems.length; i++) ...[
+                      buildRatingRow(
+                        icon: ratingItems[i].icon,
+                        label: ratingItems[i].label,
+                        value: ratingItems[i].value,
+                      ),
+                      if (i < ratingItems.length - 1) SizedBox(height: screenWidth * 0.02),
+                    ],
+                  ],
+                );
+              }),
             ),
           ],
         ),

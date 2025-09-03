@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import '../api/leaderboard.dart';
+import '../models/leaderboard_item.dart';
+import '../utils/color_schemes.dart';
+import '../utils/navigation_helper.dart';
 import '../utils/leaderboard_type.dart';
 import '../utils/tier_colors.dart';
-import '../utils/color_schemes.dart';
-import '../models/leaderboard_user.dart';
 
+/// 리더보드 메인 위젯
 class LeaderboardBody extends StatefulWidget {
   const LeaderboardBody({super.key});
 
@@ -16,155 +19,14 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
   late TabController _tabController;
   LeaderboardType _selectedType = LeaderboardType.rating;
 
-  // 임시 더미 데이터 (나중에 API로 교체)
-  final List<LeaderboardUser> _ratingUsers = [
-    const LeaderboardUser(
-      rank: 1,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '대 승 규',
-      value: '2847',
-      tier: 'Master',
-    ),
-    const LeaderboardUser(
-      rank: 2,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '바위정복자',
-      value: '2743',
-      tier: 'Diamond I',
-    ),
-    const LeaderboardUser(
-      rank: 3,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '홀드마스터',
-      value: '2698',
-      tier: 'Diamond I',
-    ),
-    const LeaderboardUser(
-      rank: 4,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '등반러버',
-      value: '2521',
-      tier: 'Platinum I',
-    ),
-    const LeaderboardUser(
-      rank: 5,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '크랙전문가',
-      value: '2456',
-      tier: 'Platinum I',
-    ),
-    const LeaderboardUser(
-      rank: 6,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '볼더링퀸',
-      value: '2289',
-      tier: 'Gold I',
-    ),
-    const LeaderboardUser(
-      rank: 7,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '루트파인더',
-      value: '2167',
-      tier: 'Gold I',
-    ),
-    const LeaderboardUser(
-      rank: 8,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '멀티피치',
-      value: '1998',
-      tier: 'Silver I',
-    ),
-    const LeaderboardUser(
-      rank: 9,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '앵커마스터',
-      value: '1876',
-      tier: 'Silver I',
-    ),
-    const LeaderboardUser(
-      rank: 10,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '비긴너클라이머',
-      value: '1654',
-      tier: 'Bronze I',
-    ),
-  ];
-
-  final List<LeaderboardUser> _contributionUsers = [
-    const LeaderboardUser(
-      rank: 1,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '정보제공자',
-      value: '247',
-      tier: 'Gold I',
-    ),
-    const LeaderboardUser(
-      rank: 2,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '리뷰어',
-      value: '189',
-      tier: 'Master',
-    ),
-    const LeaderboardUser(
-      rank: 3,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '길잡이',
-      value: '156',
-      tier: 'Platinum I',
-    ),
-    const LeaderboardUser(
-      rank: 4,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '헬퍼',
-      value: '134',
-      tier: 'Diamond I',
-    ),
-    const LeaderboardUser(
-      rank: 5,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '가이드',
-      value: '98',
-      tier: 'Silver I',
-    ),
-  ];
-
-  final List<LeaderboardUser> _solvedUsers = [
-    const LeaderboardUser(
-      rank: 1,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '문제해결사',
-      value: '1,247',
-      tier: 'Master',
-    ),
-    const LeaderboardUser(
-      rank: 2,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '도전자',
-      value: '1,189',
-      tier: 'Diamond I',
-    ),
-    const LeaderboardUser(
-      rank: 3,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '완주자',
-      value: '967',
-      tier: 'Platinum I',
-    ),
-    const LeaderboardUser(
-      rank: 4,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '지속자',
-      value: '834',
-      tier: 'Gold I',
-    ),
-    const LeaderboardUser(
-      rank: 5,
-      profileImageUrl: 'assets/images/avatar.png',
-      nickname: '열정가',
-      value: '712',
-      tier: 'Silver I',
-    ),
-  ];
+  // 무한스크롤 상태 관리
+  static const int _pageSize = 50;
+  static const double _scrollThreshold = 200.0; // 바닥 근처에서 다음 페이지 로드
+  final Map<LeaderboardType, List<LeaderboardItem>> _itemsByType = {};
+  final Map<LeaderboardType, int> _pageByType = {};
+  final Map<LeaderboardType, bool> _isLoadingByType = {};
+  final Map<LeaderboardType, bool> _hasMoreByType = {};
+  final Map<LeaderboardType, String?> _errorByType = {};
 
   @override
   void initState() {
@@ -173,6 +35,12 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
       length: LeaderboardType.values.length,
       vsync: this,
     );
+    
+    // 탭 변경 리스너 추가
+    _tabController.addListener(_onTabChanged);
+    
+    // 초기 데이터 로드
+    _loadInitial(_selectedType);
   }
 
   @override
@@ -181,14 +49,68 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     super.dispose();
   }
 
-  List<LeaderboardUser> get _currentUsers {
-    switch (_selectedType) {
-      case LeaderboardType.rating:
-        return _ratingUsers;
-      case LeaderboardType.contribution:
-        return _contributionUsers;
-      case LeaderboardType.solvedProblems:
-        return _solvedUsers;
+  /// 초기 페이지 로드
+  Future<void> _loadInitial(LeaderboardType type) async {
+    _errorByType[type] = null;
+    _pageByType[type] = 0;
+    _hasMoreByType[type] = true;
+    _isLoadingByType[type] = true;
+    setState(() {});
+    try {
+      final result = await LeaderboardApi.getRanking(
+        type: type,
+        page: 0,
+        size: _pageSize,
+      );
+      _itemsByType[type] = result;
+      _hasMoreByType[type] = result.length >= _pageSize;
+    } catch (e) {
+      _errorByType[type] = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      if (mounted) {
+        _isLoadingByType[type] = false;
+        setState(() {});
+      }
+    }
+  }
+
+  /// 다음 페이지 로드
+  Future<void> _loadMore(LeaderboardType type) async {
+    if (_isLoadingByType[type] == true) return;
+    if (_hasMoreByType[type] == false) return;
+    _isLoadingByType[type] = true;
+    setState(() {});
+    try {
+      final nextPage = (_pageByType[type] ?? 0) + 1;
+      final result = await LeaderboardApi.getRanking(
+        type: type,
+        page: nextPage,
+        size: _pageSize,
+      );
+      final current = _itemsByType[type] ?? <LeaderboardItem>[];
+      _itemsByType[type] = [...current, ...result];
+      _pageByType[type] = nextPage;
+      _hasMoreByType[type] = result.length >= _pageSize;
+    } catch (e) {
+      _errorByType[type] = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      if (mounted) {
+        _isLoadingByType[type] = false;
+        setState(() {});
+      }
+    }
+  }
+
+  /// 탭 변경 처리
+  void _onTabChanged() {
+    // 실제 인덱스 변화만 감지하여 처리
+    final newType = LeaderboardType.values[_tabController.index];
+    if (_selectedType != newType) {
+      _selectedType = newType;
+      if ((_itemsByType[_selectedType] ?? const <LeaderboardItem>[]).isEmpty &&
+          _isLoadingByType[_selectedType] != true) {
+        _loadInitial(_selectedType);
+      }
     }
   }
 
@@ -237,30 +159,111 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
             indicatorSize: TabBarIndicatorSize.tab,
             dividerColor: Colors.transparent,
             overlayColor: WidgetStateProperty.all(Colors.transparent),
-            onTap: (index) {
-              setState(() {
-                _selectedType = LeaderboardType.values[index];
-              });
-            },
             tabs: LeaderboardType.values
                 .map((type) => _buildTab(type.label))
                 .toList(),
           ),
         ),
 
-        // 리더보드 리스트
+        // 슬라이드 가능한 리더보드 페이지들
         Expanded(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: ListView.builder(
-              itemCount: _currentUsers.length,
-              itemBuilder: (context, index) {
-                return _buildLeaderboardItem(_currentUsers[index]);
-              },
-            ),
+          child: TabBarView(
+            controller: _tabController,
+            children: LeaderboardType.values.map((type) {
+              return _buildLeaderboardPage(type);
+            }).toList(),
           ),
         ),
       ],
+    );
+  }
+
+  /// 각 탭별 리더보드 페이지 빌드
+  Widget _buildLeaderboardPage(LeaderboardType type) {
+    final isLoading = _isLoadingByType[type] == true && (_itemsByType[type]?.isEmpty ?? true);
+    final items = _itemsByType[type] ?? const <LeaderboardItem>[];
+    final error = _errorByType[type];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: Builder(
+        builder: (context) {
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (error != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: AppColorSchemes.textSecondary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    error,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColorSchemes.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => _loadInitial(type),
+                    child: const Text('다시 시도'),
+                  ),
+                ],
+              ),
+            );
+          }
+          if (items.isEmpty) {
+            return const Center(
+              child: Text(
+                '리더보드 데이터가 없습니다',
+                style: TextStyle(
+                  color: AppColorSchemes.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              await _loadInitial(type);
+            },
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is ScrollEndNotification ||
+                    notification is UserScrollNotification) {
+                  final metrics = notification.metrics;
+                  if (metrics.pixels + _scrollThreshold >= metrics.maxScrollExtent) {
+                    _loadMore(type);
+                  }
+                }
+                return false;
+              },
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: items.length + ((_hasMoreByType[type] == true) ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index >= items.length) {
+                    // 로딩 인디케이터 셀
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return _buildLeaderboardItem(items[index]);
+                },
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -275,11 +278,19 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     );
   }
 
-  Widget _buildLeaderboardItem(LeaderboardUser user) {
+  Widget _buildLeaderboardItem(LeaderboardItem user) {
     final TierType tierType = TierColors.getTierFromString(user.tier);
     final TierColorScheme tierColorScheme = TierColors.getColorScheme(tierType);
 
-    return Container(
+    return InkWell(
+      onTap: () {
+        NavigationHelper.navigateToPublicProfileSmart(
+          context,
+          targetNickname: user.nickname,
+        );
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -298,7 +309,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
         children: [
           // 등수
           Text(
-            '${user.rank}',
+            '${user.ranking}',
             style: const TextStyle(
               color: AppColorSchemes.textSpecial,
               fontWeight: FontWeight.w700,
@@ -317,21 +328,8 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
               border: Border.all(color: tierColorScheme.primary, width: 2),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                user.profileImageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: AppColorSchemes.backgroundTertiary,
-                    child: const Icon(
-                      Icons.person,
-                      color: AppColorSchemes.textTertiary,
-                      size: 20,
-                    ),
-                  );
-                },
-              ),
+              borderRadius: BorderRadius.circular(22.5),
+              child: _buildProfileImage(user.profileImageCdnUrl),
             ),
           ),
 
@@ -391,6 +389,50 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
           const SizedBox(width: 4),
         ],
       ),
+    ),
+    );
+  }
+
+  /// 프로필 이미지 빌드 (네트워크 이미지 또는 기본 아바타)
+  Widget _buildProfileImage(String? profileImageCdnUrl) {
+    // 기본 아바타 위젯 
+    final Widget defaultAvatar = Container(
+      color: AppColorSchemes.backgroundTertiary,
+      child: const Icon(
+        Icons.person,
+        color: AppColorSchemes.textTertiary,
+        size: 20,
+      ),
+    );
+
+    if (profileImageCdnUrl == null || profileImageCdnUrl.isEmpty) {
+      return defaultAvatar;
+    }
+
+    // 절대 URL만 허용. 아니면 기본 아바타 사용
+    if (!profileImageCdnUrl.startsWith('http://') &&
+        !profileImageCdnUrl.startsWith('https://')) {
+      return defaultAvatar;
+    }
+    return Image.network(
+      profileImageCdnUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => defaultAvatar,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: AppColorSchemes.backgroundTertiary,
+          child: const Center(
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

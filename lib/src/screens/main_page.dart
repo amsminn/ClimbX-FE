@@ -2,144 +2,106 @@ import 'package:flutter/material.dart';
 import '../widgets/map_body.dart';
 import '../widgets/profile_body.dart';
 import '../widgets/leaderboard_body.dart';
+import '../widgets/search_body.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 import '../utils/tier_colors.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/color_schemes.dart';
-import '../screens/analysis_page.dart';
+import '../utils/tier_provider.dart';
+import '../api/user.dart';
+import '../models/user_profile.dart';
+import 'dart:developer' as developer;
 
 class MainPage extends StatefulWidget {
   final BottomNavTab? initialTab;
+  final int? initialGymIdForSearch;
 
-  const MainPage({super.key, this.initialTab});
+  const MainPage({
+    super.key,
+    this.initialTab,
+    this.initialGymIdForSearch,
+  });
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MainPage> createState() => MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class MainPageState extends State<MainPage> {
   late BottomNavTab _currentTab;
-
-  // 현재 티어를 저장 (임시로 디버깅용으로 이렇게 해두었음, 수정 예정)
-  String currentTier = [
-    'Bronze I',
-    'Silver I',
-    'Gold I',
-    'Platinum I',
-    'Diamond I',
-    'Master',
-  ][3];
+  UserProfile? _userProfile;
+  int? _gymIdForSearch;
 
   @override
   void initState() {
     super.initState();
-    // 초기 탭 설정
+    // 초기 탭 설정 - 프로필이 첫 번째 탭이므로 기본값으로 설정
     _currentTab = widget.initialTab ?? BottomNavTab.profile;
+    _gymIdForSearch = widget.initialGymIdForSearch;
+
+    // 유저 프로필 로드
+    _loadUserProfile();
   }
 
   @override
   Widget build(BuildContext context) {
-    // 현재 티어 색상 정보 가져옴
-    final TierType tierType = TierColors.getTierFromString(currentTier);
+    // 앱 전역은 항상 렌더링하고, 프로필은 내부에서 자체 로딩/에러 처리
+    // 색상 스킴은 rating 기반으로 계산
+    final TierType tierType = _userProfile != null
+        ? TierColors.getTierTypeFromRating(_userProfile!.rating.totalRating)
+        : TierType.bronze;
     final TierColorScheme colorScheme = TierColors.getColorScheme(tierType);
 
-    return Scaffold(
-      backgroundColor: AppColorSchemes.backgroundSecondary,
+    return TierProvider(
+      colorScheme: colorScheme,
+      child: Scaffold(
+        backgroundColor: AppColorSchemes.backgroundSecondary,
 
-      // 상단 앱바
-      appBar: CustomAppBar(
-        currentTier: currentTier,
-        onTierChanged: (String selectedTier) {
-          setState(() {
-            currentTier = selectedTier;
-          });
-        },
-      ),
+        // 상단 앱바
+        appBar: const CustomAppBar(),
       // Body - Indexed Stack으로 화면 전환
       body: IndexedStack(
         index: _currentTab.index,
         children: [
-          // 0: 홈
-          _buildComingSoon('홈', Icons.home, colorScheme),
+          // 0: 프로필
+          const ProfileBody(),
           // 1: 리더보드
           const LeaderboardBody(),
-          // 2: 분석
-          AnalysisPage(isActive: _currentTab == BottomNavTab.analysis),
+          // 2: 검색
+          SearchBody(initialGymId: _gymIdForSearch),
           // 3: 지도
           const MapBody(),
-          // 4: 프로필
-          ProfileBody(currentTier: currentTier, colorScheme: colorScheme),
         ],
       ),
 
-      // 하단 네비게이션 바
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentTab: _currentTab,
-        colorScheme: colorScheme,
-        onTap: (tab) {
-          // 현재 페이지 내에서 탭 변경
-          setState(() {
-            _currentTab = tab;
-          });
-        },
-      ),
-    );
-  }
-
-  // 출시 예정 페이지 (임시페이지임 삭제 예정)
-  Widget _buildComingSoon(
-    String title,
-    IconData icon,
-    TierColorScheme colorScheme,
-  ) {
-    final screenSize = MediaQuery.of(context).size;
-
-    return Center(
-      child: Container(
-        width: screenSize.width * 0.85,
-        height: screenSize.height * 0.4,
-        decoration: BoxDecoration(
-          color: AppColorSchemes.backgroundPrimary,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: AppColorSchemes.lightShadow,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(screenSize.width * 0.05),
-              decoration: BoxDecoration(
-                gradient: colorScheme.gradient,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                icon,
-                color: AppColorSchemes.backgroundPrimary,
-                size: screenSize.width * 0.08,
-              ),
-            ),
-            SizedBox(height: screenSize.height * 0.02),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: screenSize.width * 0.05,
-                fontWeight: FontWeight.w700,
-                color: AppColorSchemes.textPrimary,
-              ),
-            ),
-            SizedBox(height: screenSize.height * 0.01),
-            Text(
-              '곧 출시 예정입니다',
-              style: TextStyle(
-                fontSize: screenSize.width * 0.035,
-                color: AppColorSchemes.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+              // 하단 네비게이션 바
+        bottomNavigationBar: CustomBottomNavigationBar(
+          currentTab: _currentTab,
+          onTap: (tab) {
+            // 현재 페이지 내에서 탭 변경
+            setState(() {
+              _currentTab = tab;
+            });
+          },
         ),
       ),
     );
   }
+  
+  /// 유저 프로필 로드
+  Future<void> _loadUserProfile() async {
+    try {
+      developer.log('유저 프로필 로드 시작', name: 'MainPage');
+      final userProfile = await UserApi.getCurrentUserProfile();
+      if (!mounted) return;
+      setState(() {
+        _userProfile = userProfile;
+      });
+      developer.log('유저 프로필 로드 완료: ${userProfile.tier}', name: 'MainPage');
+    } catch (e) {
+      developer.log('유저 프로필 로드 실패: $e', name: 'MainPage', error: e);
+      // 실패해도 전역 UI를 막지 않음. 기존 _userProfile 유지.
+    }
+  }
+
 }

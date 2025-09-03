@@ -3,16 +3,19 @@ import 'package:fl_chart/fl_chart.dart';
 import '../utils/color_schemes.dart';
 import '../models/history_data.dart';
 import '../utils/tier_colors.dart';
+import 'history_widget.dart';
 import 'dart:math';
 
 class HistoryChart extends StatefulWidget {
   final HistoryData historyData;
   final TierColorScheme colorScheme;
+  final HistoryPeriod period;
 
   const HistoryChart({
     super.key,
     required this.historyData,
     required this.colorScheme,
+    required this.period,
   });
 
   @override
@@ -35,12 +38,14 @@ class _HistoryChartState extends State<HistoryChart>
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    // 첫 번째 로드 시에만 애니메이션 실행
     _controller.forward();
   }
 
   @override
   void didUpdateWidget(HistoryChart oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // 데이터가 변경될 때만 애니메이션 실행 (기간 변경 시에는 애니메이션 없음)
     if (oldWidget.historyData != widget.historyData) {
       _controller.reset();
       _controller.forward();
@@ -83,6 +88,10 @@ class _HistoryChartState extends State<HistoryChart>
   }
 
   Widget _buildChart() {
+    // 데이터가 없을 때도 빈 그래프 표시
+    final dataPoints = widget.historyData.dataPoints;
+    final isEmpty = dataPoints.isEmpty;
+
     final minY = _getMinY();
     final maxY = _getMaxY();
     final yInterval = getNiceInterval(minY, maxY, 6); // 6개 눈금 기준
@@ -162,10 +171,10 @@ class _HistoryChartState extends State<HistoryChart>
                 maxX: (widget.historyData.dataPoints.length - 1).toDouble(),
                 minY: minY,
                 maxY: maxY,
-                lineBarsData: [
+                lineBarsData: isEmpty ? [] : [
                   LineChartBarData(
                     spots: _getAnimatedSpots(),
-                    isCurved: true,
+                    isCurved: _shouldUseCurve(),
                     gradient: widget.colorScheme.gradient,
                     barWidth: 3,
                     isStrokeCapRound: true,
@@ -190,7 +199,7 @@ class _HistoryChartState extends State<HistoryChart>
                           ),
                           children: [
                             TextSpan(
-                              text: '${dataPoint.experience.toInt()} EXP',
+                              text: '${dataPoint.value.toInt()} EXP',
                               style: TextStyle(
                                 color: widget.colorScheme.primary,
                                 fontWeight: FontWeight.w700,
@@ -213,7 +222,20 @@ class _HistoryChartState extends State<HistoryChart>
 
   // 애니메이션된 점 데이터 가져오기
   List<FlSpot> _getAnimatedSpots() {
-    // 애니메이션 진행도에 따라 몇 개의 점만 포함
+    // 기간이 변경된 경우 애니메이션 없이 모든 점 표시
+    if (widget.period != HistoryPeriod.all) {
+      return widget.historyData.dataPoints
+          .asMap()
+          .entries
+          .map((entry) {
+            final index = entry.key;
+            final dataPoint = entry.value;
+            return FlSpot(index.toDouble(), dataPoint.value);
+          })
+          .toList();
+    }
+
+    // 전체 기간일 때만 애니메이션 적용
     final maxVisibleIndex =
         (widget.historyData.dataPoints.length * _animation.value).floor();
 
@@ -224,21 +246,27 @@ class _HistoryChartState extends State<HistoryChart>
         .map((entry) {
           final index = entry.key;
           final dataPoint = entry.value;
-          return FlSpot(index.toDouble(), dataPoint.experience);
+          return FlSpot(index.toDouble(), dataPoint.value);
         })
         .toList();
   }
 
   double _getMinY() {
+    if (widget.historyData.dataPoints.isEmpty) {
+      return 0.0;
+    }
     final minExp = widget.historyData.dataPoints
-        .map((e) => e.experience)
+        .map((e) => e.value)
         .reduce((a, b) => a < b ? a : b);
     return (minExp - 50).floorToDouble();
   }
 
   double _getMaxY() {
+    if (widget.historyData.dataPoints.isEmpty) {
+      return 100.0;
+    }
     final maxExp = widget.historyData.dataPoints
-        .map((e) => e.experience)
+        .map((e) => e.value)
         .reduce((a, b) => a > b ? a : b);
     return (maxExp + 50).ceilToDouble();
   }
@@ -294,5 +322,11 @@ class _HistoryChartState extends State<HistoryChart>
     final set = <int>{0, mid1, mid2, last};
     final sorted = set.toList()..sort();
     return sorted;
+  }
+
+  bool _shouldUseCurve() {
+    // 1개월, 1주 선택 시에는 직선 그래프 사용
+    return widget.period != HistoryPeriod.oneMonth && 
+           widget.period != HistoryPeriod.oneWeek;
   }
 }

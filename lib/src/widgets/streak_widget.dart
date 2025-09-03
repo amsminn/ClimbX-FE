@@ -8,25 +8,26 @@ import '../models/streak_data.dart';
 import '../api/user.dart';
 
 class StreakWidget extends HookWidget {
-  final String tierName;
-  final UserProfile? userProfile;
+  final UserProfile userProfile;
+  final String? nickname; // 특정 유저 스트릭 조회용
 
   const StreakWidget({
     super.key,
-    this.tierName = 'Diamond I',
-    this.userProfile,
+    required this.userProfile,
+    this.nickname,
   });
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final TierType currentTier = TierColors.getTierFromString(tierName);
+    // 색상은 rating 기반으로 계산
+    final TierType currentTier = userProfile.tierType;
     final TierColorScheme colorScheme = TierColors.getColorScheme(currentTier);
 
     // fquery로 스트릭 데이터 get
     final streakQuery = useQuery<StreakData, Exception>([
-      'user_streak',
-    ], UserApi.getCurrentUserStreak);
+      'user_streak', nickname ?? '',
+    ], () => UserApi.getUserStreak(nickname: nickname));
 
     // 로딩 상태
     if (streakQuery.isLoading) {
