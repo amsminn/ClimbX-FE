@@ -16,18 +16,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
 
       // 로고
-      title: const Padding(
-        padding: EdgeInsets.only(left: 8.0),
-        child: Text(
-          'ClimbX',
-          style: TextStyle(
-            color: AppColorSchemes.textPrimary,
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-          ),
+      title: const Text(
+        'ClimbX',
+        style: TextStyle(
+          color: AppColorSchemes.textPrimary,
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.5,
         ),
       ),
+      titleSpacing: 24.0,
       centerTitle: false, // 왼쪽 정렬
 
       // 액션들
