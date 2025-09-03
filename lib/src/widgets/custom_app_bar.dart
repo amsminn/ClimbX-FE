@@ -25,7 +25,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
       // 로고
       title: const Padding(
-        padding: EdgeInsets.only(left: 8.0), // 원하는 만큼 값 조정
+        padding: EdgeInsets.only(left: 8.0),
         child: Text(
           'ClimbX',
           style: TextStyle(
