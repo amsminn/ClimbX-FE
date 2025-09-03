@@ -14,6 +14,7 @@ import '../api/submission.dart';
 import '../utils/navigation_helper.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/error_message_helper.dart';
+import '../utils/profile_refresh_manager.dart';
 
 /// 문제 제출 페이지
 class ProblemSubmitPage extends HookWidget {
@@ -109,6 +110,9 @@ class ProblemSubmitPage extends HookWidget {
         );
 
         developer.log('영상 업로드 완료: $videoId', name: 'ProblemSubmitPage');
+
+        // 영상 업로드 성공 시 프로필 새로고침 플래그 설정
+        await ProfileRefreshManager().setNeedsRefresh(true);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -954,6 +958,9 @@ class ProblemSubmitPage extends HookWidget {
         // 서버 스펙에 따라 problemId가 정수형일 경우 변환 필요
         problemId: problem.problemId,
       );
+
+      // 풀이 제출 성공 시 프로필 새로고침 플래그 설정
+      await ProfileRefreshManager().setNeedsRefresh(true);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
