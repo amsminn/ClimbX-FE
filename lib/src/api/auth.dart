@@ -243,6 +243,13 @@ class AuthApi {
       const iosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
       const webClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
 
+      if (defaultTargetPlatform == TargetPlatform.iOS && iosClientId.isEmpty) {
+        throw Exception('GOOGLE_IOS_CLIENT_ID가 설정되지 않았습니다.');
+      }
+      if (webClientId.isEmpty) {
+        throw Exception('GOOGLE_WEB_CLIENT_ID가 설정되지 않았습니다.');
+      }
+
       await GoogleSignIn.instance.initialize(
         clientId: defaultTargetPlatform == TargetPlatform.iOS
             ? iosClientId
