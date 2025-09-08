@@ -180,32 +180,16 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
 
   /// 정보 카드 위젯
   Widget _buildInfoCard(String label, String value) {
-    final normalized = ColorCodes.labelAndColorFromAny(value);
-    final displayLabel = normalized?.$1 ?? value;
-    final displayColor = normalized?.$2 ?? AppColorSchemes.accentBlue;
-    
-    // 흰색 예외처리
-    final bool needsBorder = ColorCodes.needsBorderForLabel(displayLabel);
-    final bool isWhite = needsBorder && displayLabel == '흰색';
-    
-    final Color bgColor = isWhite
-        ? AppColorSchemes.whiteSelectionBackground
-        : displayColor.withValues(alpha: 0.1);
-    final Color borderColor = isWhite
-        ? AppColorSchemes.whiteSelectionBorder.withValues(alpha: 0.3)
-        : displayColor.withValues(alpha: 0.3);
-    final Color textColor = isWhite
-        ? AppColorSchemes.whiteSelectionText
-        : displayColor;
+    final colorStyle = ColorCodes.getColorStyleInfo(value, AppColorSchemes.accentBlue);
 
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: bgColor,
+          color: colorStyle.bgColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: borderColor,
+            color: colorStyle.borderColor,
             width: 1,
           ),
         ),
@@ -227,20 +211,20 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: displayColor,
+                    color: colorStyle.displayColor,
                     shape: BoxShape.circle,
-                    border: needsBorder 
+                    border: colorStyle.needsBorder 
                         ? Border.all(color: AppColorSchemes.whiteSelectionBorder, width: 1)
                         : null,
                   ),
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  displayLabel,
+                  colorStyle.displayLabel,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: textColor,
+                    color: colorStyle.textColor,
                   ),
                 ),
               ],

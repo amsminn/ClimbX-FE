@@ -393,17 +393,15 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         runSpacing: 10,
         children: options.map((opt) {
           final bool isSel = selected == opt;
-          final color = ColorCodes.toDisplayColorFromAny(opt);
-          final bool needsBorder = ColorCodes.needsBorderForLabel(opt);
-          final bool isWhite = needsBorder && opt == '흰색';
-          final Color selectedBg = isWhite
+          final colorStyle = ColorCodes.getColorStyleInfo(opt, AppColorSchemes.accentBlue);
+          final Color selectedBg = colorStyle.displayLabel == '흰색'
               ? AppColorSchemes.whiteSelectionBackground
-              : color.withValues(alpha: 0.12);
+              : colorStyle.displayColor.withValues(alpha: 0.12);
           final Color sideColor = isSel
-              ? (isWhite ? AppColorSchemes.whiteSelectionBorder : color)
+              ? (colorStyle.displayLabel == '흰색' ? AppColorSchemes.whiteSelectionBorder : colorStyle.displayColor)
               : AppColorSchemes.borderPrimary;
           final Color textColor = isSel
-              ? (isWhite ? AppColorSchemes.whiteSelectionText : color)
+              ? (colorStyle.displayLabel == '흰색' ? AppColorSchemes.whiteSelectionText : colorStyle.displayColor)
               : AppColorSchemes.textPrimary;
           return ChoiceChip(
             label: Row(
@@ -413,9 +411,9 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: color, 
+                    color: colorStyle.displayColor, 
                     shape: BoxShape.circle,
-                    border: needsBorder 
+                    border: colorStyle.needsBorder 
                         ? Border.all(color: AppColorSchemes.whiteSelectionBorder, width: 1)
                         : null,
                   ),

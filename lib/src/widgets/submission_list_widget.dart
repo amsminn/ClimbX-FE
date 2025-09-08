@@ -304,30 +304,19 @@ class _SubmissionListItem extends StatelessWidget {
     final parts = text.split(': ');
     final colorLabel = parts.length > 1 ? parts[1] : text;
     
-    // 흰색 처리: AppColorSchemes 사용
-    final bool needsBorder = ColorCodes.needsBorderForLabel(colorLabel);
-    final bool isWhite = needsBorder && colorLabel == '흰색';
-    final Color bgColor = isWhite
-        ? AppColorSchemes.whiteSelectionBackground
-        : color.withValues(alpha: 0.1);
-    final Color borderColor = isWhite
-        ? AppColorSchemes.whiteSelectionBorder.withValues(alpha: 0.3)
-        : color.withValues(alpha: 0.3);
-    final Color textColor = isWhite
-        ? AppColorSchemes.whiteSelectionText
-        : color;
+    final colorStyle = ColorCodes.getColorStyleInfo(colorLabel, color);
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: bgColor,
-        border: Border.all(color: borderColor, width: 1),
+        color: colorStyle.bgColor,
+        border: Border.all(color: colorStyle.borderColor, width: 1),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: textColor,
+          color: colorStyle.textColor,
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
