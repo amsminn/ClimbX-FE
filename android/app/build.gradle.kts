@@ -1,13 +1,21 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
 }
+val keystorePropertiesFile = rootProject.file("key.properties")
+val hasReleaseKeystore = keystorePropertiesFile.exists()
+val keystoreProperties = Properties()
+if (hasReleaseKeystore) {
+    keystoreProperties.load(keystorePropertiesFile.inputStream())
+}
 
 android {
-    namespace = "com.example.climbx_fe"
-    compileSdk = 36  // API 36 (flutter_naver_map 요구사항)
-    ndkVersion = "27.0.12077973"  // 네이버 지도 요구사항
+    namespace = "com.climbx.climbx_fe"
+    compileSdk = 36 // API 36 (flutter_naver_map 요구사항)
+    ndkVersion = "27.0.12077973" // 네이버 지도 요구사항
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -15,29 +23,39 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "11"
     }
 
     defaultConfig {
-        applicationId = "com.example.climbx_fe"
+        applicationId = "com.climbx.climbx_fe"
         minSdk = 24
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
-    buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("debug")
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
         }
     }
-
-    // Include Android resources in unit tests
+    buildTypes {
+        release {
+            signingConfig = if (hasReleaseKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+        }
+    }
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
-
-    // Lint settings: disable all reports and prevent abort
     lint {
         abortOnError = false
         checkReleaseBuilds = false
