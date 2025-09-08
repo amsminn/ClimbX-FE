@@ -72,3 +72,6 @@ ios/Flutter/Release.xcconfig
 # Freezed / json_serializable generated files
 **/*.freezed.dart
 **/*.g.dart
+
+# keystore
+upload-keystore.jks

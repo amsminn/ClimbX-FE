@@ -1,4 +1,4 @@
-package com.example.climbx_fe
+package com.climbx.climbx_fe
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
