@@ -182,6 +182,9 @@ class ProblemGridItem extends StatelessWidget {
             decoration: BoxDecoration(
               color: displayColor,
               shape: BoxShape.circle,
+              border: needsBorder 
+                  ? Border.all(color: AppColorSchemes.whiteSelectionBorder, width: 1)
+                  : null,
             ),
           ),
           SizedBox(width: iconTextSpacing),

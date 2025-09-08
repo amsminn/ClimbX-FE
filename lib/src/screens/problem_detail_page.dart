@@ -183,15 +183,29 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     final normalized = ColorCodes.labelAndColorFromAny(value);
     final displayLabel = normalized?.$1 ?? value;
     final displayColor = normalized?.$2 ?? AppColorSchemes.accentBlue;
+    
+    // 흰색 예외처리
+    final bool needsBorder = ColorCodes.needsBorderForLabel(displayLabel);
+    final bool isWhite = needsBorder && displayLabel == '흰색';
+    
+    final Color bgColor = isWhite
+        ? AppColorSchemes.whiteSelectionBackground
+        : displayColor.withValues(alpha: 0.1);
+    final Color borderColor = isWhite
+        ? AppColorSchemes.whiteSelectionBorder.withValues(alpha: 0.3)
+        : displayColor.withValues(alpha: 0.3);
+    final Color textColor = isWhite
+        ? AppColorSchemes.whiteSelectionText
+        : displayColor;
 
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: displayColor.withValues(alpha: 0.1),
+          color: bgColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: displayColor.withValues(alpha: 0.3),
+            color: borderColor,
             width: 1,
           ),
         ),
@@ -215,6 +229,9 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   decoration: BoxDecoration(
                     color: displayColor,
                     shape: BoxShape.circle,
+                    border: needsBorder 
+                        ? Border.all(color: AppColorSchemes.whiteSelectionBorder, width: 1)
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -223,7 +240,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: displayColor,
+                    color: textColor,
                   ),
                 ),
               ],
