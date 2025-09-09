@@ -146,19 +146,7 @@ class ProblemGridItem extends StatelessWidget {
     required double verticalPadding,
     required double iconTextSpacing,
   }) {
-    final normalized = ColorCodes.labelAndColorFromAny(raw);
-    final displayLabel = normalized?.$1 ?? raw;
-    final displayColor = normalized?.$2 ?? AppColorSchemes.accentBlue;
-    
-    // 흰색 처리: AppColorSchemes 사용
-    final bool needsBorder = ColorCodes.needsBorderForLabel(displayLabel);
-    final bool isWhite = needsBorder && displayLabel == '흰색';
-    final Color bgColor = isWhite
-        ? AppColorSchemes.whiteSelectionBackground
-        : displayColor.withValues(alpha: 0.1);
-    final Color borderColor = isWhite
-        ? AppColorSchemes.whiteSelectionBorder.withValues(alpha: 0.3)
-        : displayColor.withValues(alpha: 0.3);
+    final colorStyle = ColorCodes.getColorStyleInfo(raw, AppColorSchemes.accentBlue);
     
     return Container(
       padding: EdgeInsets.symmetric(
@@ -166,10 +154,10 @@ class ProblemGridItem extends StatelessWidget {
         vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: colorStyle.bgColor,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: borderColor,
+          color: colorStyle.borderColor,
           width: 1,
         ),
       ),
@@ -180,18 +168,21 @@ class ProblemGridItem extends StatelessWidget {
             width: iconSize,
             height: iconSize,
             decoration: BoxDecoration(
-              color: displayColor,
+              color: colorStyle.displayColor,
               shape: BoxShape.circle,
+              border: colorStyle.needsBorder 
+                  ? Border.all(color: AppColorSchemes.whiteSelectionBorder, width: 1)
+                  : null,
             ),
           ),
           SizedBox(width: iconTextSpacing),
           Flexible(
             child: Text(
-              '$label: $displayLabel',
+              '$label: ${colorStyle.displayLabel}',
               style: TextStyle(
                 fontSize: fontSize,
                 fontWeight: FontWeight.w500,
-                color: isWhite ? AppColorSchemes.whiteSelectionText : displayColor,
+                color: colorStyle.textColor,
               ),
             ),
           ),

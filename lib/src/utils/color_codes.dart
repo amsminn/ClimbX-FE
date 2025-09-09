@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'color_schemes.dart';
 
 /// 문제 색상(한글 라벨) <-> 서버 코드 매핑 유틸
 enum ProblemColorCode { white, yellow, orange, green, blue, red, purple, gray, brown, black }
@@ -183,5 +184,48 @@ class ColorCodes {
     final c = fromAny(value);
     return c == ProblemColorCode.white || c == ProblemColorCode.gray;
   }
+
+  /// 색상 스타일 정보를 담는 클래스
+  static ColorStyleInfo getColorStyleInfo(String? value, Color fallbackColor) {
+    final normalized = labelAndColorFromAny(value);
+    final displayLabel = normalized?.$1 ?? (value ?? '');
+    final displayColor = normalized?.$2 ?? fallbackColor;
+    final needsBorder = needsBorderForLabel(displayLabel);
+    final isWhite = needsBorder && displayLabel == '흰색';
+    
+    return ColorStyleInfo(
+      displayLabel: displayLabel,
+      displayColor: displayColor,
+      bgColor: isWhite
+          ? AppColorSchemes.whiteSelectionBackground
+          : displayColor.withValues(alpha: 0.1),
+      borderColor: isWhite
+          ? AppColorSchemes.whiteSelectionBorder.withValues(alpha: 0.3)
+          : displayColor.withValues(alpha: 0.3),
+      textColor: isWhite
+          ? AppColorSchemes.whiteSelectionText
+          : displayColor,
+      needsBorder: needsBorder,
+    );
+  }
+}
+
+/// 색상 스타일 정보 클래스
+class ColorStyleInfo {
+  final String displayLabel;
+  final Color displayColor;
+  final Color bgColor;
+  final Color borderColor;
+  final Color textColor;
+  final bool needsBorder;
+
+  const ColorStyleInfo({
+    required this.displayLabel,
+    required this.displayColor,
+    required this.bgColor,
+    required this.borderColor,
+    required this.textColor,
+    required this.needsBorder,
+  });
 }
 
