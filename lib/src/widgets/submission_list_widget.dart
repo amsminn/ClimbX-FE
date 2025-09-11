@@ -11,7 +11,13 @@ import '../utils/color_codes.dart';
 
 class SubmissionListWidget extends HookWidget {
   final String? nickname; // 특정 유저의 제출 조회용
-  const SubmissionListWidget({super.key, this.nickname});
+  final bool isGuestMode;
+  
+  const SubmissionListWidget({
+    super.key, 
+    this.nickname,
+    this.isGuestMode = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +116,10 @@ class SubmissionListWidget extends HookWidget {
                           );
                         }
                         final item = submissionsState.value[index];
-                        return _SubmissionListItem(item: item);
+                        return _SubmissionListItem(
+                          item: item,
+                          isGuestMode: isGuestMode,
+                        );
                       },
                     ),
         );
@@ -150,8 +159,12 @@ class SubmissionListWidget extends HookWidget {
 
 class _SubmissionListItem extends StatelessWidget {
   final Submission item;
+  final bool isGuestMode;
 
-  const _SubmissionListItem({required this.item});
+  const _SubmissionListItem({
+    required this.item,
+    this.isGuestMode = false,
+  });
 
   Color _statusColor(SubmissionStatus status) {
     switch (status) {
@@ -186,7 +199,11 @@ class _SubmissionListItem extends StatelessWidget {
     final holdColor = Color(holdColorInt);
 
     return InkWell(
-      onTap: () => NavigationHelper.navigateToProblemVotes(context, item.problemId),
+      onTap: () => NavigationHelper.navigateToProblemVotes(
+        context, 
+        item.problemId,
+        isGuestMode: isGuestMode,
+      ),
       child: Container(
       decoration: BoxDecoration(
         color: AppColorSchemes.backgroundPrimary,

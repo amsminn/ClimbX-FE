@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:path/path.dart';
 import '../api/vote.dart';
 import '../models/problem_vote.dart';
 import '../utils/color_schemes.dart';
 import '../widgets/problem_vote_compose.dart';
 import '../widgets/problem_vote_list_item.dart';
+import '../utils/login_prompt_helper.dart';
 
 class ProblemVotesPage extends HookWidget {
   final String problemId;
+  final bool isGuestMode;
 
-  const ProblemVotesPage({super.key, required this.problemId});
+  const ProblemVotesPage({
+    super.key, 
+    required this.problemId,
+    this.isGuestMode = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +74,10 @@ class ProblemVotesPage extends HookWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            ProblemVoteCompose(problemId: problemId, onSubmitted: refreshAfterSubmit),
+            // 게스트 모드에서는 로그인 프롬프트, 로그인 사용자는 작성 폼
+            isGuestMode 
+              ? _buildGuestLoginPrompt()
+              : ProblemVoteCompose(problemId: problemId, onSubmitted: refreshAfterSubmit),
             const SizedBox(height: 16),
             Expanded(
               child: PagedListView<int, ProblemVote>(
@@ -123,6 +133,63 @@ class ProblemVotesPage extends HookWidget {
       child: const Text(
         '아직 등록된 의견이 없어요. 첫 의견을 남겨보세요!',
         style: TextStyle(color: AppColorSchemes.textSecondary),
+      ),
+    );
+  }
+
+  /// 게스트 모드용 로그인 프롬프트
+  Widget _buildGuestLoginPrompt() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColorSchemes.backgroundPrimary,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppColorSchemes.lightShadow,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '난이도 의견 작성',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColorSchemes.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '문제 난이도에 대한 의견을 남기려면 로그인해주세요',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColorSchemes.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          ElevatedButton(
+            onPressed: () {
+              LoginPromptHelper.showLoginPrompt(
+                context as BuildContext,
+                '난이도 의견을 작성하려면 로그인이 필요합니다',
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColorSchemes.accentBlue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('로그인'),
+          ),
+        ],
       ),
     );
   }

@@ -8,7 +8,12 @@ import '../utils/tier_colors.dart';
 
 /// 리더보드 메인 위젯
 class LeaderboardBody extends StatefulWidget {
-  const LeaderboardBody({super.key});
+  final bool isGuestMode;
+  
+  const LeaderboardBody({
+    super.key,
+    this.isGuestMode = false,
+  });
 
   @override
   State<LeaderboardBody> createState() => _LeaderboardBodyState();
@@ -287,6 +292,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
         NavigationHelper.navigateToPublicProfileSmart(
           context,
           targetNickname: user.nickname,
+          isGuestMode: widget.isGuestMode,
         );
       },
       borderRadius: BorderRadius.circular(16),
@@ -435,4 +441,5 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
       },
     );
   }
+
 }

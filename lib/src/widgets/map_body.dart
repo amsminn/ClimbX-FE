@@ -12,7 +12,12 @@ import '../utils/tier_colors.dart';
 import '../utils/navigation_helper.dart';
 
 class MapBody extends HookWidget {
-  const MapBody({super.key});
+  final bool isGuestMode;
+  
+  const MapBody({
+    super.key,
+    this.isGuestMode = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -310,25 +315,27 @@ class MapBody extends HookWidget {
                                   ),
                                   const SizedBox(height: 16),
 
-                                  // 문제 제출 버튼 (표준 난이도 분포 아래)
+                                  // 문제 보기 버튼 (표준 난이도 분포 아래)
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton.icon(
                                       onPressed: () {
                                         // 바텀시트 닫기
                                         Navigator.of(sheetContext).pop();
+                                        
                                         // MapBody 컨텍스트로 네비게이션 실행
                                         if (!rootContext.mounted) return;
                                         NavigationHelper.navigateToSearchWithGym(
                                           rootContext,
                                           gym.gymId,
+                                          isGuestMode: isGuestMode,
                                         );
                                       },
                                       icon: const Icon(
-                                        Icons.assignment_turned_in,
+                                        Icons.search,
                                         color: Colors.white,
                                       ),
-                                      label: const Text('이 지점 문제 제출하기'),
+                                      label: const Text('이 지점 문제 보기'),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
                                             AppColorSchemes.accentBlue,
