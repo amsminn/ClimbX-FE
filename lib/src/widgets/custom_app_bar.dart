@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import '../utils/navigation_helper.dart';
 import '../utils/color_schemes.dart';
+import '../screens/login_page.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+  final bool isGuestMode;
+  
+  const CustomAppBar({
+    super.key,
+    this.isGuestMode = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,42 +36,57 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
       // 액션들
       actions: [
-        // 레이팅 디버깅 버튼 삭제
-
-        // 알림 버튼 (비활성화/주석 처리)
-        // Container(
-        //   margin: const EdgeInsets.only(right: 8),
-        //   decoration: BoxDecoration(
-        //     color: AppColorSchemes.backgroundSecondary,
-        //     borderRadius: BorderRadius.circular(12),
-        //   ),
-        //   child: IconButton(
-        //     icon: const Icon(
-        //       Icons.notifications_outlined,
-        //       color: AppColorSchemes.textSecondary,
-        //       size: 22,
-        //     ),
-        //     onPressed: () {},
-        //   ),
-        // ),
-        // 설정
-        Container(
-          margin: const EdgeInsets.only(right: 16),
-          decoration: BoxDecoration(
-            color: AppColorSchemes.backgroundSecondary,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            icon: const Icon(
-              Icons.settings,
-              color: AppColorSchemes.textSecondary,
-              size: 22,
+        if (isGuestMode)
+          // 게스트 모드: 로그인 버튼
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: TextButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              },
+              icon: const Icon(
+                Icons.login,
+                color: AppColorSchemes.accentBlue,
+                size: 20,
+              ),
+              label: const Text(
+                '로그인',
+                style: TextStyle(
+                  color: AppColorSchemes.accentBlue,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                backgroundColor: AppColorSchemes.backgroundSecondary,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
-            onPressed: () {
-              NavigationHelper.navigateToSettings(context);
-            },
+          )
+        else
+          // 로그인 모드: 설정 버튼
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: BoxDecoration(
+              color: AppColorSchemes.backgroundSecondary,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.settings,
+                color: AppColorSchemes.textSecondary,
+                size: 22,
+              ),
+              onPressed: () {
+                NavigationHelper.navigateToSettings(context);
+              },
+            ),
           ),
-        ),
       ],
     );
   }

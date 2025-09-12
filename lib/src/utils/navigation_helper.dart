@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import '../screens/main_page.dart';
-import '../screens/login_page.dart';
 import '../screens/settings_page.dart';
 import '../screens/markdown_viewer_page.dart';
 import '../screens/email_compose_page.dart';
@@ -10,6 +9,7 @@ import '../screens/video_submission_flow_page.dart';
 import '../screens/public_profile_page.dart';
 import '../screens/problem_votes_page.dart';
 import '../api/util/auth/user_identity.dart';
+import '../widgets/auth_wrapper.dart';
 
 /// 공통 네비게이션 처리 헬퍼
 class NavigationHelper {
@@ -30,39 +30,52 @@ class NavigationHelper {
     );
   }
   /// 로그인 성공 후 MainPage로 이동
-  static void navigateToMainAfterLogin(BuildContext context) {
+  static void navigateToMainAfterLogin(BuildContext context, {bool isGuestMode = false}) {
     Navigator.pushReplacement(
       context,
-      _createPageRoute(const MainPage()),
+      _createPageRoute(MainPage(isGuestMode: isGuestMode)),
     );
   }
 
   /// 난이도 기여 페이지로 이동
-  static void navigateToProblemVotes(BuildContext context, String problemId) {
+  static void navigateToProblemVotes(
+    BuildContext context, 
+    String problemId, {
+    bool isGuestMode = false,
+  }) {
     Navigator.push(
       context,
       _createPageRoute(
-        ProblemVotesPage(problemId: problemId),
+        ProblemVotesPage(
+          problemId: problemId, 
+          isGuestMode: isGuestMode,
+        ),
       ),
     );
   }
 
-  /// 로그아웃 후 LoginPage로 이동 (모든 페이지 스택 제거)
-  static void navigateToLoginAfterLogout(BuildContext context) {
+  /// 로그아웃 후 AuthWrapper로 이동 (모든 페이지 스택 제거)
+  static void navigateToAuthWrapperAfterLogout(BuildContext context) {
     Navigator.pushAndRemoveUntil(
       context,
-      _createPageRoute(const LoginPage()),
+      _createPageRoute(const AuthWrapper()),
       (route) => false, // 모든 이전 페이지 제거
     );
   }
 
   /// 메인에서 특정 탭으로 이동 (검색 탭 등)
-  static void navigateToMainWithTab(BuildContext context, BottomNavTab tab) {
+  static void navigateToMainWithTab(
+    BuildContext context, 
+    BottomNavTab tab, {
+    bool isGuestMode = false,
+  }) {
     Navigator.pushAndRemoveUntil(
       context,
-      _createPageRoute(MainPage(initialTab: tab)),
+      _createPageRoute(MainPage(
+        initialTab: tab,
+        isGuestMode: isGuestMode,
+      )),
       (route) => false,
-
     );
   }
 
@@ -70,14 +83,29 @@ class NavigationHelper {
   static Future<void> navigateToPublicProfileSmart(
     BuildContext context, {
     required String targetNickname,
+    bool isGuestMode = false,
   }) async {
     // await 이전에 NavigatorState를 확보하여 context 경고 회피
     final navigator = Navigator.of(context);
+    
+    // 게스트 모드에서는 자신의 닉네임 확인을 건너뛰고 바로 공개 프로필로 이동
+    if (isGuestMode) {
+      navigator.push(
+        _createPageRoute(
+          PublicProfilePage(nickname: targetNickname),
+        ),
+      );
+      return;
+    }
+    
     try {
       final current = await UserIdentity.getOrFetchNickname(logContext: 'NavigationHelper');
       if (current == targetNickname) {
         navigator.pushAndRemoveUntil(
-          _createPageRoute(const MainPage(initialTab: BottomNavTab.profile)),
+          _createPageRoute(MainPage(
+            initialTab: BottomNavTab.profile,
+            isGuestMode: isGuestMode,
+          )),
           (route) => false,
         );
         return;
@@ -92,19 +120,27 @@ class NavigationHelper {
     }
     navigator.push(
       _createPageRoute(
-        PublicProfilePage(nickname: targetNickname),
+        PublicProfilePage(
+          nickname: targetNickname,
+          isGuestMode: isGuestMode,
+        ),
       ),
     );
   }
 
   /// 지도에서 검색 탭으로 이동하며 특정 지점을 프리필 (완전히 새로운 페이지로)
-  static void navigateToSearchWithGym(BuildContext context, int gymId) {
+  static void navigateToSearchWithGym(
+    BuildContext context, 
+    int gymId, {
+    bool isGuestMode = false,
+  }) {
     Navigator.pushReplacement(
       context,
       _createPageRoute(
         MainPage(
           initialTab: BottomNavTab.search,
           initialGymIdForSearch: gymId,
+          isGuestMode: isGuestMode,
         ),
       ),
     );
@@ -156,11 +192,18 @@ class NavigationHelper {
   }
 
   /// 퍼블릭 프로필 페이지로 이동 (하단바 없이 오버레이)
-  static void navigateToPublicProfile(BuildContext context, String nickname) {
+  static void navigateToPublicProfile(
+    BuildContext context, 
+    String nickname, {
+    bool isGuestMode = false,
+  }) {
     Navigator.push(
       context,
       _createPageRoute(
-        PublicProfilePage(nickname: nickname),
+        PublicProfilePage(
+          nickname: nickname,
+          isGuestMode: isGuestMode,
+        ),
       ),
     );
   }
