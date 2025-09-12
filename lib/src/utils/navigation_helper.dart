@@ -92,7 +92,7 @@ class NavigationHelper {
     if (isGuestMode) {
       navigator.push(
         _createPageRoute(
-          PublicProfilePage(nickname: targetNickname),
+          PublicProfilePage(nickname: targetNickname, isGuestMode: isGuestMode),
         ),
       );
       return;
