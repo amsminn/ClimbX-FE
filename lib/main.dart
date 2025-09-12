@@ -70,7 +70,7 @@ void main() async {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: AppColorSchemes.accentOrange.withOpacity(0.1),
+                  color: AppColorSchemes.accentOrange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(28),
                 ),
                 child: const Icon(

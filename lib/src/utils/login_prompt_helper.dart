@@ -24,7 +24,7 @@ class LoginPromptHelper {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: AppColorSchemes.accentBlue.withOpacity(0.1),
+                  color: AppColorSchemes.accentBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(28),
                 ),
                 child: const Icon(

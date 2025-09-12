@@ -148,11 +148,11 @@ class ProblemVotesPage extends HookWidget {
       ),
       child: Row(
         children: [
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   '난이도 의견 작성',
                   style: TextStyle(
                     fontSize: 16,
@@ -160,8 +160,8 @@ class ProblemVotesPage extends HookWidget {
                     color: AppColorSchemes.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
+                SizedBox(height: 8),
+                Text(
                   '문제 난이도에 대한 의견을 남기려면 로그인해주세요',
                   style: TextStyle(
                     fontSize: 14,

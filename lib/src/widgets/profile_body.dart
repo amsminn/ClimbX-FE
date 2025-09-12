@@ -230,7 +230,7 @@ extension on ProfileBody {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // 클라이밍 아이콘
-          Icon(
+          const Icon(
             Icons.terrain,
             size: 80,
             color: AppColorSchemes.accentBlue,
@@ -239,7 +239,7 @@ extension on ProfileBody {
           const SizedBox(height: 32),
           
           // 메인 타이틀
-          Text(
+          const Text(
             '나만의 클라이밍 기록을\n시작하세요',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -253,7 +253,7 @@ extension on ProfileBody {
           const SizedBox(height: 16),
           
           // 서브 타이틀
-          Text(
+          const Text(
             '프로필, 기록 분석, 문제 등록 등\n모든 기능을 이용하실 수 있습니다',
             textAlign: TextAlign.center,
             style: TextStyle(
