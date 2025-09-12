@@ -84,7 +84,7 @@ void main() async {
               
               // 제목
               const Text(
-                '로그인 만료',
+                '로그아웃',
                 style: TextStyle(
                   color: AppColorSchemes.textPrimary,
                   fontSize: 20,
@@ -96,7 +96,7 @@ void main() async {
               
               // 메시지
               const Text(
-                '로그인이 만료되었습니다.\n다시 로그인해주세요.',
+                '로그아웃되었습니다.\n다시 로그인해주세요.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColorSchemes.textSecondary,
