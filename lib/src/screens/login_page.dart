@@ -7,13 +7,17 @@ import '../api/util/error/auth_cancelled_exception.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:io';
 import '../utils/navigation_helper.dart';
-
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class LoginPage extends HookWidget {
   const LoginPage({super.key});
 
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
   @override
   Widget build(BuildContext context) {
+    analytics.logScreenView(screenName: 'LoginPage');
+
     // fquery mutation 사용
     final signInMutation = useMutation(
       (_) => AuthApi.signInWithKakao(),

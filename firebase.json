@@ -1,0 +1,30 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "climbx-test-crossplatfor-62f18",
+          "appId": "1:135583972672:android:a67880be6947e774538ea5",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "climbx-test-crossplatfor-62f18",
+          "appId": "1:135583972672:ios:1ab3ea8145fddfc5538ea5",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "climbx-test-crossplatfor-62f18",
+          "configurations": {
+            "android": "1:135583972672:android:a67880be6947e774538ea5",
+            "ios": "1:135583972672:ios:1ab3ea8145fddfc5538ea5"
+          }
+        }
+      }
+    }
+  }
+}

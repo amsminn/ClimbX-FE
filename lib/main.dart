@@ -7,13 +7,17 @@ import 'src/api/util/core/api_client.dart';
 import 'src/api/util/auth/auth_interceptor.dart';
 import 'src/utils/color_schemes.dart';
 import 'dart:developer' as developer;
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 // 전역 네비게이터 키 (팝업용)
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   // 네이버 맵 클라이언트 ID 검증
   const naverMapClientId = String.fromEnvironment('NAVER_MAP_CLIENT_ID');
   if (naverMapClientId.isEmpty) {

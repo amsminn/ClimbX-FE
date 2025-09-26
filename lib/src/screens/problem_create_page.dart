@@ -9,6 +9,7 @@ import '../utils/color_schemes.dart';
 import '../utils/image_compressor.dart';
 import '../widgets/gym_area_map_overlay.dart';
 import '../utils/profile_refresh_manager.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 /// 문제 등록 페이지
 class ProblemCreatePage extends StatefulWidget {
@@ -28,6 +29,8 @@ class ProblemCreatePage extends StatefulWidget {
 }
 
 class _ProblemCreatePageState extends State<ProblemCreatePage> {
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
   // 상태
   List<Gym> _gyms = [];
   Gym? _selectedGym;
@@ -197,6 +200,8 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
 
   @override
   Widget build(BuildContext context) {
+    analytics.logScreenView(screenName: 'ProblemCreatePage');
+
     return Scaffold(
       backgroundColor: AppColorSchemes.backgroundPrimary,
       appBar: AppBar(
