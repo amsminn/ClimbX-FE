@@ -10,6 +10,7 @@ import '../models/gym.dart';
 import '../utils/color_schemes.dart';
 import '../utils/tier_colors.dart';
 import '../utils/navigation_helper.dart';
+import '../utils/analytics_helper.dart';
 
 class MapBody extends HookWidget {
   final bool isGuestMode;
@@ -21,6 +22,12 @@ class MapBody extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    // GA 이벤트 로깅
+    useEffect(() {
+      AnalyticsHelper.visitMap();
+      return null;
+    }, []);
+    
     final controller = useState<NaverMapController?>(null);
     final searchController = useTextEditingController();
     final searchQuery = useState<String>('');
@@ -262,6 +269,8 @@ class MapBody extends HookWidget {
                                       const SizedBox(width: 8),
                                       InkWell(
                                         onTap: () async {
+                                          AnalyticsHelper.clickPhoneNumber(gym.gymId);
+                                          
                                           final String raw = gym.phoneNumber.trim();
                                           if (raw.isEmpty) return;
                                           final String digits = raw.replaceAll(RegExp(r'[^0-9+]'), '');
@@ -320,6 +329,8 @@ class MapBody extends HookWidget {
                                     width: double.infinity,
                                     child: ElevatedButton.icon(
                                       onPressed: () {
+                                        AnalyticsHelper.clickProblemSearch(gym.gymId);
+                                        
                                         // 바텀시트 닫기
                                         Navigator.of(sheetContext).pop();
                                         
@@ -394,6 +405,7 @@ class MapBody extends HookWidget {
 
             // 마커 클릭 이벤트
             marker.setOnTapListener((NMarker marker) {
+              AnalyticsHelper.clickMarker(gym.gymId);
               showGymDetailBottomSheet(gym);
             });
 

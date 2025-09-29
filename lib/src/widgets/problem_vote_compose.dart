@@ -5,6 +5,7 @@ import '../api/vote.dart';
 import '../utils/color_schemes.dart';
 import '../utils/tier_colors.dart';
 import '../models/problem_tier_code.dart';
+import '../utils/analytics_helper.dart';
 
 class ProblemVoteCompose extends HookWidget {
   final String problemId;
@@ -26,6 +27,12 @@ class ProblemVoteCompose extends HookWidget {
         comment: vars['comment'] as String?,
       ),
       onSuccess: (_, __, ___) {
+        // GA 이벤트 로깅
+        AnalyticsHelper.submitContribution(
+          selectedTier.value!.code,
+          controller.text.trim(),
+        );
+        
         controller.clear();
         selectedTier.value = null;
         if (context.mounted) {

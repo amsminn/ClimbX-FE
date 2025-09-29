@@ -9,6 +9,7 @@ import '../utils/color_schemes.dart';
 import '../utils/image_compressor.dart';
 import '../widgets/gym_area_map_overlay.dart';
 import '../utils/profile_refresh_manager.dart';
+import '../utils/analytics_helper.dart';
 
 /// 문제 등록 페이지
 class ProblemCreatePage extends StatefulWidget {
@@ -50,6 +51,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsHelper.visitProblemRegisterView();
     _loadGyms();
   }
 
@@ -162,6 +164,14 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         localLevelColor: ColorCodes.koreanLabelToServerCode(_localLevel),
         holdColor: ColorCodes.koreanLabelToServerCode(_holdColor),
         imageFile: _imageFile!,
+      );
+
+      // GA 이벤트 로깅
+      AnalyticsHelper.submitProblemRegister(
+        gymId: _selectedGym!.gymId,
+        areaId: _areaId!,
+        levelColor: _localLevel ?? '',
+        holdColor: _holdColor ?? '',
       );
 
       // 문제 등록 성공 시 프로필 새로고침 플래그 설정

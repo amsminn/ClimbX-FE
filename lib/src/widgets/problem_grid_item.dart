@@ -3,6 +3,7 @@ import '../models/problem.dart';
 import '../utils/color_schemes.dart';
 import '../screens/problem_detail_page.dart';
 import '../utils/color_codes.dart';
+import '../utils/analytics_helper.dart';
 
 /// 클라이밍 문제 그리드 아이템 위젯
 class ProblemGridItem extends StatelessWidget {
@@ -38,6 +39,9 @@ class ProblemGridItem extends StatelessWidget {
     
     return GestureDetector(
       onTap: () {
+        // GA 이벤트 로깅
+        AnalyticsHelper.clickProblemDetail(problem.problemId);
+        
         if (onTapOverride != null) {
           onTapOverride!();
           return;

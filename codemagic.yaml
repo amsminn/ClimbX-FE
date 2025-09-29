@@ -17,6 +17,7 @@ workflows:
         - $HOME/.gradle/wrapper
         - $HOME/Library/Caches/CocoaPods
         - $HOME/Library/Android/sdk
+        - $HOME/programs/flutter
 
     triggering:
       events:

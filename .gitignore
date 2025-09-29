@@ -75,3 +75,12 @@ ios/Flutter/Release.xcconfig
 
 # keystore
 upload-keystore.jks
+
+android/app/google-services.json
+
+# Firebase SwiftPM 캐시/환경설정
+ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+ios/Runner.xcworkspace/xcshareddata/swiftpm/
+
+# firebase 관련 설정
+firebase.json

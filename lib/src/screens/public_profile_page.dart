@@ -12,6 +12,7 @@ import '../widgets/history_widget.dart';
 import '../widgets/streak_widget.dart';
 import '../widgets/video_gallery_widget.dart';
 import '../widgets/submission_list_widget.dart';
+import '../utils/analytics_helper.dart';
 
 class PublicProfilePage extends HookWidget {
   final String nickname;
@@ -25,6 +26,13 @@ class PublicProfilePage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    // GA 이벤트 로깅
+    useEffect(() {
+      // 이메일 정보는 비공개 정보이므로 빈 스트링 전달
+      AnalyticsHelper.visitUserView(nickname, ''); // nickname 사용
+      return null;
+    }, []);
+    
     final profileQuery = useQuery<UserProfile, Exception>(
       ['user_profile', nickname],
       () => UserApi.getUserProfileByNickname(nickname),

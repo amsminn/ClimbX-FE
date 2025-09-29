@@ -1,5 +1,12 @@
+pod 'Firebase/Analytics' # GA용
+
 # Uncomment this line to define a global platform for your project
-platform :ios, '13.0' # 카카오 로그인 버전 13.0 이상 필요
+platform :ios, '15.6' # 카카오 로그인 및 프로젝트 설정과 버전 통일
+
+pod 'Firebase', :modular_headers => true
+pod 'FirebaseCoreInternal', :modular_headers => true
+pod 'GoogleUtilities', :modular_headers => true
+pod 'FirebaseCore', :modular_headers => true
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'

@@ -10,6 +10,7 @@ import '../utils/tier_provider.dart';
 import '../utils/tier_colors.dart';
 import 'video_overlay_player.dart';
 import '../utils/navigation_helper.dart';
+import '../utils/analytics_helper.dart';
 
 class VideoGalleryWidget extends HookWidget {
   final bool isActive;
@@ -389,7 +390,10 @@ class VideoGalleryWidget extends HookWidget {
                 ),
                 // 새로고침 버튼
                 IconButton(
-                  onPressed: (isLoading.value || isAnyUploading) ? null : refreshVideos,
+                  onPressed: (isLoading.value || isAnyUploading) ? null : () {
+                    AnalyticsHelper.clickMyVideoRefresh();
+                    refreshVideos();
+                  },
                   icon: isLoading.value
                       ? const SizedBox(
                           width: 16,
@@ -429,7 +433,10 @@ class VideoGalleryWidget extends HookWidget {
                         return _buildActionTile(
                           icon: Icons.videocam_outlined,
                           label: '촬영하기',
-                          onTap: isPickerActive.value ? null : recordVideo,
+                          onTap: isPickerActive.value ? null : () {
+                            AnalyticsHelper.clickMyVideoFilming();
+                            recordVideo();
+                          },
                           isDisabled: isPickerActive.value,
                         );
                       } else if (!readOnly && index == 1) {
@@ -439,7 +446,10 @@ class VideoGalleryWidget extends HookWidget {
                           label: '갤러리에서 선택',
                           onTap: isPickerActive.value
                               ? null
-                              : selectFromGallery,
+                              : () {
+                                  AnalyticsHelper.clickMyVideoUpload();
+                                  selectFromGallery();
+                                },
                           isDisabled: isPickerActive.value,
                         );
                       } else {

@@ -4,6 +4,7 @@ import 'package:fquery/fquery.dart';
 import '../models/history_data.dart';
 import '../api/user.dart';
 import '../utils/tier_colors.dart';
+import '../utils/analytics_helper.dart';
 import 'history_period_selector.dart';
 import 'history_chart.dart';
 import 'history_stats_summary.dart';
@@ -44,6 +45,21 @@ extension HistoryPeriodExtension on HistoryPeriod {
         return const Duration(days: 30);
       case HistoryPeriod.oneWeek:
         return const Duration(days: 7);
+    }
+  }
+
+  String get apiValue {
+    switch (this) {
+      case HistoryPeriod.all:
+        return 'total';
+      case HistoryPeriod.oneYear:
+        return 'year';
+      case HistoryPeriod.sixMonths:
+        return 'half_year';
+      case HistoryPeriod.oneMonth:
+        return 'month';
+      case HistoryPeriod.oneWeek:
+        return 'week';
     }
   }
 }
@@ -102,6 +118,7 @@ class HistoryWidget extends HookWidget {
             selectedPeriod: selectedPeriod.value,
             onPeriodChanged: (period) {
               selectedPeriod.value = period;
+              AnalyticsHelper.visitMyHistory(period.apiValue);
             },
             colorScheme: colorScheme,
           ),
