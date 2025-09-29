@@ -42,7 +42,6 @@ workflows:
       - name: Install FlutterFire CLI (and Firebase CLI)
         script: |
           set -euo pipefail
-          npm i -g firebase-tools
           dart pub global activate flutterfire_cli
           # flutterfire PATH 등록 (이후 스텝에 유지)
           echo 'export PATH="$PATH:$HOME/.pub-cache/bin"' >> $CM_ENV
