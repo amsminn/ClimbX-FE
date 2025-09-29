@@ -15,6 +15,7 @@ import '../utils/tier_provider.dart';
 import 'submission_list_widget.dart';
 import '../utils/profile_refresh_manager.dart';
 import '../screens/login_page.dart';
+import '../utils/analytics_helper.dart';
 
 /// 프로필 화면의 메인 바디 위젯
 /// 로딩/에러 상태 처리 및 탭 구조 관리
@@ -33,6 +34,7 @@ class ProfileBody extends HookWidget {
     if (isGuestMode) {
       return _buildGuestLoginPrompt(context);
     }
+    
     // 사용자 프로필 데이터 조회
     final userQuery = useQuery<UserProfile, Exception>([
       'user_profile',
@@ -102,6 +104,25 @@ class ProfileBody extends HookWidget {
             SliverPersistentHeader(
               delegate: _StickyTabBarDelegate(
                 TabBar(
+                  onTap: (index) {
+                    switch (index) {
+                      case 0:
+                        AnalyticsHelper.visitMyStatSummary();
+                        break;
+                      case 1:
+                        AnalyticsHelper.visitMyHistory('total'); // 기본값
+                        break;
+                      case 2:
+                        AnalyticsHelper.visitMyStreak();
+                        break;
+                      case 3:
+                        AnalyticsHelper.visitMyVideo();
+                        break;
+                      case 4:
+                        AnalyticsHelper.visitMySubmission();
+                        break;
+                    }
+                  },
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
                   labelColor: AppColorSchemes.backgroundPrimary,

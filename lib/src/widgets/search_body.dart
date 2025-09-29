@@ -12,6 +12,7 @@ import '../screens/problem_submit_page.dart';
 import '../utils/color_codes.dart';
 import 'gym_area_map_overlay.dart';
 import '../utils/login_prompt_helper.dart';
+import '../utils/analytics_helper.dart';
 
 /// 검색 탭 메인 위젯
 class SearchBody extends StatefulWidget {
@@ -55,6 +56,8 @@ class _SearchBodyState extends State<SearchBody> {
   @override
   void initState() {
     super.initState();
+    // GA 이벤트 로깅
+    AnalyticsHelper.visitProblemSearchView();
     _loadGyms();
   }
 
@@ -163,6 +166,15 @@ class _SearchBodyState extends State<SearchBody> {
 
   /// 검색어 변경 처리
   void _onSearchChanged(String query) {
+    // GA 이벤트 로깅
+    AnalyticsHelper.searchProblem(
+      searchKeyword: query,
+      gymId: _selectedGym?.gymId,
+      areaId: _selectedAreaId,
+      levelColor: _selectedLocalLevel,
+      holdColor: _selectedHoldColor,
+    );
+    
     setState(() {
       _isSearching = query.isNotEmpty;
       if (query.isEmpty) {
@@ -212,6 +224,15 @@ class _SearchBodyState extends State<SearchBody> {
     setState(() {
       _selectedLocalLevel = localLevel;
     });
+    
+    // GA 이벤트 로깅
+    AnalyticsHelper.searchProblem(
+      gymId: _selectedGym?.gymId,
+      areaId: _selectedAreaId,
+      levelColor: localLevel,
+      holdColor: _selectedHoldColor,
+    );
+    
     _loadProblems();
   }
 
@@ -220,6 +241,15 @@ class _SearchBodyState extends State<SearchBody> {
     setState(() {
       _selectedHoldColor = holdColor;
     });
+    
+    // GA 이벤트 로깅
+    AnalyticsHelper.searchProblem(
+      gymId: _selectedGym?.gymId,
+      areaId: _selectedAreaId,
+      levelColor: _selectedLocalLevel,
+      holdColor: holdColor,
+    );
+    
     _loadProblems();
   }
 
@@ -246,6 +276,15 @@ class _SearchBodyState extends State<SearchBody> {
                         selectedAreaId: _selectedAreaId,
                         onSelected: (id) {
                           setState(() => _selectedAreaId = id);
+                          
+                          // GA 이벤트 로깅
+                          AnalyticsHelper.searchProblem(
+                            gymId: _selectedGym?.gymId,
+                            areaId: id,
+                            levelColor: _selectedLocalLevel,
+                            holdColor: _selectedHoldColor,
+                          );
+                          
                           _loadProblems();
                         },
                         selectedOpacity: 0.35,
@@ -418,7 +457,13 @@ class _SearchBodyState extends State<SearchBody> {
                     color: AppColorSchemes.textSecondary,
                   ),
                 ),
-                onTap: () => _onGymSelected(gym),
+                onTap: () {
+                  // GA 이벤트 - 지점 선택
+                  AnalyticsHelper.searchProblem(
+                    gymId: gym.gymId,
+                  );
+                  _onGymSelected(gym);
+                },
               );
             },
           ),
@@ -491,6 +536,15 @@ class _SearchBodyState extends State<SearchBody> {
         setState(() {
           _selectedAreaId = areaId;
         });
+        
+        // GA 이벤트 로깅
+        AnalyticsHelper.searchProblem(
+          gymId: _selectedGym?.gymId,
+          areaId: areaId,
+          levelColor: _selectedLocalLevel,
+          holdColor: _selectedHoldColor,
+        );
+        
         _loadProblems();
       },
       backgroundColor: Colors.white,

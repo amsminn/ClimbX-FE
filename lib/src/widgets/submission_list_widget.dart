@@ -5,6 +5,7 @@ import '../api/submission.dart';
 import '../models/submission.dart';
 import '../utils/color_schemes.dart';
 import '../utils/tier_colors.dart';
+import '../utils/analytics_helper.dart';
 import '../utils/problem_tier.dart';
 import '../utils/navigation_helper.dart';
 import '../utils/color_codes.dart';
@@ -199,11 +200,14 @@ class _SubmissionListItem extends StatelessWidget {
     final holdColor = Color(holdColorInt);
 
     return InkWell(
-      onTap: () => NavigationHelper.navigateToProblemVotes(
-        context, 
-        item.problemId,
-        isGuestMode: isGuestMode,
-      ),
+      onTap: () {
+        AnalyticsHelper.clickContribution(item.problemId, 'profile');
+        NavigationHelper.navigateToProblemVotes(
+          context, 
+          item.problemId,
+          isGuestMode: isGuestMode,
+        );
+      },
       child: Container(
       decoration: BoxDecoration(
         color: AppColorSchemes.backgroundPrimary,

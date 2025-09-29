@@ -8,6 +8,7 @@ import '../utils/color_schemes.dart';
 import '../widgets/problem_vote_compose.dart';
 import '../widgets/problem_vote_list_item.dart';
 import '../utils/login_prompt_helper.dart';
+import '../utils/analytics_helper.dart';
 
 class ProblemVotesPage extends HookWidget {
   final String problemId;
@@ -28,6 +29,9 @@ class ProblemVotesPage extends HookWidget {
     );
 
     useEffect(() {
+      // GA 이벤트 로깅
+      AnalyticsHelper.visitContributionView('problem_detail');
+      
       void fetchPage(int pageKey) async {
         try {
           final votes = await ProblemVoteApi.getVotes(

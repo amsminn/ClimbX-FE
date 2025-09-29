@@ -3,12 +3,15 @@ import '../utils/color_schemes.dart';
 import '../utils/navigation_helper.dart';
 import '../api/auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../utils/analytics_helper.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // GA 이벤트 로깅
+    AnalyticsHelper.viewSetting();
     return Scaffold(
       backgroundColor: AppColorSchemes.backgroundSecondary,
       appBar: AppBar(
@@ -31,6 +34,7 @@ class SettingsPage extends StatelessWidget {
             icon: Icons.logout,
             title: '로그아웃',
             onTap: () async {
+              AnalyticsHelper.clickSettingEvent('logout');
               await AuthHelpers.clearToken();
               if (context.mounted) {
                 NavigationHelper.navigateToAuthWrapperAfterLogout(context);
@@ -41,6 +45,7 @@ class SettingsPage extends StatelessWidget {
             icon: Icons.delete_forever_outlined,
             title: '계정 삭제',
             onTap: () async {
+              AnalyticsHelper.clickSettingEvent('request_delete');
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) {
@@ -161,6 +166,7 @@ class SettingsPage extends StatelessWidget {
             icon: Icons.email_outlined,
             title: '문의하기',
             onTap: () {
+              AnalyticsHelper.clickSettingEvent('inquiry');
               NavigationHelper.navigateToEmailCompose(
                 context,
                 title: '문의하기',
@@ -174,6 +180,7 @@ class SettingsPage extends StatelessWidget {
             icon: Icons.report_gmailerrorred_outlined,
             title: '콘텐츠 신고',
             onTap: () {
+              AnalyticsHelper.clickSettingEvent('report');
               NavigationHelper.navigateToEmailCompose(
                 context,
                 title: '콘텐츠 신고',

@@ -15,6 +15,7 @@ import '../utils/navigation_helper.dart';
 import '../utils/bottom_nav_tab.dart';
 import '../utils/error_message_helper.dart';
 import '../utils/profile_refresh_manager.dart';
+import '../utils/analytics_helper.dart';
 
 /// 문제 제출 페이지
 class ProblemSubmitPage extends HookWidget {
@@ -31,6 +32,12 @@ class ProblemSubmitPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    // GA 이벤트 로깅
+    useEffect(() {
+      AnalyticsHelper.visitProblemSubmissionView(problem.problemId);
+      return null;
+    }, []);
+    
     // 선택된 영상 ID들 관리 (초기 선택 지원)
     final selectedVideoIds = useState<Set<String>>(
       initialSelectedVideoId != null && initialSelectedVideoId!.isNotEmpty
@@ -976,6 +983,13 @@ class ProblemSubmitPage extends HookWidget {
         problemId: problem.problemId,
       );
 
+      // GA 이벤트 로깅 - 성공
+      AnalyticsHelper.submitProblem(
+        problem.problemId,
+        selectedVideoIds.value.first, // 첫 번째 비디오 ID 사용
+        'success',
+      );
+      
       // 풀이 제출 성공 시 프로필 새로고침 플래그 설정
       await ProfileRefreshManager().setNeedsRefresh(true);
 
@@ -991,6 +1005,13 @@ class ProblemSubmitPage extends HookWidget {
         NavigationHelper.navigateToMainWithTab(context, BottomNavTab.search);
       }
     } catch (e) {
+      // GA 이벤트 로깅 - 실패
+      AnalyticsHelper.submitProblem(
+        problem.problemId,
+        selectedVideoIds.value.isNotEmpty ? selectedVideoIds.value.first : '',
+        'fail',
+      );
+      
       if (context.mounted) {
         final userFriendlyMessage = ErrorMessageHelper.getUserFriendlyMessage(e);
         ScaffoldMessenger.of(context).showSnackBar(

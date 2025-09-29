@@ -7,6 +7,7 @@ import '../api/user.dart';
 import '../models/user_profile.dart';
 import '../utils/color_schemes.dart';
 import '../utils/image_compressor.dart';
+import '../utils/analytics_helper.dart';
 import '../utils/tier_colors.dart';
 import '../utils/tier_provider.dart';
 
@@ -63,6 +64,14 @@ class ProfileHeader extends HookWidget {
             newNickname: newNick.isNotEmpty ? newNick : u.nickname,
             newStatusMessage: newStatus,
           );
+          
+          // GA 이벤트 로깅
+          if (nickChanged) {
+            AnalyticsHelper.editProfile('nickname', newNick);
+          }
+          if (statusChanged) {
+            AnalyticsHelper.editProfile('status_message', newStatus);
+          }
         }
 
         // 프로필 이미지 업데이트
@@ -81,6 +90,9 @@ class ProfileHeader extends HookWidget {
               file: XFile(compressed.path),
             );
             imageUploadSuccess = true; // 이미지 업로드 성공
+            
+            // GA 이벤트 로깅
+            AnalyticsHelper.editProfile('image', 'image_changed');
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(

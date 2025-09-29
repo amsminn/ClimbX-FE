@@ -7,16 +7,13 @@ import '../api/util/error/auth_cancelled_exception.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:io';
 import '../utils/navigation_helper.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import '../utils/analytics_helper.dart';
 
 class LoginPage extends HookWidget {
   const LoginPage({super.key});
 
-  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-
   @override
   Widget build(BuildContext context) {
-    analytics.logScreenView(screenName: 'LoginPage');
 
     // fquery mutation 사용
     final signInMutation = useMutation(
@@ -66,7 +63,10 @@ class LoginPage extends HookWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF64748B)),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            AnalyticsHelper.clickBack();
+            Navigator.of(context).pop();
+          },
         ),
       ),
       body: Center(
@@ -119,7 +119,10 @@ class LoginPage extends HookWidget {
                   borderRadius: BorderRadius.circular(8),
                   onTap: signInMutation.isPending
                       ? null
-                      : () => signInMutation.mutate(null),
+                      : () {
+                          AnalyticsHelper.clickLogin('kakao');
+                          signInMutation.mutate(null);
+                        },
                   child: Center(
                     child: signInMutation.isPending
                         ? const SizedBox(
@@ -189,7 +192,10 @@ class LoginPage extends HookWidget {
                   borderRadius: BorderRadius.circular(8),
                   onTap: signInGoogleMutation.isPending
                       ? null
-                      : () => signInGoogleMutation.mutate(null),
+                      : () {
+                          AnalyticsHelper.clickLogin('google');
+                          signInGoogleMutation.mutate(null);
+                        },
                   child: Center(
                     child: signInGoogleMutation.isPending
                         ? const SizedBox(
@@ -246,7 +252,10 @@ class LoginPage extends HookWidget {
                   borderRadius: BorderRadius.circular(8), // 모던한 디자인으로 통일
                   onPressed: signInAppleMutation.isPending
                       ? null
-                      : () => signInAppleMutation.mutate(null),
+                      : () {
+                          AnalyticsHelper.clickLogin('apple');
+                          signInAppleMutation.mutate(null);
+                        },
                 ),
               ),
             ],

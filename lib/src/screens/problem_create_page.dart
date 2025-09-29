@@ -9,7 +9,7 @@ import '../utils/color_schemes.dart';
 import '../utils/image_compressor.dart';
 import '../widgets/gym_area_map_overlay.dart';
 import '../utils/profile_refresh_manager.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import '../utils/analytics_helper.dart';
 
 /// 문제 등록 페이지
 class ProblemCreatePage extends StatefulWidget {
@@ -29,8 +29,6 @@ class ProblemCreatePage extends StatefulWidget {
 }
 
 class _ProblemCreatePageState extends State<ProblemCreatePage> {
-  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-
   // 상태
   List<Gym> _gyms = [];
   Gym? _selectedGym;
@@ -53,6 +51,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsHelper.visitProblemRegisterView();
     _loadGyms();
   }
 
@@ -167,6 +166,14 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         imageFile: _imageFile!,
       );
 
+      // GA 이벤트 로깅
+      AnalyticsHelper.submitProblemRegister(
+        gymId: _selectedGym!.gymId,
+        areaId: _areaId!,
+        levelColor: _localLevel ?? '',
+        holdColor: _holdColor ?? '',
+      );
+
       // 문제 등록 성공 시 프로필 새로고침 플래그 설정
       await ProfileRefreshManager().setNeedsRefresh(true);
 
@@ -200,8 +207,6 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
 
   @override
   Widget build(BuildContext context) {
-    analytics.logScreenView(screenName: 'ProblemCreatePage');
-
     return Scaffold(
       backgroundColor: AppColorSchemes.backgroundPrimary,
       appBar: AppBar(

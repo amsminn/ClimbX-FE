@@ -5,6 +5,7 @@ import '../utils/color_schemes.dart';
 import '../utils/navigation_helper.dart';
 import '../utils/leaderboard_type.dart';
 import '../utils/tier_colors.dart';
+import '../utils/analytics_helper.dart';
 
 /// 리더보드 메인 위젯
 class LeaderboardBody extends StatefulWidget {
@@ -36,6 +37,10 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
   @override
   void initState() {
     super.initState();
+    
+    // GA 이벤트 로깅
+    AnalyticsHelper.visitRanking(_selectedType.criteria);
+    
     _tabController = TabController(
       length: LeaderboardType.values.length,
       vsync: this,
@@ -112,6 +117,9 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
     final newType = LeaderboardType.values[_tabController.index];
     if (_selectedType != newType) {
       _selectedType = newType;
+      
+      // GA 이벤트 로깅
+      AnalyticsHelper.visitRanking(newType.criteria);
       if ((_itemsByType[_selectedType] ?? const <LeaderboardItem>[]).isEmpty &&
           _isLoadingByType[_selectedType] != true) {
         _loadInitial(_selectedType);
@@ -289,6 +297,7 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
 
     return InkWell(
       onTap: () {
+        AnalyticsHelper.clickUserView(user.nickname, '');
         NavigationHelper.navigateToPublicProfileSmart(
           context,
           targetNickname: user.nickname,
