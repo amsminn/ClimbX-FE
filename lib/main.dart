@@ -15,9 +15,16 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  
+  // Firebase 초기화
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    developer.log('Firebase 초기화 실패: $e', name: 'Firebase');
+    // Firebase 실패해도 앱은 계속 실행
+  }
   // 네이버 맵 클라이언트 ID 검증
   const naverMapClientId = String.fromEnvironment('NAVER_MAP_CLIENT_ID');
   if (naverMapClientId.isEmpty) {

@@ -95,15 +95,47 @@ class ProfileBody extends HookWidget {
     final userProfile = userQuery.data!;
     final currentTier = userProfile.displayTier;
     final colorScheme = TierProvider.of(context);
-    return DefaultTabController(
-      length: 5,
-      child: NestedScrollView(
+    
+    // TabController 생성
+    final tabController = useTabController(initialLength: 5);
+    
+    // 스와이프 이벤트 감지를 위한 listener 추가
+    useEffect(() {
+      void tabListener() {
+        if (!tabController.indexIsChanging) {
+          // 스와이프로 탭 전환 완료 시 이벤트 기록
+          switch (tabController.index) {
+            case 0:
+              AnalyticsHelper.visitMyStatSummary();
+              break;
+            case 1:
+              AnalyticsHelper.visitMyHistory('total');
+              break;
+            case 2:
+              AnalyticsHelper.visitMyStreak();
+              break;
+            case 3:
+              AnalyticsHelper.visitMyVideo();
+              break;
+            case 4:
+              AnalyticsHelper.visitMySubmission();
+              break;
+          }
+        }
+      }
+      
+      tabController.addListener(tabListener);
+      return () => tabController.removeListener(tabListener);
+    }, [tabController]);
+    
+    return NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
             SliverToBoxAdapter(child: ProfileHeader(userProfile: userProfile)),
             SliverPersistentHeader(
               delegate: _StickyTabBarDelegate(
                 TabBar(
+                  controller: tabController,
                   onTap: (index) {
                     switch (index) {
                       case 0:
@@ -156,6 +188,7 @@ class ProfileBody extends HookWidget {
           ];
         },
         body: TabBarView(
+          controller: tabController,
           children: [
             _buildTabContent(child: TierWidget(userProfile: userProfile)),
             _buildTabContent(child: HistoryWidget(tierName: currentTier)),
@@ -176,8 +209,7 @@ class ProfileBody extends HookWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   // 탭바에서 선택할 수 있는 텍스트

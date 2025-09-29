@@ -1,7 +1,7 @@
 pod 'Firebase/Analytics' # GA용
 
 # Uncomment this line to define a global platform for your project
-platform :ios, '15.0' # 카카오 로그인 버전 15.0 이상 필요
+platform :ios, '15.6' # 카카오 로그인 및 프로젝트 설정과 버전 통일
 
 pod 'Firebase', :modular_headers => true
 pod 'FirebaseCoreInternal', :modular_headers => true

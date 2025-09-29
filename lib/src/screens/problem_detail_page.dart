@@ -292,7 +292,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: OutlinedButton(
         onPressed: () {
-          AnalyticsHelper.clickContributionFromProblemDetail(widget.problem.problemId);
+          AnalyticsHelper.clickContribution(widget.problem.problemId, 'problem_detail');
           NavigationHelper.navigateToProblemVotes(
             context, 
             widget.problem.problemId,
