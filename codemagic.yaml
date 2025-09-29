@@ -41,41 +41,6 @@ workflows:
       - name: Generate code with build_runner
         script: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Install FlutterFire CLI (and Firebase CLI)
-        script: |
-          set -euo pipefail
-          dart pub global activate flutterfire_cli
-          # flutterfire PATH 등록 (이후 스텝에 유지)
-          echo 'export PATH="$PATH:$HOME/.pub-cache/bin"' >> $CM_ENV
-
-      - name: Generate firebase_options.dart (fail hard, no dummy)
-        script: |
-          set -euo pipefail
-
-          # 필수 ENV 확인 (Codemagic UI 또는 Env Group에 등록 필요)
-          missing=()
-          [ -z "${FIREBASE_TOKEN:-}" ] && missing+=("FIREBASE_TOKEN")
-          [ -z "${FIREBASE_PROJECT_ID:-}" ] && missing+=("FIREBASE_PROJECT_ID")
-          [ -z "${ANDROID_PACKAGE_NAME:-}" ] && missing+=("ANDROID_PACKAGE_NAME")
-          [ -z "${IOS_BUNDLE_ID:-}" ] && missing+=("IOS_BUNDLE_ID")
-          if [ ${#missing[@]} -ne 0 ]; then
-            echo "ERROR: Missing envs: ${missing[*]}" >&2
-            exit 1
-          fi
-
-          # 비대화형 생성
-          flutterfire configure \
-            --project="$FIREBASE_PROJECT_ID" \
-            --platforms=android,ios \
-            --android-package-name="$ANDROID_PACKAGE_NAME" \
-            --ios-bundle-id="$IOS_BUNDLE_ID" \
-            --out="lib/firebase_options.dart" \
-            --yes
-
-          # 산출물 검증
-          test -f lib/firebase_options.dart || { echo "ERROR: firebase_options.dart not created"; exit 1; }
-          grep -q "class DefaultFirebaseOptions" lib/firebase_options.dart || { echo "ERROR: invalid firebase_options.dart"; exit 1; }
-
       - name: Flutter analyze
         script: flutter analyze
 
