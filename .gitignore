@@ -84,4 +84,3 @@ ios/Runner.xcworkspace/xcshareddata/swiftpm/
 
 # firebase 관련 설정
 firebase.json
-lib/firebase_options.dart
