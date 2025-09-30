@@ -325,7 +325,7 @@ class AuthApi {
       developer.log('토큰 갱신 성공', name: 'AuthApi');
       return newAccessToken;
     } catch (e) {
-      throw Exception('다시 로그인해주세요');
+      throw Exception('다시 로그인해 주세요');
     }
   }
 }
