@@ -2,14 +2,22 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 
 class AnalyticsHelper {
+  static FirebaseAnalytics? _analyticsInstance;
+  static bool _isAnalyticsInitialized = false;
+
   /// Firebase Analytics 인스턴스를 lazy하게 가져옴
   /// Firebase 초기화가 실패한 경우 null 반환
   static FirebaseAnalytics? get _analytics {
-    try {
-      return FirebaseAnalytics.instance;
-    } catch (e) {
-      return null;
+    if (!_isAnalyticsInitialized) {
+      _isAnalyticsInitialized = true;
+      try {
+        _analyticsInstance = FirebaseAnalytics.instance;
+      } catch (e) {
+        debugPrint('Firebase Analytics 초기화 실패: $e');
+        _analyticsInstance = null;
+      }
     }
+    return _analyticsInstance;
   }
 
   /// 안전한 이벤트 로깅
