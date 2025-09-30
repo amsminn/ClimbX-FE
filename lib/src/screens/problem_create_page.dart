@@ -139,7 +139,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('이미지 선택/압축에 실패했습니다: $e')),
+        const SnackBar(content: Text('이미지를 불러올 수 없어요')),
       );
     }
   }
@@ -180,7 +180,7 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('문제가 등록되었습니다.'),
+          content: Text('문제가 등록되었어요'),
           backgroundColor: AppColorSchemes.accentGreen,
         ),
       );
@@ -191,8 +191,8 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('문제 등록 실패: $e'),
+        const SnackBar(
+          content: Text('문제를 등록할 수 없어요'),
           backgroundColor: AppColorSchemes.accentRed,
         ),
       );

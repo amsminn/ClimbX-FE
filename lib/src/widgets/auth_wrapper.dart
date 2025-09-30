@@ -52,7 +52,7 @@ class AuthWrapper extends HookWidget {
 
               // 로딩 텍스트
               Text(
-                '로그인 상태 확인 중...',
+                '로그인 중...',
                 style: TextStyle(
                   color: AppColorSchemes.textSecondary,
                   fontSize: 16,

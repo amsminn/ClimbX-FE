@@ -107,7 +107,7 @@ void main() async {
               
               // 메시지
               const Text(
-                '로그아웃되었습니다.\n다시 로그인해주세요.',
+                '다시 로그인해주세요.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColorSchemes.textSecondary,

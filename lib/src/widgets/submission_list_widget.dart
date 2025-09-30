@@ -71,7 +71,7 @@ class SubmissionListWidget extends HookWidget {
         if (!context.mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('더 불러오기 실패: $e')));
+        ).showSnackBar(const SnackBar(content: Text('더 불러올 수 없어요')));
       } finally {
         isLoadingMore.value = false;
       }
@@ -182,9 +182,9 @@ class _SubmissionListItem extends StatelessWidget {
   String _statusLabel(SubmissionStatus status) {
     switch (status) {
       case SubmissionStatus.pending:
-        return '대기중';
+        return '대기 중';
       case SubmissionStatus.processing:
-        return '처리중';
+        return '처리 중';
       case SubmissionStatus.accepted:
         return '승인';
       case SubmissionStatus.failed:

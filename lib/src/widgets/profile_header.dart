@@ -97,7 +97,7 @@ class ProfileHeader extends HookWidget {
             if (context.mounted) {
               ScaffoldMessenger.of(
                 context,
-              ).showSnackBar(SnackBar(content: Text('이미지 업로드 실패: $e')));
+              ).showSnackBar(const SnackBar(content: Text('이미지를 업로드할 수 없어요')));
             }
             // 이미지 업로드 실패해도 텍스트 변경사항은 반영
           }
@@ -110,8 +110,8 @@ class ProfileHeader extends HookWidget {
         // 성공 메시지 (부분 성공도 포함)
         if (context.mounted) {
           final successMessage = imageChanged && !imageUploadSuccess
-              ? '텍스트 정보가 업데이트되었습니다. (이미지 업로드 실패)'
-              : '프로필이 업데이트되었습니다.';
+              ? '프로필이 업데이트되었어요 (이미지 제외)'
+              : '프로필이 업데이트되었어요';
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(successMessage)));
@@ -129,7 +129,7 @@ class ProfileHeader extends HookWidget {
           } else {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text('업데이트 실패: $e')));
+            ).showSnackBar(const SnackBar(content: Text('프로필을 업데이트할 수 없어요')));
           }
         }
       } finally {

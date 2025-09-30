@@ -154,7 +154,7 @@ class _VideoOverlayPlayerState extends State<VideoOverlayPlayer> {
                   } else if (snapshot.hasError) {
                     return const Center(
                       child: Text(
-                        '영상을 불러오는데 실패했습니다.',
+                        '영상을 재생할 수 없어요',
                         style: TextStyle(color: Colors.white),
                       ),
                     );

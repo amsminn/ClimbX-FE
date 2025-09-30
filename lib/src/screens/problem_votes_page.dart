@@ -112,13 +112,13 @@ class ProblemVotesPage extends HookWidget {
   }
 
   Widget _buildError(BuildContext context, String message) {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, color: AppColorSchemes.accentRed, size: 48),
-          const SizedBox(height: 12),
-          Text('불러오기 실패: $message', style: const TextStyle(color: AppColorSchemes.textSecondary)),
+          Icon(Icons.error_outline, color: AppColorSchemes.accentRed, size: 48),
+          SizedBox(height: 12),
+          Text('의견을 불러올 수 없어요', style: TextStyle(color: AppColorSchemes.textSecondary)),
         ],
       ),
     );
