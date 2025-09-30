@@ -124,7 +124,7 @@ class ProblemSubmitPage extends HookWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('영상 업로드가 완료되었습니다!'),
+              content: Text('업로드 완료!'),
               backgroundColor: AppColorSchemes.accentGreen,
             ),
           );
@@ -189,7 +189,7 @@ class ProblemSubmitPage extends HookWidget {
         );
 
         if (video != null) {
-          await handleVideoUpload(video, '촬영된 영상을 업로드 중입니다...');
+          await handleVideoUpload(video, '영상을 업로드하고 있어요...');
         }
       } catch (e) {
         developer.log('비디오 촬영 실패: $e', name: 'ProblemSubmitPage', error: e);
@@ -214,7 +214,7 @@ class ProblemSubmitPage extends HookWidget {
         );
 
         if (picked != null) {
-          await handleVideoUpload(picked, '선택된 영상을 업로드 중입니다...');
+          await handleVideoUpload(picked, '영상을 업로드하고 있어요...');
         }
       } catch (e) {
         developer.log(
@@ -799,6 +799,10 @@ class ProblemSubmitPage extends HookWidget {
   }
 
   Widget _buildStatusCell(BuildContext context, String label) {
+    // 라벨 정제
+    final displayLabel = label == '업로드중' ? '업로드 중' :
+                        label == '서버 처리중' ? '처리 중' : label;
+
     return Container(
       color: AppColorSchemes.backgroundSecondary,
       alignment: Alignment.center,
@@ -817,7 +821,7 @@ class ProblemSubmitPage extends HookWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            label,
+            displayLabel,
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -996,7 +1000,7 @@ class ProblemSubmitPage extends HookWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('제출이 완료되었습니다!'),
+            content: Text('제출 완료!'),
             backgroundColor: AppColorSchemes.accentGreen,
           ),
         );

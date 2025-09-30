@@ -137,7 +137,7 @@ class AuthApi {
           developer.log('카카오톡으로 로그인 성공', name: 'AuthApi');
         } catch (error) {
           developer.log('카카오톡으로 로그인 실패: $error', name: 'AuthApi');
-          _handleKakaoLoginError(error, ctx: '카카오톡 로그인에 실패했습니다');
+          _handleKakaoLoginError(error, ctx: '카카오 로그인을 할 수 없어요');
         }
       } else {
         // 카카오톡이 설치되지 않은 경우 카카오계정으로 로그인
@@ -147,7 +147,7 @@ class AuthApi {
           developer.log('카카오계정으로 로그인 성공', name: 'AuthApi');
         } catch (error) {
           developer.log('카카오계정으로 로그인 실패: $error', name: 'AuthApi');
-          _handleKakaoLoginError(error, ctx: '카카오톡 로그인에 실패했습니다');
+          _handleKakaoLoginError(error, ctx: '카카오 로그인을 할 수 없어요');
         }
       }
 
@@ -182,7 +182,7 @@ class AuthApi {
       if (e is AuthCancelledException) {
         rethrow;
       }
-      throw Exception('카카오 로그인에 실패했습니다: $e');
+      throw Exception('카카오 로그인을 할 수 없어요');
     }
   }
 
@@ -229,7 +229,7 @@ class AuthApi {
           e.code.toString().toLowerCase().contains('canceled')) {
         throw const AuthCancelledException('Apple 로그인이 취소되었습니다.');
       }
-      throw Exception('Apple 로그인에 실패했습니다: \\${e.toString()}');
+      throw Exception('Apple 로그인을 할 수 없어요');
     }
   }
 
@@ -288,7 +288,7 @@ class AuthApi {
           throw const AuthCancelledException('Google 로그인이 취소되었습니다.');
         }
       }
-      throw Exception('Google 로그인에 실패했습니다: ${e.toString()}');
+      throw Exception('Google 로그인을 할 수 없어요');
     }
   }
 
@@ -325,7 +325,7 @@ class AuthApi {
       developer.log('토큰 갱신 성공', name: 'AuthApi');
       return newAccessToken;
     } catch (e) {
-      throw Exception('토큰 갱신에 실패했습니다: $e');
+      throw Exception('다시 로그인해주세요');
     }
   }
 }

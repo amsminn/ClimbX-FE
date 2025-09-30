@@ -125,7 +125,7 @@ class SettingsPage extends StatelessWidget {
                 // API 미구현: 임시로 로그아웃 처리 및 안내만 제공
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('삭제 요청이 접수되었습니다. 처리에는 최대 14일이 소요될 수 있습니다.')),
+                  const SnackBar(content: Text('삭제 요청이 접수되었어요. 처리에는 최대 14일이 소요될 수 있어요.')),
                 );
                 await AuthHelpers.clearToken();
                 if (context.mounted) {

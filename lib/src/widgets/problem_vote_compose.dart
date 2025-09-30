@@ -37,7 +37,7 @@ class ProblemVoteCompose extends HookWidget {
         selectedTier.value = null;
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('의견이 등록되었습니다.')),
+            const SnackBar(content: Text('의견이 등록되었어요')),
           );
           onSubmitted?.call();
           queryClient.invalidateQueries(['problem_votes', problemId]);
@@ -47,7 +47,7 @@ class ProblemVoteCompose extends HookWidget {
       onError: (error, __, ___) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('등록 실패: $error')),
+            const SnackBar(content: Text('의견을 등록할 수 없어요')),
           );
         }
         isSubmitting.value = false;

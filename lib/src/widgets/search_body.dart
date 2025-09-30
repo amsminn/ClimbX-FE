@@ -119,7 +119,7 @@ class _SearchBodyState extends State<SearchBody> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('클라이밍장 목록을 불러오는 데 실패했습니다: $e')),
+          const SnackBar(content: Text('클라이밍장 목록을 불러올 수 없어요')),
         );
         if (!mounted) return;
         setState(() {
@@ -153,7 +153,7 @@ class _SearchBodyState extends State<SearchBody> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('문제 목록을 불러오는 데 실패했습니다: $e')),
+          const SnackBar(content: Text('문제 목록을 불러올 수 없어요')),
         );
         if (!mounted) return;
         setState(() {

@@ -87,7 +87,7 @@ class GymApi {
       developer.log('키워드 검색 ${gymList.length}개 결과', name: 'GymApi');
       return gymList;
     } catch (e) {
-      throw Exception('클라이밍장 검색에 실패했습니다: $e');
+      throw Exception('클라이밍장을 검색할 수 없어요');
     }
   }
 

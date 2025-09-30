@@ -118,7 +118,7 @@ class ProblemVotesPage extends HookWidget {
         children: [
           const Icon(Icons.error_outline, color: AppColorSchemes.accentRed, size: 48),
           const SizedBox(height: 12),
-          Text('불러오기 실패: $message', style: const TextStyle(color: AppColorSchemes.textSecondary)),
+          const Text('의견을 불러올 수 없어요', style: TextStyle(color: AppColorSchemes.textSecondary)),
         ],
       ),
     );
