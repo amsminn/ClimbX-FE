@@ -2,12 +2,25 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 
 class AnalyticsHelper {
-  static final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+  /// Firebase Analytics 인스턴스를 lazy하게 가져옴
+  /// Firebase 초기화가 실패한 경우 null 반환
+  static FirebaseAnalytics? get _analytics {
+    try {
+      return FirebaseAnalytics.instance;
+    } catch (e) {
+      return null;
+    }
+  }
 
   /// 안전한 이벤트 로깅
   static void _logEventSafely(String eventName, [Map<String, Object>? parameters]) {
     try {
-      _analytics.logEvent(name: eventName, parameters: parameters);
+      final analytics = _analytics;
+      if (analytics == null) {
+        debugPrint('GA 사용 불가 - Firebase 미초기화 ($eventName)');
+        return;
+      }
+      analytics.logEvent(name: eventName, parameters: parameters);
     } catch (e) {
       debugPrint('GA 이벤트 로깅 실패 ($eventName): $e');
     }
