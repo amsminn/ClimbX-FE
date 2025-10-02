@@ -361,6 +361,8 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
               children: [
                 Text(
                   user.nickname,
+                  maxLines: 1,                        // 줄 제한
+                  overflow: TextOverflow.ellipsis,    // 줄 초과 시 생략
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
