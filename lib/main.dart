@@ -169,6 +169,7 @@ class MyApp extends StatelessWidget {
         navigatorKey: navigatorKey, // 전역 네비게이터 키 설정
         // 키보드 자동 숨기기 기능 추가
         builder: (context, child) => GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () {
             // 현재 포커스를 해제하여 키보드를 숨김
             FocusManager.instance.primaryFocus?.unfocus();
