@@ -1,5 +1,5 @@
 import 'dart:developer' as developer;
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../screens/main_page.dart';
 import '../screens/settings_page.dart';
 import '../screens/markdown_viewer_page.dart';
@@ -208,12 +208,10 @@ class NavigationHelper {
     );
   }
 
-  /// 공통 페이지 라우트 생성 (애니메이션 없음)
-  static PageRouteBuilder<T> _createPageRoute<T extends Widget>(T page) {
-    return PageRouteBuilder<T>(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionDuration: Duration.zero,
-      reverseTransitionDuration: Duration.zero,
+  /// 공통 페이지 라우트 생성 (스와이프로 뒤로가기 지원)
+  static CupertinoPageRoute<T> _createPageRoute<T extends Widget>(T page) {
+    return CupertinoPageRoute<T>(
+      builder: (context) => page,
     );
   }
 } 
