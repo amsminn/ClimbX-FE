@@ -209,7 +209,7 @@ class NavigationHelper {
   }
 
   /// 공통 페이지 라우트 생성 (스와이프로 뒤로가기 지원)
-  static CupertinoPageRoute<T> _createPageRoute<T extends Widget>(T page) {
+  static CupertinoPageRoute<T> _createPageRoute<T>(Widget page) {
     return CupertinoPageRoute<T>(
       builder: (context) => page,
     );
