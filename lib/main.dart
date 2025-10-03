@@ -15,7 +15,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Firebase 초기화
   try {
     await Firebase.initializeApp(
@@ -30,7 +30,7 @@ void main() async {
   if (naverMapClientId.isEmpty) {
     throw Exception('NAVER_MAP_CLIENT_ID가 설정되지 않았습니다.');
   }
-  
+
   await FlutterNaverMap().init(
     clientId: naverMapClientId,
     onAuthFailed: (ex) {
@@ -39,8 +39,8 @@ void main() async {
           developer.log('사용량 초과 (message: $message)', name: 'FlutterNaverMap');
           break;
         case NUnauthorizedClientException() ||
-            NClientUnspecifiedException() ||
-            NAnotherAuthFailedException():
+        NClientUnspecifiedException() ||
+        NAnotherAuthFailedException():
           developer.log('인증 실패: $ex', name: 'FlutterNaverMap');
           break;
       }
@@ -90,9 +90,9 @@ void main() async {
                   size: 28,
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // 제목
               const Text(
                 '로그아웃',
@@ -102,9 +102,9 @@ void main() async {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // 메시지
               const Text(
                 '다시 로그인해주세요.',
@@ -116,9 +116,9 @@ void main() async {
                   height: 1.4,
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // 확인 버튼
               SizedBox(
                 width: double.infinity,
@@ -167,6 +167,15 @@ class MyApp extends StatelessWidget {
         title: 'ClimbX',
         theme: ThemeData(primarySwatch: Colors.blue),
         navigatorKey: navigatorKey, // 전역 네비게이터 키 설정
+        // 키보드 자동 숨기기 기능 추가
+        builder: (context, child) => GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            // 현재 포커스를 해제하여 키보드를 숨김
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: child,
+        ),
         home: const AuthWrapper(),
       ),
     );
