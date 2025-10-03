@@ -322,17 +322,21 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
       ),
       child: Row(
         children: [
-          // 등수
-          Text(
-            '${user.ranking}',
-            style: const TextStyle(
-              color: AppColorSchemes.textSpecial,
-              fontWeight: FontWeight.w700,
-              fontSize: 20,
+          // 등수 (고정 너비 숫자 3개만큼 미리 추가)
+          SizedBox(
+            width: 45,
+            child: Text(
+              '${user.ranking}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppColorSchemes.textSpecial,
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+              ),
             ),
           ),
 
-          const SizedBox(width: 32),
+          const SizedBox(width: 16),
 
           // 프로필 사진
           Container(
@@ -357,6 +361,8 @@ class _LeaderboardBodyState extends State<LeaderboardBody>
               children: [
                 Text(
                   user.nickname,
+                  maxLines: 1,                        // 줄 제한
+                  overflow: TextOverflow.ellipsis,    // 줄 초과 시 생략
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
