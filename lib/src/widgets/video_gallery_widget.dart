@@ -339,6 +339,191 @@ class VideoGalleryWidget extends HookWidget {
       }
     }
 
+    // 업로드 옵션 선택 팝업 표시
+    void showUploadOptions() {
+      showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (BuildContext context) {
+          return Container(
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColorSchemes.backgroundPrimary,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 20),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColorSchemes.textTertiary.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  '영상 업로드',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColorSchemes.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      // 촬영하기 옵션
+                      ListTile(
+                        leading: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.videocam_outlined,
+                            color: colorScheme.primary,
+                            size: 24,
+                          ),
+                        ),
+                        title: const Text(
+                          '촬영하기',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColorSchemes.textPrimary,
+                          ),
+                        ),
+                        subtitle: const Text(
+                          '새로운 영상을 촬영합니다',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColorSchemes.textSecondary,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          AnalyticsHelper.clickMyVideoFilming();
+                          recordVideo();
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // 갤러리에서 선택 옵션
+                      ListTile(
+                        leading: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.photo_library_outlined,
+                            color: colorScheme.primary,
+                            size: 24,
+                          ),
+                        ),
+                        title: const Text(
+                          '갤러리에서 선택',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColorSchemes.textPrimary,
+                          ),
+                        ),
+                        subtitle: const Text(
+                          '기존 영상을 선택합니다',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColorSchemes.textSecondary,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          AnalyticsHelper.clickMyVideoUpload();
+                          selectFromGallery();
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
+    // 빈 상태 UI
+    Widget buildEmptyState() {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Icon(
+                Icons.videocam_off_outlined,
+                size: 32,
+                color: colorScheme.primary.withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              '아직 영상이 없습니다',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColorSchemes.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColorSchemes.textSecondary,
+                  height: 1.4,
+                ),
+                children: [
+                  const TextSpan(text: '우측 상단의 '),
+                  WidgetSpan(
+                    child: Icon(
+                      Icons.add_circle_outline,
+                      size: 14,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  const TextSpan(text: ' 버튼을 눌러\n첫 영상을 업로드해보세요'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      );
+    }
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -388,27 +573,46 @@ class VideoGalleryWidget extends HookWidget {
                     ),
                   ),
                 ),
-                // 새로고침 버튼
-                IconButton(
-                  onPressed: (isLoading.value || isAnyUploading) ? null : () {
-                    AnalyticsHelper.clickMyVideoRefresh();
-                    refreshVideos();
-                  },
-                  icon: isLoading.value
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.refresh, size: 20),
-                  tooltip: '목록 새로고침',
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 업로드 버튼 (읽기 전용이 아닐 때만 표시)
+                    if (!readOnly) ...[
+                      IconButton(
+                        onPressed: isPickerActive.value ? null : showUploadOptions,
+                        icon: Icon(
+                          Icons.add_circle_outline,
+                          size: 20,
+                          color: isPickerActive.value 
+                              ? AppColorSchemes.textTertiary
+                              : colorScheme.primary,
+                        ),
+                        tooltip: '영상 업로드',
+                      ),
+                    ],
+                    // 새로고침 버튼
+                    IconButton(
+                      onPressed: (isLoading.value || isAnyUploading) ? null : () {
+                        AnalyticsHelper.clickMyVideoRefresh();
+                        refreshVideos();
+                      },
+                      icon: isLoading.value
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.refresh, size: 20),
+                      tooltip: '목록 새로고침',
+                    ),
+                  ],
                 ),
               ],
             ),
 
             const SizedBox(height: 16),
 
-            // 비디오 그리드
+            // 비디오 그리드 또는 빈 상태
             isLoading.value
                 ? const Center(
                     child: Padding(
@@ -416,104 +620,28 @@ class VideoGalleryWidget extends HookWidget {
                       child: CircularProgressIndicator(),
                     ),
                   )
-                : GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
-                    itemCount: (readOnly ? 0 : 2) + getAllVideos().length,
-                    // (읽기 전용이 아니면) 촬영/갤러리 버튼 + 영상들
-                    itemBuilder: (context, index) {
-                      if (!readOnly && index == 0) {
-                        // 촬영 버튼
-                        return _buildActionTile(
-                          icon: Icons.videocam_outlined,
-                          label: '촬영하기',
-                          onTap: isPickerActive.value ? null : () {
-                            AnalyticsHelper.clickMyVideoFilming();
-                            recordVideo();
-                          },
-                          isDisabled: isPickerActive.value,
-                        );
-                      } else if (!readOnly && index == 1) {
-                        // 갤러리에서 선택 버튼
-                        return _buildActionTile(
-                          icon: Icons.photo_library_outlined,
-                          label: '갤러리에서 선택',
-                          onTap: isPickerActive.value
-                              ? null
-                              : () {
-                                  AnalyticsHelper.clickMyVideoUpload();
-                                  selectFromGallery();
-                                },
-                          isDisabled: isPickerActive.value,
-                        );
-                      } else {
-                        // 실제 영상들
-                        final base = readOnly ? 0 : 2;
-                        final video = getAllVideos()[index - base];
-                        return _buildVideoTile(
-                          context,
-                          video,
-                          () => onVideoTap(context, video),
-                        );
-                      }
-                    },
-                  ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 액션 버튼 타일 (촬영, 갤러리 선택)
-  Widget _buildActionTile({
-    required IconData icon,
-    required String label,
-    required VoidCallback? onTap,
-    bool isDisabled = false,
-  }) {
-    return GestureDetector(
-      onTap: isDisabled ? null : onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDisabled
-              ? AppColorSchemes.backgroundSecondary.withValues(alpha: 0.5)
-              : AppColorSchemes.backgroundSecondary,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDisabled
-                ? AppColorSchemes.textTertiary.withValues(alpha: 0.1)
-                : AppColorSchemes.textTertiary.withValues(alpha: 0.2),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 32,
-              color: isDisabled
-                  ? AppColorSchemes.textSecondary.withValues(alpha: 0.5)
-                  : AppColorSchemes.textSecondary,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: isDisabled
-                    ? AppColorSchemes.textSecondary.withValues(alpha: 0.5)
-                    : AppColorSchemes.textSecondary,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-            ),
+                : getAllVideos().isEmpty
+                    ? buildEmptyState()
+                    : GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                            ),
+                        itemCount: getAllVideos().length,
+                        // 영상들만 표시
+                        itemBuilder: (context, index) {
+                          final video = getAllVideos()[index];
+                          return _buildVideoTile(
+                            context,
+                            video,
+                            () => onVideoTap(context, video),
+                          );
+                        },
+                      ),
           ],
         ),
       ),
