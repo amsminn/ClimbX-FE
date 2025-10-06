@@ -19,9 +19,9 @@ void main() {
       expect(result['page'], '0');
 
       // 모든 값이 String 타입인지 확인
-      result.values.forEach((value) {
+      for (final value in result.values) {
         expect(value, isA<String>());
-      });
+      }
     });
 
     test('add()는 null 값을 자동으로 필터링한다', () {
@@ -109,8 +109,8 @@ void main() {
     });
 
     test('실제 사용 예시: API 쿼리 파라미터 구성', () {
-      final int? cursor = null;
-      final String searchText = '';
+      const int? cursor = null;
+      const String searchText = '';
 
       final result = QueryParamsBuilder()
           .add('latitude', 37.5665)

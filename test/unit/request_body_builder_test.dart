@@ -108,7 +108,7 @@ void main() {
     });
 
     test('실제 사용 예시: API 요청 body 구성', () {
-      final String? optionalComment = null;
+      const String? optionalComment = null;
       final List<String> tags = ['V4', 'overhang'];
 
       final result = RequestBodyBuilder()
