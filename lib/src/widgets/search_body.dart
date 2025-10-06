@@ -353,6 +353,9 @@ class _SearchBodyState extends State<SearchBody> {
                 MaterialPageRoute(
                   builder: (context) => ProblemCreatePage(
                     initialGymId: selectedGymId,
+                    initialAreaId: _selectedAreaId,
+                    initialLocalLevel: _selectedLocalLevel,
+                    initialHoldColor: _selectedHoldColor,
                     pendingVideoId: widget.submissionVideoId,
                   ),
                 ),
@@ -641,6 +644,9 @@ class _SearchBodyState extends State<SearchBody> {
                       MaterialPageRoute(
                         builder: (context) => ProblemCreatePage(
                           initialGymId: selectedGymId,
+                          initialAreaId: _selectedAreaId,
+                          initialLocalLevel: _selectedLocalLevel,
+                          initialHoldColor: _selectedHoldColor,
                         ),
                       ),
                     );

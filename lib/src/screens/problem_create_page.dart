@@ -16,11 +16,20 @@ class ProblemCreatePage extends StatefulWidget {
   const ProblemCreatePage({
     super.key,
     this.initialGymId,
+    this.initialAreaId,
+    this.initialLocalLevel,
+    this.initialHoldColor,
     this.pendingVideoId,
   });
 
   /// 진입 시 선택되어 있던 지점이 있다면 초기값으로 사용
   final int? initialGymId;
+  /// 진입 시 선택되어 있던 영역이 있다면 초기값으로 사용
+  final int? initialAreaId;
+  /// 진입 시 선택되어 있던 난이도색이 있다면 초기값으로 사용
+  final String? initialLocalLevel;
+  /// 진입 시 선택되어 있던 홀드색이 있다면 초기값으로 사용
+  final String? initialHoldColor;
   /// 영상에서 넘어온 videoId (등록 성공 시 제출 페이지로 이어붙이기 위함)
   final String? pendingVideoId;
 
@@ -110,6 +119,17 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
         });
         await _loadGymDetail(_selectedGym!.gymId);
       }
+
+      // 초기 색상 값 설정
+      if (!mounted) return;
+      setState(() {
+        if (widget.initialLocalLevel != null) {
+          _localLevel = widget.initialLocalLevel;
+        }
+        if (widget.initialHoldColor != null) {
+          _holdColor = widget.initialHoldColor;
+        }
+      });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -638,8 +658,17 @@ class _ProblemCreatePageState extends State<ProblemCreatePage> {
       setState(() {
         _selectedGym = detail;
         _gymAreas = detail.gymAreas;
+
+        // 기존 _areaId 유효성 검증
         if (_gymAreas.where((a) => a.areaId == _areaId).isEmpty) {
           _areaId = null;
+        }
+
+        // 초기값 설정 (유효한 경우에만)
+        if (_areaId == null && widget.initialAreaId != null) {
+          if (_gymAreas.where((a) => a.areaId == widget.initialAreaId).isNotEmpty) {
+            _areaId = widget.initialAreaId;
+          }
         }
       });
     } catch (e) {
