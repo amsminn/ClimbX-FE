@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
+import 'util/core/query_params_builder.dart';
 import '../models/user_profile.dart';
 import '../models/history_data.dart';
 import '../models/streak_data.dart';
@@ -79,14 +80,14 @@ class UserApi {
     try {
       // 닉네임이 주어지지 않으면 현재 사용자 닉네임 사용
       final String finalNickname = await _resolveNickname(nickname);
-      // 쿼리 파라미터 구성
-      final queryParams = <String, String>{'criteria': criteria};
-      if (from != null) queryParams['from'] = from;
-      if (to != null) queryParams['to'] = to;
 
       return await _apiClient.get<HistoryData>(
         '/api/users/$finalNickname/history',
-        queryParameters: queryParams,
+        queryParameters: QueryParamsBuilder()
+            .add('criteria', criteria)
+            .add('from', from)
+            .add('to', to)
+            .build(),
         fromJson: (data) => HistoryData.fromJson(data as List<dynamic>),
         logContext: 'UserApi',
       );
@@ -114,14 +115,13 @@ class UserApi {
     try {
       // 닉네임이 주어지지 않으면 현재 사용자 닉네임 사용
       final String finalNickname = await _resolveNickname(nickname);
-      // 쿼리 파라미터 구성
-      final queryParams = <String, String>{};
-      if (from != null) queryParams['from'] = from;
-      if (to != null) queryParams['to'] = to;
 
       return await _apiClient.get<StreakData>(
         '/api/users/$finalNickname/streak',
-        queryParameters: queryParams,
+        queryParameters: QueryParamsBuilder()
+            .add('from', from)
+            .add('to', to)
+            .build(),
         fromJson: (data) => StreakData.fromJson(data as List<dynamic>),
         logContext: 'UserApi',
       );

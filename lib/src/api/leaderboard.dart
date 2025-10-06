@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
+import 'util/core/query_params_builder.dart';
 import '../models/leaderboard_item.dart';
 import '../utils/leaderboard_type.dart';
 import '../utils/tier_colors.dart';
@@ -32,12 +33,12 @@ class LeaderboardApi {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
         '/api/ranking/users',
-        queryParameters: {
-          'criteria': type.criteria,
-          'sort': order, // desc | asc
-          'page': page,
-          'size': size,
-        },
+        queryParameters: QueryParamsBuilder()
+            .add('criteria', type.criteria)
+            .add('sort', order)
+            .add('page', page)
+            .add('size', size)
+            .build(),
         logContext: 'LeaderboardApi',
       );
 

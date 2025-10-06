@@ -115,6 +115,20 @@ class UserApi {
 }
 ```
 
+### Query Parameters
+Use `QueryParamsBuilder` for type-safe query parameter handling:
+
+```dart
+// QueryParamsBuilder - null 값 자동 필터링
+queryParameters: QueryParamsBuilder()
+  .add('latitude', 37.5665)
+  .add('longitude', 126.9780)
+  .add('cursor', cursor)  // null이면 자동으로 제외됨
+  .build()
+```
+
+**권장**: QueryParamsBuilder를 사용하면 null 값이 자동으로 필터링되고 모든 값이 String으로 안전하게 변환됩니다.
+
 ### Authentication Flow
 - Automatic token management via AuthInterceptor
 - Token stored in flutter_secure_storage

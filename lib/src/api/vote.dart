@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
+import 'util/core/query_params_builder.dart';
 import '../models/problem_vote.dart';
 import '../models/problem.dart';
 
@@ -16,10 +17,10 @@ class ProblemVoteApi {
     developer.log('투표 목록 조회 시작 - problemId: $problemId page=$page size=$size', name: 'ProblemVoteApi');
     final data = await _client.get<List<ProblemVote>>(
       '/api/problems/$problemId/votes',
-      queryParameters: {
-        'page': page,
-        'size': size,
-      },
+      queryParameters: QueryParamsBuilder()
+          .add('page', page)
+          .add('size', size)
+          .build(),
       fromJson: (json) => (json as List)
           .map((item) => ProblemVote.fromJson(item as Map<String, dynamic>))
           .toList(),

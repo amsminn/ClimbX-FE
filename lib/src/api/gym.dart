@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
+import 'util/core/query_params_builder.dart';
 import '../models/gym.dart';
 
 /// 클라이밍장 관련 API 호출 함수들
@@ -46,10 +47,10 @@ class GymApi {
     try {
       final data = await _apiClient.get<List<dynamic>>(
         '/api/gyms/nearby',
-        queryParameters: {
-          'latitude': latitude,
-          'longitude': longitude,
-        },
+        queryParameters: QueryParamsBuilder()
+            .add('latitude', latitude)
+            .add('longitude', longitude)
+            .build(),
         logContext: 'GymApi',
       );
 
@@ -74,9 +75,9 @@ class GymApi {
 
       final data = await _apiClient.get<List<dynamic>>(
         '/api/gyms/search',
-        queryParameters: {
-          'keyword': keyword.trim(),
-        },
+        queryParameters: QueryParamsBuilder()
+            .add('keyword', keyword.trim())
+            .build(),
         logContext: 'GymApi',
       );
 

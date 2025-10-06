@@ -4,11 +4,18 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import '../models/problem.dart';
 import 'util/core/api_client.dart';
+import 'util/core/query_params_builder.dart';
 import '../utils/color_codes.dart';
 
 /// 클라이밍 문제 관련 API 호출 함수들
 class ProblemApi {
   static final ApiClient _client = ApiClient.instance;
+
+  /// ColorCodes 변환 헬퍼 - null 안전
+  static String? _convertColorCode(String? colorValue) {
+    if (colorValue == null) return null;
+    return ColorCodes.anyToServerCode(colorValue) ?? colorValue;
+  }
 
   /// 문제 목록 조회
   static Future<List<Problem>> getProblems({
@@ -19,20 +26,16 @@ class ProblemApi {
     String? problemTier,
     String? activeStatus,
   }) async {
-    final queryParams = <String, dynamic>{
-      if (gymId != null) 'gymId': gymId,
-      if (gymAreaId != null) 'gymAreaId': gymAreaId,
-      if (localLevel != null)
-        'localLevel': ColorCodes.anyToServerCode(localLevel) ?? localLevel,
-      if (holdColor != null)
-        'holdColor': ColorCodes.anyToServerCode(holdColor) ?? holdColor,
-      if (problemTier != null) 'problemTier': problemTier,
-      if (activeStatus != null) 'activeStatus': activeStatus,
-    };
-
     return _client.get<List<Problem>>(
       '/api/problems',
-      queryParameters: queryParams,
+      queryParameters: QueryParamsBuilder()
+          .add('gymId', gymId)
+          .add('gymAreaId', gymAreaId)
+          .add('localLevel', _convertColorCode(localLevel))
+          .add('holdColor', _convertColorCode(holdColor))
+          .add('problemTier', problemTier)
+          .add('activeStatus', activeStatus)
+          .build(),
       fromJson: (data) => (data as List)
           .map((item) => Problem.fromJson(item as Map<String, dynamic>))
           .toList(),
@@ -65,9 +68,8 @@ class ProblemApi {
 
     final requestJson = {
       'gymAreaId': gymAreaId,
-      'localLevel':
-          ColorCodes.anyToServerCode(localLevelColor) ?? localLevelColor,
-      'holdColor': ColorCodes.anyToServerCode(holdColor) ?? holdColor,
+      'localLevel': _convertColorCode(localLevelColor)!,
+      'holdColor': _convertColorCode(holdColor)!,
     };
 
     // request를 application/json 파트로 전송

@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
+import 'util/core/query_params_builder.dart';
 import '../models/submission.dart';
 import 'util/auth/user_identity.dart';
 
@@ -33,15 +34,13 @@ class SubmissionApi {
     final String finalNickname =
         nickname ?? await UserIdentity.getOrFetchNickname(logContext: 'SubmissionApi');
 
-    final query = <String, dynamic>{
-      'nickname': finalNickname,
-      'size': size,
-      if (cursor != null) 'cursor': cursor,
-    };
-
     final data = await _client.get<SubmissionPageData>(
       '/api/submissions',
-      queryParameters: query,
+      queryParameters: QueryParamsBuilder()
+          .add('nickname', finalNickname)
+          .add('size', size)
+          .add('cursor', cursor)
+          .build(),
       fromJson: (json) => SubmissionPageData.fromJson(json as Map<String, dynamic>),
       logContext: 'SubmissionApi',
     );
