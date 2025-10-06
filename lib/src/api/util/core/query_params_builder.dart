@@ -15,5 +15,5 @@ import 'base_map_builder.dart';
 class QueryParamsBuilder extends BaseMapBuilder<QueryParamsBuilder, String> {
   /// 값을 String으로 변환
   @override
-  String _processValue(dynamic value) => value.toString();
+  String processValue(dynamic value) => value.toString();
 }

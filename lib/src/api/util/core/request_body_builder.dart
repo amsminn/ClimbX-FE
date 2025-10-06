@@ -15,5 +15,5 @@ import 'base_map_builder.dart';
 class RequestBodyBuilder extends BaseMapBuilder<RequestBodyBuilder, dynamic> {
   /// 값을 원본 타입 그대로 유지
   @override
-  dynamic _processValue(dynamic value) => value;
+  dynamic processValue(dynamic value) => value;
 }

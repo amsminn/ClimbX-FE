@@ -4,7 +4,7 @@
 /// - T: 빌더 자신의 타입 (메서드 체이닝용)
 /// - V: Map의 값 타입 (String, dynamic 등)
 ///
-/// 하위 클래스는 [_processValue]만 구현하면 됨
+/// 하위 클래스는 [processValue]만 구현하면 됨
 abstract class BaseMapBuilder<T, V> {
   final Map<String, V> _data = {};
 
@@ -12,7 +12,7 @@ abstract class BaseMapBuilder<T, V> {
   ///
   /// QueryParamsBuilder: value.toString() → String
   /// RequestBodyBuilder: value → dynamic (그대로)
-  V _processValue(dynamic value);
+  V processValue(dynamic value);
 
   /// 값 추가 (null은 자동으로 무시됨)
   ///
@@ -20,7 +20,7 @@ abstract class BaseMapBuilder<T, V> {
   /// 메서드 체이닝 가능
   T add(String key, dynamic value) {
     if (value != null) {
-      _data[key] = _processValue(value);
+      _data[key] = processValue(value);
     }
     return this as T;
   }
@@ -38,7 +38,7 @@ abstract class BaseMapBuilder<T, V> {
     if (value is List && value.isEmpty) return this as T;
     if (value is Map && value.isEmpty) return this as T;
 
-    _data[key] = _processValue(value);
+    _data[key] = processValue(value);
     return this as T;
   }
 
