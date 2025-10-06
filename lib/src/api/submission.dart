@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
 import 'util/core/query_params_builder.dart';
+import 'util/core/request_body_builder.dart';
 import '../models/submission.dart';
 import 'util/auth/user_identity.dart';
 
@@ -15,10 +16,10 @@ class SubmissionApi {
     developer.log('문제 제출 요청 시작 - videoId: $videoId, problemId: $problemId', name: 'SubmissionApi');
     await _client.post<Map<String, dynamic>>(
       '/api/submissions',
-      data: {
-        'videoId': videoId,
-        'problemId': problemId,
-      },
+      data: RequestBodyBuilder()
+          .add('videoId', videoId)
+          .add('problemId', problemId)
+          .build(),
       logContext: 'SubmissionApi',
     );
     developer.log('문제 제출 요청 완료', name: 'SubmissionApi');

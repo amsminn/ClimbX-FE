@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:light_compressor/light_compressor.dart' as compressor;
 import 'util/core/api_client.dart';
+import 'util/core/request_body_builder.dart';
 import 'util/auth/user_identity.dart';
 import '../models/video.dart';
 
@@ -93,7 +94,10 @@ class VideoApi {
 
       final response = await _apiClient.post<Map<String, dynamic>>(
         '/api/videos/upload',
-        data: {'fileExtension': fileExtension, 'fileSize': fileSize},
+        data: RequestBodyBuilder()
+            .add('fileExtension', fileExtension)
+            .add('fileSize', fileSize)
+            .build(),
         logContext: 'VideoApi',
       );
 

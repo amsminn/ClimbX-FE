@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
 import 'util/core/query_params_builder.dart';
+import 'util/core/request_body_builder.dart';
 import '../models/user_profile.dart';
 import '../models/history_data.dart';
 import '../models/streak_data.dart';
@@ -140,7 +141,10 @@ class UserApi {
   }) async {
     await _apiClient.put<void>(
       '/api/users/$currentNickname',
-      data: {'newNickname': newNickname, 'newStatusMessage': newStatusMessage},
+      data: RequestBodyBuilder()
+          .add('newNickname', newNickname)
+          .add('newStatusMessage', newStatusMessage)
+          .build(),
       logContext: 'UserApi',
     );
 

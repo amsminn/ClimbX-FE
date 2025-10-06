@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'util/core/api_client.dart';
 import 'util/core/query_params_builder.dart';
+import 'util/core/request_body_builder.dart';
 import '../models/problem_vote.dart';
 import '../models/problem.dart';
 
@@ -39,11 +40,11 @@ class ProblemVoteApi {
     developer.log('투표 생성 요청 - problemId: $problemId', name: 'ProblemVoteApi');
     final result = await _client.post<Problem>(
       '/api/problems/$problemId/votes',
-      data: {
-        'tier': tier,
-        'tags': tags,
-        if (comment?.isNotEmpty ?? false) 'comment': comment,
-      },
+      data: RequestBodyBuilder()
+          .add('tier', tier)
+          .addIfNotEmpty('tags', tags)
+          .addIfNotEmpty('comment', comment)
+          .build(),
       fromJson: (json) => Problem.fromJson(json as Map<String, dynamic>),
       logContext: 'ProblemVoteApi',
     );

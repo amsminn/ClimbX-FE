@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:dio/dio.dart';
 import 'util/core/api_client.dart';
+import 'util/core/request_body_builder.dart';
 import 'util/auth/token_storage.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -172,7 +173,10 @@ class AuthApi {
       // 헤더에서 Refresh-Token을 받기 위해 순수 Dio 사용 (인터셉터 없음)
       final dioResponse = await _pureDio.post(
         '/api/auth/oauth2/kakao/callback',
-        data: {'idToken': idToken, 'nonce': nonce},
+        data: RequestBodyBuilder()
+            .add('idToken', idToken)
+            .add('nonce', nonce)
+            .build(),
       );
 
       final accessToken = await _processAuthResponse(dioResponse);
@@ -214,7 +218,10 @@ class AuthApi {
       // 백엔드로 토큰 전송
       final dioResponse = await _pureDio.post(
         '/api/auth/oauth2/apple/callback',
-        data: {'idToken': identityToken, 'nonce': nonce},
+        data: RequestBodyBuilder()
+            .add('idToken', identityToken)
+            .add('nonce', nonce)
+            .build(),
       );
 
       final accessToken = await _processAuthResponse(dioResponse);
@@ -271,7 +278,9 @@ class AuthApi {
       // 백엔드로 토큰 전송
       final dioResponse = await _pureDio.post(
         '/api/auth/oauth2/google/callback',
-        data: {'idToken': idToken}, // 구글은 nonce를 직접 내부에 생성하므로 nonce를 전달X
+        data: RequestBodyBuilder()
+            .add('idToken', idToken) // 구글은 nonce를 직접 내부에 생성하므로 nonce를 전달X
+            .build(),
       );
 
       final accessToken = await _processAuthResponse(dioResponse);
