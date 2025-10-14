@@ -166,6 +166,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // 딥링크 상수
+  static const _deepLinkScheme = 'climbx';
+  static const _deepLinkHost = 'open';
+
   StreamSubscription? _deepLinkSubscription;
 
   @override
@@ -185,6 +189,9 @@ class _MyAppState extends State<MyApp> {
     // 앱이 종료된 상태에서 딥링크로 실행된 경우 처리
     try {
       final initialLink = await getInitialLink();
+      // await 이후 위젯이 unmount되었는지 확인
+      if (!mounted) return;
+
       if (initialLink != null) {
         _handleDeepLink(initialLink);
       }
@@ -209,7 +216,7 @@ class _MyAppState extends State<MyApp> {
     final uri = Uri.parse(link);
 
     // climbx://open 처리
-    if (uri.scheme == 'climbx' && uri.host == 'open') {
+    if (uri.scheme == _deepLinkScheme && uri.host == _deepLinkHost) {
       developer.log('ClimbX app opened via deep link', name: 'DeepLink');
       // 홈 화면으로 이동하거나 특정 동작 수행
       // 현재는 앱이 열리는 것만으로도 충분하므로 추가 동작 없음
