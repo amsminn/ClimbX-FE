@@ -78,6 +78,8 @@ dependencies:
   # GA
   firebase_analytics: ^12.0.1
   firebase_core: ^4.1.0
+  # 딥링크 처리
+  uni_links: ^0.5.1
 
 
 dev_dependencies:

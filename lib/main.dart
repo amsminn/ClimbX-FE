@@ -9,6 +9,8 @@ import 'src/utils/color_schemes.dart';
 import 'dart:developer' as developer;
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'dart:async';
+import 'package:uni_links/uni_links.dart';
 
 // 전역 네비게이터 키 (팝업용)
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -156,8 +158,63 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  StreamSubscription? _deepLinkSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinks();
+  }
+
+  @override
+  void dispose() {
+    _deepLinkSubscription?.cancel();
+    super.dispose();
+  }
+
+  /// 딥링크 초기화 및 처리
+  Future<void> _initDeepLinks() async {
+    // 앱이 종료된 상태에서 딥링크로 실행된 경우 처리
+    try {
+      final initialLink = await getInitialLink();
+      if (initialLink != null) {
+        _handleDeepLink(initialLink);
+      }
+    } catch (e) {
+      developer.log('Initial deep link error: $e', name: 'DeepLink');
+    }
+
+    // 앱이 백그라운드에 있을 때 딥링크 처리
+    _deepLinkSubscription = linkStream.listen((String? link) {
+      if (link != null) {
+        _handleDeepLink(link);
+      }
+    }, onError: (err) {
+      developer.log('Deep link stream error: $err', name: 'DeepLink');
+    });
+  }
+
+  /// 딥링크 URL 처리
+  void _handleDeepLink(String link) {
+    developer.log('Deep link received: $link', name: 'DeepLink');
+
+    final uri = Uri.parse(link);
+
+    // climbx://open 처리
+    if (uri.scheme == 'climbx' && uri.host == 'open') {
+      developer.log('ClimbX app opened via deep link', name: 'DeepLink');
+      // 홈 화면으로 이동하거나 특정 동작 수행
+      // 현재는 앱이 열리는 것만으로도 충분하므로 추가 동작 없음
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
